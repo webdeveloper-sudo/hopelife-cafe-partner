@@ -1,0 +1,113 @@
+{
+  "partners": [
+    {
+      "id": "demo-id",
+      "partnerCode": "demo",
+      "name": "Grand Hotel & Suites (Demo)",
+      "email": "demo@partner.hub",
+      "mobile": "0000000000",
+      "commissionSlab": 7.5
+    },
+    {
+      "id": "p_1772277716048",
+      "name": "Hotel New",
+      "contactName": "Test",
+      "mobile": "9442266704",
+      "email": null,
+      "partnerCode": "HOTNEW6047",
+      "commissionSlab": 7.5,
+      "status": "ACTIVE",
+      "walletBalance": 500,
+      "createdAt": "2026-02-28T11:21:56.048Z"
+    }
+  ],
+  "guests": [
+    {
+      "id": "g_1772272097440",
+      "name": "Simulated User",
+      "mobileNumber": "9123456789",
+      "partnerId": "demo-id",
+      "createdAt": "2026-02-28T09:48:17.440Z"
+    },
+    {
+      "id": "g_1772272291059",
+      "name": "Fresh User",
+      "mobileNumber": "9988776655",
+      "partnerId": "demo-id",
+      "createdAt": "2026-02-28T09:51:31.059Z"
+    },
+    {
+      "id": "g_1772273612544",
+      "name": "Test Guest",
+      "mobileNumber": "9876543210",
+      "partnerId": "demo-id",
+      "createdAt": "2026-02-28T10:13:32.544Z"
+    },
+    {
+      "id": "g_1772275405462",
+      "name": "Flow Test User",
+      "mobileNumber": "9617503787",
+      "partnerId": "demo-id",
+      "createdAt": "2026-02-28T10:43:25.462Z"
+    },
+    {
+      "id": "g_1772276187063",
+      "name": "Raj",
+      "mobileNumber": "9442266704",
+      "partnerId": "demo-id",
+      "createdAt": "2026-02-28T10:56:27.063Z"
+    }
+  ],
+  "scanLogs": [
+    {
+      "id": "s_1772272428608",
+      "guestId": "g_1772272291059",
+      "adminId": "admin_01",
+      "billAmount": 1500,
+      "discountAmount": 112.5,
+      "status": "SETTLED",
+      "createdAt": "2026-02-28T09:53:48.608Z"
+    },
+    {
+      "id": "s_1772275407315",
+      "guestId": "g_1772275405462",
+      "adminId": "admin_test",
+      "billAmount": 2000,
+      "discountAmount": 150,
+      "status": "SETTLED",
+      "createdAt": "2026-02-28T10:43:27.315Z"
+    }
+  ],
+  "dynamicQRs": [
+    {
+      "id": "q_1772272125730",
+      "guestId": "g_1772272097440",
+      "secretKey": "b204af29d92764b67cfdf32431cbc0ade669ff4bad0940f099f30546a2006f01",
+      "expiresAt": "2026-03-07T09:48:45.729Z"
+    },
+    {
+      "id": "q_1772272291062",
+      "guestId": "g_1772272291059",
+      "secretKey": "d5880d761d0b7994c47288d4f8383c26b8f99f242bf64bd82b29e3337b91cf48",
+      "expiresAt": "2026-03-07T09:51:31.062Z"
+    },
+    {
+      "id": "q_1772273612546",
+      "guestId": "g_1772273612544",
+      "secretKey": "e7d19e50a3e28fd5d73d3358b49df666b54ef6cdb02bad4e0e71d528a89b10f8",
+      "expiresAt": "2026-03-07T10:13:32.546Z"
+    },
+    {
+      "id": "q_1772275405464",
+      "guestId": "g_1772275405462",
+      "secretKey": "10b265fcd26387b96d438e120ecc1c19442f091105e0124467a80a367ccd9eb7",
+      "expiresAt": "2026-03-07T10:43:25.463Z"
+    },
+    {
+      "id": "q_1772276187067",
+      "guestId": "g_1772276187063",
+      "secretKey": "1e0535eb8fd7f18faf4260c216f60ed5986853ec5755c1deaf4ab30e86b8b2a8",
+      "expiresAt": "2026-03-07T11:10:23.603Z"
+    }
+  ]
+}

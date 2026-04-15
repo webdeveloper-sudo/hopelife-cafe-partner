@@ -1,0 +1,72 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Partner {
+  id                String     @id @default(cuid())
+  partnerCode       String     @unique
+  name              String
+  contactName       String?
+  mobile            String     @unique
+  email             String?    @unique
+  password          String?    // Added for secure authentication
+  commissionSlab    Float      @default(7.5)
+  guestDiscountSlab Float      @default(7.5)
+  bankAccount       String?
+  ifsc              String?
+  status            String     @default("PENDING") // ACTIVE, REJECTED, PENDING
+  referralGoal      Int        @default(10)
+  currentTier       String     @default("BRONZE") // BRONZE, SILVER, GOLD, DIAMOND, ELITE
+  businessType      String?    // e.g. rental, homestay, agency
+  walletBalance     Float      @default(0)
+  guests            Guest[]
+  payouts           Payout[]
+}
+
+model Guest {
+  id              String       @id @default(cuid())
+  name            String
+  mobileNumber    String       @unique
+  partnerId       String
+  partner         Partner      @relation(fields: [partnerId], references: [id])
+  createdAt       DateTime     @default(now())
+  dynamicQr       DynamicQR?
+  scanLogs        ScanLog[]
+}
+
+model DynamicQR {
+  id              String     @id @default(cuid())
+  guestId         String     @unique
+  guest           Guest      @relation(fields: [guestId], references: [id])
+  secretKey       String
+  expiresAt       DateTime
+}
+
+model ScanLog {
+  id                       String     @id @default(cuid())
+  guestId                  String
+  guest                    Guest      @relation(fields: [guestId], references: [id])
+  adminId                  String
+  billAmount               Float
+  discountAmount           Float
+  guestDiscountAmount      Float      @default(0)
+  partnerCommissionAmount  Float      @default(0)
+  status                   String     @default("SETTLED") // SETTLED, PAID
+  createdAt                DateTime   @default(now())
+}
+
+model Payout {
+  id              String     @id @default(cuid())
+  partnerId       String
+  partner         Partner    @relation(fields: [partnerId], references: [id])
+  amount          Float
+  status          String     @default("COMPLETED")
+  method          String     @default("BANK_TRANSFER")
+  logsCount       Int        @default(0)
+  createdAt       DateTime   @default(now())
+}
