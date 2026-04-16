@@ -18,7 +18,7 @@ export default function EarningsCalculator() {
 
     return (
         <Card className="border border-hope-green/20 shadow-3xl bg-gradient-to-br from-hope-purple to-hope-green rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-[0_20px_60px_-15px_rgba(45,106,79,0.3)]">
-            {/* Left Side: Light Mode Estimator */}
+            {/* Left Side: Light  Estimator */}
             <div className="bg-white p-8 md:p-12 md:w-[55%] flex flex-col justify-center rounded-r-3xl md:rounded-r-[2.5rem] relative z-10 shadow-2xl shadow-purple-950/10">
                 <div className="mb-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-hope-green/10 border border-hope-green/20 mb-6">
