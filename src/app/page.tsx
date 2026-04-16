@@ -53,35 +53,35 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 relative z-10 text-center">
           <motion.div
             {...fadeInUp}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/60 backdrop-blur-md border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-10 hover:-translate-y-1 transition-transform cursor-default"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/60 backdrop-blur-md border border-white/40 shadow-sm mb-10 hover:-translate-y-0.5 transition-transform cursor-default"
           >
             <Sparkles className="w-4 h-4 text-hope-purple animate-pulse" />
-            <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-hope-purple to-hope-pink uppercase tracking-[0.2em]">HOPE Cafe</span>
+            <span className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-hope-purple to-hope-pink">Hope Cafe</span>
           </motion.div>
 
           <motion.h1
             {...fadeInUp}
             transition={{ delay: 0.1, duration: 0.8 }}
-            className="text-5xl md:text-7xl lg:text-[7.5rem] font-black text-gray-900 mb-8 tracking-tighter leading-[0.9]"
+            className="text-5xl md:text-7xl lg:text-8xl font-bold text-gray-900 mb-8 leading-tight"
           >
-            HOPE Cafe <br />
+            Hope Cafe <br />
             <span className="relative inline-block mt-4 md:mt-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-hope-green via-hope-pink to-hope-gold relative z-10">Partner Hub</span>
               {/* Highlight stroke behind text */}
-              <div className="absolute inset-x-0 bottom-2 md:bottom-4 h-[30%] bg-hope-gold/20 -z-0 -rotate-2 scale-110 blur-[2px]" />
+              <div className="absolute inset-x-0 bottom-2 md:bottom-4 h-[15%] bg-hope-gold/15 -z-0 rounded-full scale-110 blur-[1px]" />
             </span>
           </motion.h1>
 
           <motion.p
             {...fadeInUp}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-xl md:text-2xl text-gray-600 mb-14 max-w-3xl mx-auto leading-relaxed font-medium"
+            className="text-xl md:text-2xl text-gray-600 mb-14 max-w-3xl mx-auto leading-relaxed font-normal"
           >
-            Empowering the local hospitality ecosystem. Refer guests to HOPE Cafe and unlock a
-            <span className="text-gray-900 font-extrabold mx-2 relative whitespace-nowrap">
+            Empowering the local hospitality ecosystem. Refer guests to Hope Cafe and unlock a
+            <span className="text-gray-900 font-bold mx-2 relative whitespace-nowrap">
               <span className="relative z-10">7.5% referral commission</span>
-              <svg className="absolute w-full h-full -bottom-1 left-0 text-hope-green/30 -z-0" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <path d="M0,15 Q50,25 100,10" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+              <svg className="absolute w-full h-full -bottom-1 left-0 text-hope-green/20 -z-0" viewBox="0 0 100 20" preserveAspectRatio="none">
+                <path d="M0,15 Q50,20 100,10" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
               </svg>
             </span>
             on every interaction.
@@ -119,7 +119,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">The Partner Advantage</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900">The Partner Advantage</h2>
           </motion.div>
 
           <motion.div
@@ -144,11 +144,11 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
 
                   <div className="relative z-10">
-                    <div className={cn("w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner transition-transform duration-500 group-hover:scale-110", benefit.bg)}>
-                      <benefit.icon className={cn("w-12 h-12 transition-transform duration-500 group-hover:-rotate-12", benefit.color)} />
+                    <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-inner transition-transform duration-500 group-hover:scale-110", benefit.bg)}>
+                      <benefit.icon className={cn("w-10 h-10 transition-transform duration-500 group-hover:-rotate-6", benefit.color)} />
                     </div>
-                    <h3 className="text-2xl font-black text-gray-900 mb-4">{benefit.title}</h3>
-                    <p className="text-gray-500 text-base leading-relaxed font-medium">{benefit.desc}</p>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{benefit.title}</h3>
+                    <p className="text-gray-500 text-base leading-relaxed">{benefit.desc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -161,8 +161,8 @@ export default function Home() {
       <section className="py-24 bg-purple-50/30 border-y border-purple-100/50">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Who Can Join as a Partner?</h2>
-            <p className="text-gray-500 mt-3 font-medium">Any tourism-facing business can earn commission by referring guests to HOPE Cafe.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Who Can Join as a Partner?</h2>
+            <p className="text-gray-600 mt-4">Any tourism-facing business can earn commission by referring guests to Hope Cafe.</p>
           </div>
 
           <motion.div
@@ -218,13 +218,13 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm mb-6">
               <span className="w-2 h-2 rounded-full bg-hope-purple animate-pulse" />
-              <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Process</span>
+              <span className="text-xs font-bold text-gray-600">Process</span>
             </div>
-            <h2 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tighter mb-6 relative inline-block">
+            <h2 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 relative inline-block">
               The Partner Workflow
             </h2>
-            <p className="text-gray-500 text-xl md:text-2xl font-medium max-w-2xl mx-auto">
-              Simple. Transparent. <span className="text-gray-900 font-bold decoration-hope-purple decoration-4 underline-offset-4 underline">Rewarding.</span>
+            <p className="text-gray-600 text-xl md:text-2xl max-w-2xl mx-auto">
+              Simple. Transparent. <span className="text-gray-900 font-bold decoration-hope-purple decoration-2 underline-offset-8 underline">Rewarding.</span>
             </p>
           </motion.div>
 
@@ -249,8 +249,8 @@ export default function Home() {
                 {/* Number Node */}
                 <div className="w-24 h-24 bg-white rounded-3xl shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center mb-8 relative group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-hope-purple/20 transition-all duration-500 border border-gray-50 ring-4 ring-white">
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-hope-purple/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-hope-purple/80 transition-colors">Step</span>
-                  <span className="text-4xl font-black text-gray-900 group-hover:text-hope-purple transition-colors z-10 leading-none">{step.id}</span>
+                  <span className="text-xs font-semibold text-gray-400 mb-1 group-hover:text-hope-purple/80 transition-colors">Step</span>
+                  <span className="text-4xl font-bold text-gray-900 group-hover:text-hope-purple transition-colors z-10 leading-none">{step.id}</span>
                 </div>
 
                 {/* Content Card */}
@@ -258,8 +258,8 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-2xl bg-gray-50 group-hover:bg-hope-purple/10 flex items-center justify-center mx-auto mb-6 transition-colors duration-500">
                     <step.icon className="w-6 h-6 text-gray-600 group-hover:text-hope-purple transition-colors duration-500" />
                   </div>
-                  <h4 className="text-2xl font-black text-gray-900 mb-4">{step.title}</h4>
-                  <p className="text-base text-gray-500 font-medium leading-relaxed">{step.desc}</p>
+                  <h4 className="text-2xl font-bold text-gray-900 mb-4">{step.title}</h4>
+                  <p className="text-base text-gray-500 leading-relaxed">{step.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -284,14 +284,14 @@ export default function Home() {
             >
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-purple-200/50 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-hope-purple animate-pulse" />
-                <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Revenue Model</span>
+                <span className="text-xs font-bold text-gray-600">Revenue Model</span>
               </div>
-              <h2 className="text-5xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
+              <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
                 Calculate Your <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-hope-purple to-hope-pink">Growth Margin.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-hope-purple to-hope-pink">Growth Margin</span>
               </h2>
-              <p className="text-gray-600 text-lg md:text-xl font-medium leading-relaxed">
-                We believe in shared prosperity. By connecting your hospitality business to HOPE Cafe, you don't just refer guests—you build a sustainable revenue stream.
+              <p className="text-gray-600 text-lg md:text-xl leading-relaxed">
+                We believe in shared prosperity. By connecting your hospitality business to Hope Cafe, you don't just refer guests—you build a sustainable revenue stream.
               </p>
               <div className="space-y-5 pt-4">
                 {[
@@ -344,18 +344,18 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight"
+              className="text-4xl md:text-6xl font-bold text-gray-900"
             >
-              Intelligence & <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-gray-300">Answers</span>
+              Intelligence & <span className="text-gray-300">Answers</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-gray-500 text-xl font-medium max-w-2xl mx-auto"
+              className="text-gray-600 text-xl max-w-2xl mx-auto"
             >
-              Everything you need to know about joining the HOPE Cafe Channel Partner Network.
+              Everything you need to know about joining the Hope Cafe Channel Partner Network.
             </motion.p>
           </div>
 
@@ -380,8 +380,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-10 border-b border-white/20 pb-10 mb-10">
             <Link href="/" className="flex items-center group">
-              <div className="h-16 w-auto relative group-hover:scale-105 transition-transform duration-500">
-                <img src="/logo.png" alt="HOPE Cafe" className="h-full w-auto object-contain" />
+              <div className="h-12 w-auto relative group-hover:scale-105 transition-transform duration-500">
+                <img src="/logo.png" alt="Hope Cafe" className="h-full w-auto object-contain brightness-0 invert" />
               </div>
             </Link>
 
@@ -396,12 +396,12 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-purple-200 text-xs font-bold tracking-[0.2em] uppercase" suppressHydrationWarning>
-              &copy; {new Date().getFullYear()} HOPE Cafe.
+            <p className="text-purple-200 text-xs font-semibold" suppressHydrationWarning>
+              &copy; {new Date().getFullYear()} Hope Cafe.
             </p>
             <div className="flex items-center gap-6">
               {['Terms', 'Privacy', 'Contact'].map((item) => (
-                <span key={item} className="text-purple-200 text-xs font-bold tracking-widest uppercase cursor-pointer hover:text-white transition-colors">
+                <span key={item} className="text-purple-200 text-xs font-semibold cursor-pointer hover:text-white transition-colors">
                   {item}
                 </span>
               ))}

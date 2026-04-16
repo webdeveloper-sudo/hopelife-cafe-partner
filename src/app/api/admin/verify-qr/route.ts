@@ -65,20 +65,27 @@ export async function POST(req: Request) {
         if (!guest || !guest.dynamicQr) return NextResponse.json({ error: "Guest or QR Record not found" }, { status: 404 });
 
         // Phase 1.5: Cryptographically verify the HMAC signature
-        // Using deterministic key-sorted stringification to avoid signature mismatches
-        const sortedData = Object.keys(parsedData).sort().reduce((obj: any, key) => {
-            obj[key] = parsedData[key];
-            return obj;
-        }, {});
-
         const expectedSignature = crypto
             .createHmac('sha256', guest.dynamicQr.secretKey)
-            .update(JSON.stringify(sortedData))
+            .update(JSON.stringify(parsedData)) // Just use raw data as generated
             .digest('hex');
 
         if (signature !== expectedSignature) {
             return NextResponse.json({ error: "Invalid Digital Signature. Pass may be spoofed." }, { status: 403 });
         }
+
+        // Phase 1.6: Explicit Expiry Check (24h validity)
+        if (new Date() > guest.dynamicQr.expiresAt) {
+            return NextResponse.json({ 
+                error: "QR EXPIRED: This pass was valid for 24 hours only. Please ask the guest to request a new referral from their partner.",
+                isExpired: true 
+            }, { status: 410 });
+        }
+
+        // Get referral frequency (settled visits)
+        const referralCount = await prisma.scanLog.count({
+            where: { guestId: guest.id }
+        });
 
             // Phase 2: If action is "settle", process the billing
         if (action === "settle") {
@@ -137,6 +144,7 @@ export async function POST(req: Request) {
                 partnerName: guest.partner.name,
                 commissionSlab: guest.partner.commissionSlab,
                 guestDiscountSlab: guest.partner.guestDiscountSlab || guest.partner.commissionSlab,
+                referralCount: referralCount + 1, // Current visit number
                 isRedeemed: !!redemptionCheck
             }
         });

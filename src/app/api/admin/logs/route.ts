@@ -33,7 +33,7 @@ export async function GET() {
                 type: "PARTNER",
                 title: "Partner Registered",
                 description: `${partner.name} joined as a new referral partner.`,
-                timestamp: new Date(partner.joinedAt).getTime(),
+                timestamp: new Date(partner.createdAt).getTime(),
                 status: partner.status
             });
         });

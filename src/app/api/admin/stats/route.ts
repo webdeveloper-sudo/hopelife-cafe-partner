@@ -35,13 +35,13 @@ export async function GET() {
         // 6. Recent Approvals (Partners requiring ACTION - PENDING ones)
         const recentApprovals = partners
             .filter((p: any) => p.status === "PENDING")
-            .sort((a: any, b: any) => new Date(b.joinedAt || Date.now()).getTime() - new Date(a.joinedAt || Date.now()).getTime())
+            .sort((a: any, b: any) => new Date(b.createdAt || Date.now()).getTime() - new Date(a.createdAt || Date.now()).getTime())
             .slice(0, 5)
             .map((p: any) => ({
                 id: p.id,
                 name: p.name,
                 category: "Hospitality",
-                date: new Date(p.joinedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                date: new Date(p.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             }));
 
         return NextResponse.json({

@@ -13,8 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export default function AdminLoginPage() {
     const [loading, setLoading] = React.useState(false);
-    const [email, setEmail] = React.useState("admin@hopecafe.network");
-    const [password, setPassword] = React.useState("hope2026");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
 
     const router = useRouter();
     const handleLogin = async (e: React.FormEvent) => {
@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ role: "ADMIN", password: password }),
+                body: JSON.stringify({ role: "ADMIN", email, password }),
             });
 
             const data = await res.json();
@@ -111,10 +111,6 @@ export default function AdminLoginPage() {
                             </Button>
 
                             <div className="pt-8 text-center space-y-4">
-                                <div className="p-5 bg-hope-green/5 border border-hope-green/10 rounded-2xl">
-                                    <p className="text-[11px] font-black text-hope-green uppercase tracking-widest mb-1">Demo Credentials</p>
-                                    <p className="text-sm text-gray-500 font-bold">Key: <span className="text-gray-900 font-black">hope2026</span></p>
-                                </div>
                                 <Link href="/" className="inline-block text-[11px] font-black text-gray-400 uppercase tracking-widest hover:text-hope-green transition-colors">
                                     ← Back to Public Interface
                                 </Link>

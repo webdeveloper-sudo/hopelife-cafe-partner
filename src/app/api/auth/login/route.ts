@@ -6,6 +6,7 @@ import crypto from "crypto";
 
 export async function POST(req: Request) {
     try {
+        console.log("Hot-reloaded API Route");
         const body = await req.json();
         const prisma = getPrisma();
         const { role, mobile, email, password } = body;
@@ -14,12 +15,19 @@ export async function POST(req: Request) {
         // For HOPE Cafe demo, we just simplify. Admin expects generic auth.
 
         if (role === "ADMIN") {
-            const adminPass = process.env.ADMIN_PASSWORD || "hope2026";
-            if (password === adminPass) {
-                await login({ role: "ADMIN", id: "admin-1" });
-                return NextResponse.json({ success: true, redirectUrl: "/admin/dashboard" });
+            const adminUser = await prisma.admin.findUnique({ where: { email } });
+            
+            if (!adminUser) {
+                return NextResponse.json({ error: "Invalid admin credentials" }, { status: 401 });
             }
-            return NextResponse.json({ error: "Invalid admin credentials" }, { status: 401 });
+            
+            const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
+            if (adminUser.password !== hashedPassword) {
+                return NextResponse.json({ error: "Invalid admin credentials" }, { status: 401 });
+            }
+
+            await login({ role: "ADMIN", id: adminUser.id });
+            return NextResponse.json({ success: true, redirectUrl: "/admin/dashboard" });
 
         } else if (role === "PARTNER") {
             // Find partner by mobile or email

@@ -13,8 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export default function PartnerLoginPage() {
     const [loading, setLoading] = React.useState(false);
-    const [email, setEmail] = React.useState("demo@partner.hub");
-    const [password, setPassword] = React.useState("partner2026");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
 
     const router = useRouter();
     const handleLogin = async (e: React.FormEvent) => {
@@ -105,10 +105,6 @@ export default function PartnerLoginPage() {
                             </Button>
 
                             <div className="pt-6 border-t border-gray-50 text-center space-y-4">
-                                <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Demo Credentials</p>
-                                    <p className="text-xs text-gray-600 font-bold">Password: <span className="text-hope-green text-sm">partner2026</span></p>
-                                </div>
                                 <p className="text-sm font-medium text-gray-400">
                                     New to the network?{" "}
                                     <Link href="/register" className="text-hope-green font-bold hover:underline">Register Hub</Link>

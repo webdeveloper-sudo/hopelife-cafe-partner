@@ -1,61 +1,75 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import crypto from "crypto";
+import { sendAdminNewPartnerAlert } from "@/lib/email";
+import jwt from "jsonwebtoken";
 
 export const runtime = 'nodejs';
 
-// Marketing exec registers a new partner
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { partnerName, contactName, mobile, email, password, commissionSlab, businessType } = body;
+        const {
+            verificationToken,
+            partnerName, contactName, mobile, email,
+            businessType, address, city, pincode, commissionSlab
+        } = body;
 
-        if (!partnerName || !contactName || !mobile || !password) {
+        if (!partnerName || !contactName || !mobile || !email || !verificationToken) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        // Validate the OTP verification token
+        const jwtSecret = process.env.JWT_SECRET || "hope-cafe-secret";
+        let decoded: any;
+        try {
+            decoded = jwt.verify(verificationToken, jwtSecret);
+        } catch {
+            return NextResponse.json({ error: "Verification token expired. Please verify your email again." }, { status: 401 });
+        }
+
+        if (decoded.email !== email.toLowerCase() || !decoded.verified || decoded.purpose !== "partner-registration") {
+            return NextResponse.json({ error: "Invalid verification token." }, { status: 401 });
         }
 
         const prisma = getPrisma();
 
-        // Generate a unique partner code from partner name
-        const slug = partnerName
-            .toUpperCase()
-            .replace(/[^A-Z0-9\s]/g, "")
-            .split(" ")
-            .map((w: string) => w.slice(0, 3))
-            .join("")
-            .slice(0, 8);
-        const partnerCode = `${slug}${Date.now().toString().slice(-4)}`;
-
-        // Check for duplicate mobile
-        const existing = await prisma.partner.findUnique({ where: { mobile } });
-        if (existing) {
-            return NextResponse.json({ error: "A partner with this mobile already exists." }, { status: 409 });
+        // Check duplicate mobile
+        const existingMobile = await prisma.partner.findUnique({ where: { mobile } });
+        if (existingMobile) {
+            return NextResponse.json({ error: "A partner with this mobile number already exists." }, { status: 409 });
         }
+        // Check duplicate email
+        const existingEmail = await prisma.partner.findFirst({ where: { email: email.toLowerCase() } });
+        if (existingEmail) {
+            return NextResponse.json({ error: "A partner with this email already exists." }, { status: 409 });
+        }
+
+        // Generate partner code
+        const slug = partnerName.toUpperCase().replace(/[^A-Z0-9\s]/g, "").split(" ").map((w: string) => w.slice(0, 3)).join("").slice(0, 8);
+        const partnerCode = `${slug}${Date.now().toString().slice(-4)}`;
 
         const newPartner = await prisma.partner.create({
             data: {
-                id: `p_${Date.now()}`,
                 name: partnerName,
                 contactName,
                 mobile,
-                email: email || null,
-                password: crypto.createHash("sha256").update(password).digest("hex"),
+                email: email.toLowerCase(),
                 partnerCode,
                 businessType: businessType || null,
+                address: address || null,
+                city: city || null,
+                pincode: pincode || null,
                 commissionSlab: parseFloat(commissionSlab) || 7.5,
-                guestDiscountSlab: parseFloat(commissionSlab) || 7.5, // Default to matching commission
+                guestDiscountSlab: parseFloat(commissionSlab) || 7.5,
                 status: "PENDING",
-                walletBalance: 500, // ₹500 joining bonus
-                joinedAt: new Date()
+                walletBalance: 0,
             }
         });
 
-        return NextResponse.json({
-            success: true,
-            partnerCode: newPartner.partnerCode,
-            passUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5000"}/p/${newPartner.partnerCode}`
-        });
+        // Notify admin
+        await sendAdminNewPartnerAlert(partnerName, contactName, email, mobile, businessType || "N/A");
 
+        return NextResponse.json({ success: true, partnerCode: newPartner.partnerCode });
     } catch (err) {
         console.error("Partner register error:", err);
         return NextResponse.json({ error: "Failed to register partner." }, { status: 500 });

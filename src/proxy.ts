@@ -11,8 +11,15 @@ export async function proxy(request: NextRequest) {
     const isPublicPartnerRoute = pathname === "/login" || pathname === "/register" || pathname === "/scan" || pathname.startsWith("/api/auth/login");
     const isPartnerRoute = (pathname.startsWith("/dashboard") || pathname.startsWith("/settings") || pathname.startsWith("/referrals") || pathname.startsWith("/payouts") || pathname.startsWith("/transactions")) && !isPublicPartnerRoute;
 
+    // Public partner routes (no auth required for registration flow)
+    const isPublicPartnerApi =
+        pathname === "/api/partner/send-otp" ||
+        pathname === "/api/partner/verify-otp" ||
+        pathname === "/api/partner/register" ||
+        pathname === "/api/partner/set-password";
+
     // Protected API routes
-    const isProtectedApiRoute = pathname.startsWith("/api/admin") || pathname.startsWith("/api/partner") || pathname.startsWith("/api/whatsapp");
+    const isProtectedApiRoute = (pathname.startsWith("/api/admin") || pathname.startsWith("/api/partner") || pathname.startsWith("/api/whatsapp")) && !isPublicPartnerApi;
 
     if (isAdminRoute || isPartnerRoute || isProtectedApiRoute) {
         const sessionStore = request.cookies.get("session")?.value;

@@ -11,9 +11,11 @@ import {
     Zap,
     CheckCircle2,
     XCircle,
-    Settings
+    Settings,
+    QrCode
 } from "lucide-react";
 import { toast } from "sonner";
+import QRScannerModal from "@/components/QRScannerModal";
 
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -42,6 +44,7 @@ export default function AdminDashboard() {
     const [showLogs, setShowLogs] = React.useState(false);
     const [systemLogs, setSystemLogs] = React.useState<any[]>([]);
     const [logsLoading, setLogsLoading] = React.useState(false);
+    const [isScannerOpen, setIsScannerOpen] = React.useState(false);
 
     const fetchStats = async () => {
         try {
@@ -181,6 +184,12 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Button
+                            onClick={() => setIsScannerOpen(true)}
+                            className="flex items-center justify-center gap-2.5 shadow-hope-green/20 h-11 px-8 rounded-2xl bg-hope-green hover:bg-hope-green/90 border-none"
+                        >
+                            <QrCode className="w-4 h-4" /> <span className="translate-y-[0.5px]">Scan Pass</span>
+                        </Button>
+                        <Button
                             variant="ghost"
                             className="text-gray-600 border border-gray-100 hover:bg-gray-50 h-11 px-6 rounded-2xl"
                             onClick={() => setShowLogs(true)}
@@ -188,7 +197,7 @@ export default function AdminDashboard() {
                             <Settings className="w-4 h-4 mr-2" /> System Logs
                         </Button>
                         <Button
-                            className="flex items-center justify-center gap-2.5 shadow-hope-green/20 h-11 px-8 rounded-2xl bg-hope-green hover:bg-hope-green/90 border-none"
+                            className="flex items-center justify-center gap-2.5 shadow-purple-200/40 h-11 px-8 rounded-2xl bg-gray-900 text-white hover:bg-black border-none"
                             aria-label="Process batch settlement for partners"
                             onClick={() => {
                                 if (confirm("Proceed with batch settlement for all eligible partners?")) {
@@ -196,7 +205,7 @@ export default function AdminDashboard() {
                                 }
                             }}
                         >
-                            <Zap className="w-4 h-4 shrink-0" /> <span className="translate-y-[0.5px]">Batch Settlement</span>
+                            <Zap className="w-4 h-4 shrink-0" /> <span className="translate-y-[0.5px]">Payouts</span>
                         </Button>
                     </div>
                 </div>
@@ -411,6 +420,14 @@ export default function AdminDashboard() {
                     </motion.div>
                 </div>
             )}
+
+            <QRScannerModal 
+                isOpen={isScannerOpen} 
+                onClose={() => {
+                    setIsScannerOpen(false);
+                    fetchStats(); // Refresh dashboard data after potentially settling a bill
+                }} 
+            />
         </>
     );
 }

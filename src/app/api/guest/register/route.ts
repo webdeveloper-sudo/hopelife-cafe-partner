@@ -72,7 +72,12 @@ export async function POST(req: Request) {
 
         // 2. Generate/Update Dynamic QR Secret
         const secretKey = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // Expires in 7 days for example
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // Pass valid for 24 hours
+
+        // Get referral frequency (total settled visits)
+        const referralCount = await prisma.scanLog.count({
+            where: { guestId: guest.id }
+        });
 
         await prisma.dynamicQR.upsert({
             where: { guestId: guest.id },
@@ -100,7 +105,8 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             message: "Aloha! Your HOPE Cafe Guest Pass has been generated and delivered via WhatsApp. 🌴🌺",
-            guestId: guest.id // Included for frontend testing/redirect if needed
+            guestId: guest.id,
+            referralCount: referralCount + 1 // This is their Nth referral
         });
 
     } catch (error) {

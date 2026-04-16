@@ -4,17 +4,25 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
 }
 
 model Partner {
-  id                String     @id @default(cuid())
+  id                String     @id @default(uuid())
   partnerCode       String     @unique
   name              String
   contactName       String?
   mobile            String     @unique
   email             String?    @unique
-  password          String?    // Added for secure authentication
+  password          String?    // Set after admin approval via email link
   commissionSlab    Float      @default(7.5)
   guestDiscountSlab Float      @default(7.5)
   bankAccount       String?
@@ -22,14 +30,28 @@ model Partner {
   status            String     @default("PENDING") // ACTIVE, REJECTED, PENDING
   referralGoal      Int        @default(10)
   currentTier       String     @default("BRONZE") // BRONZE, SILVER, GOLD, DIAMOND, ELITE
-  businessType      String?    // e.g. rental, homestay, agency
+  businessType      String?
+  address           String?
+  city              String?
+  pincode           String?
   walletBalance     Float      @default(0)
+  createdAt         DateTime   @default(now())
   guests            Guest[]
   payouts           Payout[]
 }
 
+model PartnerOTP {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 model Guest {
-  id              String       @id @default(cuid())
+  id              String       @id @default(uuid())
   name            String
   mobileNumber    String       @unique
   partnerId       String
@@ -40,15 +62,16 @@ model Guest {
 }
 
 model DynamicQR {
-  id              String     @id @default(cuid())
+  id              String     @id @default(uuid())
   guestId         String     @unique
   guest           Guest      @relation(fields: [guestId], references: [id])
   secretKey       String
   expiresAt       DateTime
+  createdAt       DateTime   @default(now())
 }
 
 model ScanLog {
-  id                       String     @id @default(cuid())
+  id                       String     @id @default(uuid())
   guestId                  String
   guest                    Guest      @relation(fields: [guestId], references: [id])
   adminId                  String
@@ -61,7 +84,7 @@ model ScanLog {
 }
 
 model Payout {
-  id              String     @id @default(cuid())
+  id              String     @id @default(uuid())
   partnerId       String
   partner         Partner    @relation(fields: [partnerId], references: [id])
   amount          Float

@@ -85,6 +85,23 @@ Read this in order from top to bottom. Start your study session by opening the f
 - [ ] `src/app/(admin)/admin/slabs/page.tsx` (Forms to edit rate % levels)
 - [ ] `src/app/(admin)/admin/payouts/page.tsx` (List of pending bank transfers)
 - [ ] `src/components/GlobalSearch.tsx` (The Navbar search bar module)
+ GET / 200 in 2.1s (compile: 1454ms, render: 617ms)
+ GET /admin/login 200 in 1547ms (compile: 364ms, proxy.ts: 30ms, render: 1154ms)
+⨯ Error [PrismaClientConstructorValidationError]: Using engine type "client" requires either "adapter" or "accelerateUrl" to be provided to PrismaClient constructor.
+Read more at https://pris.ly/d/client-constructor
+    at module evaluation (src\lib\prisma.ts:10:46)
+    at module evaluation (src\app\api\auth\login\route.ts:4:1)
+    at Object.<anonymous> (C:\Users\DIGITAL MARKETING\Desktop\AGOC\hope-master\.next\dev\server\app\api\auth\login\route.js:5:3)
+   8 | const globalForPrisma = global as unknown as { prisma: any };
+   9 |
+> 10 | const basePrisma = globalForPrisma.prisma || new PrismaClient({
+     |                                              ^
+  11 |     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+  12 | });
+  13 | {
+  page: '/api/auth/login'
+}
+ POST /api/auth/login 500 in 1814ms (compile: 1316ms, render: 498ms)
 
 ---
 
