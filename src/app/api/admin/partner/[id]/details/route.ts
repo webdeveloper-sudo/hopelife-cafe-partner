@@ -34,28 +34,28 @@ export async function GET(
         const totalReferrals = partner.guests.length;
         
         // Scan logs across all guests
-        const allScans = partner.guests.flatMap(g => g.scanLogs);
+        const allScans = partner.guests.flatMap((g: any) => g.scanLogs);
         const salesConverted = allScans.length;
         
-        const totalBusinessVolume = allScans.reduce((sum, log) => sum + (log.billAmount || 0), 0);
-        const totalEarnedCommission = allScans.reduce((sum, log) => sum + (log.partnerCommissionAmount || 0), 0);
+        const totalBusinessVolume = allScans.reduce((sum: number, log: any) => sum + (log.billAmount || 0), 0);
+        const totalEarnedCommission = allScans.reduce((sum: number, log: any) => sum + (log.partnerCommissionAmount || 0), 0);
         
         // Dates
         const lastReferalDate = partner.guests.length > 0 
-            ? partner.guests.reduce((latest, g) => {
+            ? partner.guests.reduce((latest: Date, g: any) => {
                 const guestDate = new Date(g.createdAt);
                 return guestDate > latest ? guestDate : latest;
               }, new Date(0))
             : null;
 
         const lastActiveDate = allScans.length > 0
-            ? allScans.reduce((latest, s) => {
+            ? allScans.reduce((latest: Date, s: any) => {
                 const scanDate = new Date(s.createdAt);
                 return scanDate > latest ? scanDate : latest;
               }, new Date(0))
             : null;
 
-        const totalPayoutAmount = partner.payouts.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const totalPayoutAmount = partner.payouts.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
         // 3. Performance Momentum (Last 7 Days) for this specific partner
         const weeklyPerformance = [];
@@ -66,15 +66,15 @@ export async function GET(
             const dayStart = new Date(d.setHours(0, 0, 0, 0));
             const dayEnd = new Date(d.setHours(23, 59, 59, 999));
 
-            const dayReferrals = partner.guests.filter(g => {
+            const dayReferrals = partner.guests.filter((g: any) => {
                 const created = new Date(g.createdAt);
                 return created >= dayStart && created <= dayEnd;
             }).length;
 
-            const dayRevenue = allScans.filter(l => {
+            const dayRevenue = allScans.filter((l: any) => {
                 const created = new Date(l.createdAt);
                 return created >= dayStart && created <= dayEnd;
-            }).reduce((acc, l) => acc + (l.billAmount || 0), 0);
+            }).reduce((acc: number, l: any) => acc + (l.billAmount || 0), 0);
 
             weeklyPerformance.push({
                 name: dateStr,
@@ -84,14 +84,14 @@ export async function GET(
         }
 
         // 4. Format Guest Details with their scan counts
-        const guestActivity = partner.guests.map(g => ({
+        const guestActivity = partner.guests.map((g: any) => ({
             id: g.id,
             name: g.name,
             mobile: g.mobileNumber,
             joinDate: g.createdAt,
             scanCount: g.scanLogs.length,
-            totalBill: g.scanLogs.reduce((sum, s) => sum + s.billAmount, 0)
-        })).sort((a, b) => b.scanCount - a.scanCount);
+            totalBill: g.scanLogs.reduce((sum: number, s: any) => sum + s.billAmount, 0)
+        })).sort((a: any, b: any) => b.scanCount - a.scanCount);
 
         return NextResponse.json({
             success: true,

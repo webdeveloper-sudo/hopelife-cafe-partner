@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function GET() {
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 
@@ -31,7 +31,7 @@ export async function GET() {
         });
 
         // Map to format suitable for the UI table
-        const formattedPayouts = payouts.map(p => ({
+        const formattedPayouts = payouts.map((p: any) => ({
             id: p.id.slice(0, 8).toUpperCase(), 
             partner: p.partner.name,
             partnerCode: p.partner.partnerCode,

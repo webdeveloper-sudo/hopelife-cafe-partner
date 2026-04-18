@@ -16,7 +16,13 @@ export default function PartnerLoginPage() {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const router = useRouter();
+    React.useEffect(() => {
+        const session = sessionStorage.getItem("hopecafe_partner_session");
+        if (session) {
+            router.push("/dashboard");
+        }
+    }, [router]);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -31,8 +37,8 @@ export default function PartnerLoginPage() {
             const data = await res.json();
 
             if (data.success) {
-                // Sync JWT session with localStorage guard used by the partner layout
-                localStorage.setItem("hopecafe_partner_session", JSON.stringify({ role: "PARTNER", partnerCode: data.partnerCode, ts: Date.now() }));
+                // Sync JWT session with sessionStorage as requested
+                sessionStorage.setItem("hopecafe_partner_session", JSON.stringify({ role: "PARTNER", partnerCode: data.partnerCode, ts: Date.now() }));
                 toast.success("Login Successful");
                 router.push(data.redirectUrl || "/dashboard");
             } else {

@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 
+import { getSession } from "@/lib/auth";
+
 export const runtime = 'nodejs';
 
 export async function GET() {
     try {
+        const session = await getSession();
+        console.log("Stats API Session:", session);
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const prisma = getPrisma();
 
         const partners = await prisma.partner.findMany();
@@ -56,15 +64,15 @@ export async function GET() {
             const dayStart = new Date(d.setHours(0, 0, 0, 0));
             const dayEnd = new Date(d.setHours(23, 59, 59, 999));
 
-            const dayReferrals = guests.filter(g => {
+            const dayReferrals = guests.filter((g: any) => {
                 const created = new Date(g.createdAt);
                 return created >= dayStart && created <= dayEnd;
             }).length;
 
-            const dayRevenue = scanLogs.filter(l => {
+            const dayRevenue = scanLogs.filter((l: any) => {
                 const created = new Date(l.createdAt);
                 return created >= dayStart && created <= dayEnd;
-            }).reduce((acc, l) => acc + (l.billAmount || 0), 0);
+            }).reduce((acc: number, l: any) => acc + (l.billAmount || 0), 0);
 
             weeklyPerformance.push({
                 name: dateStr,

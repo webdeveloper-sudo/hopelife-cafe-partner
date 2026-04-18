@@ -6,15 +6,11 @@ import crypto from "crypto";
 
 export async function POST(req: Request) {
     try {
-        console.log("Hot-reloaded API Route");
         const body = await req.json();
         const prisma = getPrisma();
         const { role, mobile, email, password } = body;
 
-        // In a real app, verify the password Hash.
-        // For HOPE Cafe demo, we just simplify. Admin expects generic auth.
-
-        if (role === "ADMIN") {
+        if (role === "ADMIN" || role === "SUPER_ADMIN") {
             const adminUser = await prisma.admin.findUnique({ where: { email } });
             
             if (!adminUser) {
@@ -26,11 +22,14 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Invalid admin credentials" }, { status: 401 });
             }
 
-            await login({ role: "ADMIN", id: adminUser.id });
-            return NextResponse.json({ success: true, redirectUrl: "/admin/dashboard" });
+            // Return the actual role from the database — let the client-side decide if it matches
+            const adminRole = adminUser.role || "SUPER_ADMIN";
+            const redirectUrl = adminRole === "SUPER_ADMIN" ? "/super-admin/dashboard" : "/admin/dashboard";
+
+            await login({ role: adminRole, id: adminUser.id });
+            return NextResponse.json({ success: true, role: adminRole, redirectUrl });
 
         } else if (role === "PARTNER") {
-            // Find partner by mobile or email
             const partner = (email) ?
                 await prisma.partner.findFirst({ where: { email: email } }) :
                 await prisma.partner.findUnique({ where: { mobile: mobile } });
@@ -46,7 +45,6 @@ export async function POST(req: Request) {
                     return NextResponse.json({ error: "Invalid partner credentials" }, { status: 401 });
                 }
             } else {
-                // If no password set, allow login once (for demo migration) but recommend setting one
                 console.warn(`[SECURITY] Partner ${partner.id} logged in without password hash.`);
             }
 

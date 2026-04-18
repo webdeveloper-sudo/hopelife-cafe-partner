@@ -19,7 +19,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         pathname.includes("/support") ||
         pathname.includes("/payouts") ||
         pathname.startsWith("/pass/") ||
-        pathname.startsWith("/p/");
+        pathname.startsWith("/p/") ||
+        pathname.includes("/thank-you");
 
     return (
         <>

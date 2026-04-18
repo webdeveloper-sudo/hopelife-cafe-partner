@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function GET() {
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 
@@ -37,7 +37,7 @@ export async function GET() {
             }
         });
 
-        const processingPartnerIds = new Set(processingPayouts.map((p: any) => p.partnerId));
+        const processingPartnerIds = new Set(processingPayouts.map((p: any) => p.partnerId) as string[]);
 
         const eligiblePartners = partners.map((p: any) => {
             const hasBank = p.bankAccount && p.ifsc;

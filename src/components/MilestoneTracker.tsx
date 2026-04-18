@@ -95,7 +95,7 @@ export default function MilestoneTracker({
                         <h3 className="text-2xl font-black text-gray-900 tracking-tight">{currentTierConfig.label}</h3>
                     </div>
                 </div>
-                <div className="text-right flex flex-col items-end gap-1">
+                <div className="md:text-right flex flex-col md:items-end gap-1 mt-2 md:mt-0">
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Base Commission</p>
                         <p className="text-3xl font-black text-hope-green tracking-tighter leading-none">
@@ -103,7 +103,7 @@ export default function MilestoneTracker({
                             {nextTierConfig && <span className="text-sm text-gray-300 font-bold ml-1">→ Next Level Up</span>}
                         </p>
                     </div>
-                    <div className="mt-2 text-right">
+                    <div className="mt-2 md:text-right">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.1em]">Guest Discount</p>
                         <p className="text-lg font-black text-gray-900 tracking-tight leading-none">
                             {displayDiscount}% Flat Off

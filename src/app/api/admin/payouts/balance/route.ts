@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 export async function GET() {
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 

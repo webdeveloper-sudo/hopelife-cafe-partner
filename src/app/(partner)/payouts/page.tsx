@@ -38,7 +38,11 @@ const item = {
 
 export default function PartnerPayoutsPage() {
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({
+    const [stats, setStats] = useState<{
+        walletBalance: number;
+        lastPayout: number | null;
+        totalWithdrawn: number;
+    }>({
         walletBalance: 0,
         lastPayout: null,
         totalWithdrawn: 0

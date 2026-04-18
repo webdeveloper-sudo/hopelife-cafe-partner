@@ -9,11 +9,11 @@ function getKey() {
     return new TextEncoder().encode(secret);
 }
 
-export async function encrypt(payload: any) {
+export async function encrypt(payload: any, expiresIn: string | number = "24h") {
     return await new SignJWT(payload)
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
-        .setExpirationTime("24h")
+        .setExpirationTime(expiresIn)
         .sign(getKey());
 }
 
@@ -29,8 +29,12 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function login(payload: any) {
-    // payload should contain e.g. { role: "ADMIN", id: "admin-1" }
-    const session = await encrypt(payload);
+    // Super Admin: 24h, others: 365 days (indefinite)
+    const isSuperAdmin = payload.role === "SUPER_ADMIN";
+    const expiresIn = isSuperAdmin ? "24h" : "365d";
+    const maxAge = isSuperAdmin ? 24 * 60 * 60 : 365 * 24 * 60 * 60;
+
+    const session = await encrypt(payload, expiresIn);
 
     // Set HTTP Only Cookie
     const cookieStore = await cookies();
@@ -39,7 +43,7 @@ export async function login(payload: any) {
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 24 * 60 * 60, // 1 day
+        maxAge: maxAge,
     });
 }
 

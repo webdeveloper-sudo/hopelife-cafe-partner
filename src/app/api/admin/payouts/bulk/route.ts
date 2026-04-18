@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 

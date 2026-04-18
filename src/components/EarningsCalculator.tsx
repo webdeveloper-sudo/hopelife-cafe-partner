@@ -22,8 +22,8 @@ export default function EarningsCalculator({
 
     return (
         <Card className="border border-gray-300 shadow-3xl bg-gradient-to-br from-hope-purple to-hope-green rounded-md overflow-hidden flex flex-col md:flex-row shadow-[0_20px_60px_-15px_rgba(45,106,79,0.3)]">
-            {/* Left Side: Light  Estimator */}
-            <div className="bg-white p-8 md:p-12 md:w-[55%] flex flex-col justify-center rounded-r-md md:rounded-r-md relative z-10 shadow-2xl shadow-purple-950/10 border-r border-gray-300">
+            {/* Left Side: Estimator */}
+            <div className="bg-white p-6 sm:p-8 md:p-12 md:w-[55%] flex flex-col justify-center relative z-10 shadow-2xl md:shadow-purple-950/10 border-b md:border-b-0 md:border-r border-gray-300">
                 <div className="mb-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-hope-green/10 border border-hope-green/20 mb-6">
                         <Calculator className="w-3.5 h-3.5 text-hope-green" />
@@ -85,8 +85,8 @@ export default function EarningsCalculator({
             </div>
 
             {/* Right Side: Results Section */}
-            <div className="bg-transparent p-8 md:p-12 md:w-[45%] flex flex-col justify-center relative -ml-6 md:-ml-8 z-0">
-                <div className="space-y-10 pl-6 md:pl-10">
+            <div className="bg-transparent p-8 sm:p-12 md:w-[45%] flex flex-col justify-center relative md:-ml-8 z-0">
+                <div className="space-y-10 md:pl-10">
                     <div>
                         <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Estimated Monthly Income</p>
                         <motion.p

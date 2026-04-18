@@ -12,7 +12,7 @@ export const runtime = 'nodejs';
 export async function POST() {
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 
@@ -44,7 +44,7 @@ export async function POST() {
 
                 if (rzpStatus === "PROCESSED") {
                     // Success: Need to deduct wallet using multi-attribute logic (Bonus first)
-                    await prisma.$transaction(async (tx) => {
+                    await prisma.$transaction(async (tx: any) => {
                         const partner = await tx.partner.findUnique({ where: { id: payout.partnerId } });
                         if (!partner) return;
 

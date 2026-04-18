@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Timer, AlertCircle, Sparkles, Download, Smartphone, Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, Timer, AlertCircle, Sparkles, Smartphone, Clock } from "lucide-react";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 
 export default function PassDisplayPage({ params }: { params: Promise<{ guestId: string }> }) {
     const unwrappedParams = React.use(params);
+    const router = useRouter();
     const [timeLeft, setTimeLeft] = useState(60);
     const [guestData, setGuestData] = useState<{ 
         name: string, 
@@ -74,84 +76,41 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
         return () => clearInterval(timer);
     }, [guestData, unwrappedParams.guestId]);
 
-    const handleDownloadPass = async () => {
-        if (!qrRef.current) return;
-        
-        try {
-            const svg = qrRef.current.querySelector("svg");
-            if (!svg) return;
+    // Real-time Redemption Polling
+    useEffect(() => {
+        if (!guestData || guestData.isRedeemed || guestData.isExpired) return;
 
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            const img = new Image();
-            
-            // Set high resolution
-            canvas.width = 1200;
-            canvas.height = 1200;
-            
-            const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(svgBlob);
+        const pollRedemption = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/guest/${unwrappedParams.guestId}/status`);
+                const data = await res.json();
+                if (data.success && data.isRedeemed) {
+                    toast.success("Pass Redeemed Successfully!");
+                    router.push("/thank-you");
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
+        }, 2000);
 
-            img.onload = () => {
-                if (!ctx) return;
-                
-                // Background
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Branded Border
-                ctx.strokeStyle = "#16a34a"; // hope-green
-                ctx.lineWidth = 40;
-                ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-                // Title
-                ctx.fillStyle = "#111827";
-                ctx.font = "bold 60px Poppins, sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("HOPE CAFE GUEST PASS", canvas.width / 2, 120);
-
-                // QR Code
-                ctx.drawImage(img, 200, 200, 800, 800);
-
-                // Footer Info
-                ctx.fillStyle = "#6b7280";
-                ctx.font = "bold 40px Poppins, sans-serif";
-                ctx.fillText(`GUEST: ${guestData?.name?.toUpperCase()}`, canvas.width / 2, 1050);
-                ctx.font = "bold 35px Poppins, sans-serif";
-                ctx.fillText(`VIA: ${guestData?.partnerName?.toUpperCase()}`, canvas.width / 2, 1110);
-                
-                const pngUrl = canvas.toDataURL("image/png");
-                const downloadLink = document.createElement("a");
-                downloadLink.href = pngUrl;
-                downloadLink.download = `HOPE-Pass-${guestData?.name}.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                URL.revokeObjectURL(url);
-                toast.success("Pass downloaded successfully!");
-            };
-            img.src = url;
-        } catch (err) {
-            toast.error("Failed to generate image download.");
-        }
-    };
+        return () => clearInterval(pollRedemption);
+    }, [guestData, unwrappedParams.guestId]);
 
     if (loading) {
-        return <div className="min-h-screen bg-gray-950 flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-hope-green border-t-transparent animate-spin" /></div>;
+        return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-12 h-12 rounded-full border-4 border-hope-green border-t-transparent animate-spin" /></div>;
     }
 
     if (error || !guestData || guestData.isExpired) {
         return (
-            <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6 text-white text-center">
-                <div className="w-24 h-24 bg-red-500/10 rounded-md border border-gray-300 flex items-center justify-center mb-8">
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-gray-900 text-center">
+                <div className="w-24 h-24 bg-red-100 rounded-md border border-gray-300 flex items-center justify-center mb-8">
                     <AlertCircle className="w-12 h-12 text-red-500" />
                 </div>
-                <h1 className="text-3xl font-black mb-4">Pass Expired or Invalid</h1>
-                <p className="text-gray-400 max-w-sm mb-10 leading-relaxed">
+                <h1 className="text-3xl font-black mb-4 tracking-tight">Pass Expired or Invalid</h1>
+                <p className="text-gray-500 max-w-sm mb-10 leading-relaxed font-medium">
                     Referral passes are valid for 24 hours only. Please contact your partner/referrer to request a fresh invitation link.
                 </p>
-                <Button variant="outline" className="text-white border border-gray-300 px-8 h-12 rounded-md" onClick={() => window.location.reload()}>
+                <Button variant="outline" className="border-gray-300 px-8 h-12 rounded-md font-bold" onClick={() => window.location.reload()}>
                     Refresh Page
                 </Button>
             </div>
@@ -272,24 +231,15 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                                 </div>
                             </div>
 
-                            {!guestData.isRedeemed && (
-                                <div className="space-y-4">
-                                    <Button 
-                                        onClick={handleDownloadPass}
-                                        className="w-full h-16 bg-gray-900 hover:bg-black text-white rounded-md border border-gray-300 shadow-xl shadow-gray-900/10 font-black uppercase tracking-widest gap-3"
-                                    >
-                                        <Download className="w-5 h-5" /> Download Offline Pass
-                                    </Button>
-                                    <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
-                                        Valid for 24 hours only. <br />
-                                        Please do not share this pass with others.
-                                    </p>
-                                </div>
-                            )}
+                            <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                                Valid for 24 hours only. <br />
+                                Please do not share this pass with others.
+                            </p>
                         </div>
                     </motion.div>
                 </AnimatePresence>
             </div>
         </div>
     );
+}
 }

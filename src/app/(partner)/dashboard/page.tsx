@@ -116,7 +116,7 @@ export default function PartnerDashboard() {
 
     if (loading || !stats) {
         return (
-            <div className="p-8 space-y-8">
+            <div className="p-4 sm:p-8 space-y-8">
                 <div className="space-y-2">
                     <Skeleton className="h-10 w-64" />
                     <Skeleton className="h-4 w-48" />
@@ -140,12 +140,12 @@ export default function PartnerDashboard() {
     ];
 
     return (
-        <motion.div variants={container} initial="hidden" animate="show" className="p-8 space-y-10">
+        <motion.div variants={container} initial="hidden" animate="show" className="p-4 sm:p-8 space-y-8 md:space-y-10">
 
             {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Partner Dashboard</h1>
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">Partner Dashboard</h1>
                     <p className="text-gray-500 mt-1 font-medium">
                         Welcome back, {stats.partnerDetails.name}! Monitoring your live performance.
                     </p>

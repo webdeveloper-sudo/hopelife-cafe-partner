@@ -6,8 +6,8 @@ export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Define protected routes
-    const isPublicAdminRoute = pathname === "/admin/login" || pathname.startsWith("/api/auth/login");
-    const isAdminRoute = pathname.startsWith("/admin") && !isPublicAdminRoute;
+    const isPublicAdminRoute = pathname === "/admin/login" || pathname === "/super-admin/login" || pathname.startsWith("/api/auth/login");
+    const isAdminRoute = (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) && !isPublicAdminRoute;
     const isPublicPartnerRoute = pathname === "/login" || pathname === "/register" || pathname === "/scan" || pathname.startsWith("/api/auth/login");
     const isPartnerRoute = (pathname.startsWith("/dashboard") || pathname.startsWith("/settings") || pathname.startsWith("/referrals") || pathname.startsWith("/payouts") || pathname.startsWith("/transactions")) && !isPublicPartnerRoute;
 
@@ -24,6 +24,8 @@ export async function proxy(request: NextRequest) {
     if (isAdminRoute || isPartnerRoute || isProtectedApiRoute) {
         const sessionStore = request.cookies.get("session")?.value;
         const session = sessionStore ? await decrypt(sessionStore) : null;
+        
+        console.log(`[PROXY DEBUG] Path: ${pathname}, Role: ${session?.role}, HasSession: ${!!session}`);
 
         if (!session) {
             // Unauthenticated API request
@@ -40,14 +42,17 @@ export async function proxy(request: NextRequest) {
         }
 
         // Role-based access enforcement
-        if (isAdminRoute && session.role !== "ADMIN") {
-            return NextResponse.redirect(new URL("/admin/login", request.url));
+        if (isAdminRoute && (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
+            // Redirect to appropriate login based on path
+            const loginPath = pathname.startsWith("/super-admin") ? "/super-admin/login" : "/admin/login";
+            return NextResponse.redirect(new URL(loginPath, request.url));
         }
         if (isPartnerRoute && session.role !== "PARTNER") {
             return NextResponse.redirect(new URL("/login", request.url));
         }
         // Protect admin APIs from partner tokens and vice versa
-        if (pathname.startsWith("/api/admin") && session.role !== "ADMIN") {
+        const currentRole = session.role?.toUpperCase();
+        if (pathname.startsWith("/api/admin") && (currentRole !== "ADMIN" && currentRole !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
         if (pathname.startsWith("/api/partner") && session.role !== "PARTNER") {
@@ -62,6 +67,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
     matcher: [
         "/admin/:path*",
+        "/super-admin/:path*",
         "/dashboard/:path*",
         "/settings/:path*",
         "/referrals/:path*",

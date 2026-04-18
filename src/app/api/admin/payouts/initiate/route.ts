@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     // Force Refresh: 2026-04-17-1114
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 

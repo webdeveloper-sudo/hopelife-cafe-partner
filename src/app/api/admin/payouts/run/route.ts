@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
         // RBAC: Ensure ONLY authenticated Admin can trigger payouts
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 

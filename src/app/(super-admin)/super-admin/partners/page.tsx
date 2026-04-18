@@ -70,7 +70,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     );
 };
 
-export default function AdminPartnersPage() {
+export default function SuperAdminPartnersPage() {
     const router = useRouter();
     const [partners, setPartners] = useState<Partner[]>([]);
     const [loading, setLoading] = useState(true);
@@ -281,7 +281,7 @@ export default function AdminPartnersPage() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: i * 0.03 }}
-                                    onClick={() => router.push(`/admin/partners/${p.id}`)}
+                                    onClick={() => router.push(`/super-admin/partners/${p.id}`)}
                                     className="group hover:bg-gray-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-8 py-5">

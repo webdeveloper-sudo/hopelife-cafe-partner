@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
     try {
         const session = await getSession();
-        if (!session || session.role !== "ADMIN") {
+        if (!session || (session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 });
         }
 
@@ -58,8 +58,8 @@ export async function POST(req: Request) {
             };
         });
 
-        const totalAmount = previewData.reduce((sum, p) => p.canSettle ? sum + p.amount : sum, 0);
-        const readyCount = previewData.filter(p => p.canSettle).length;
+        const totalAmount = previewData.reduce((sum: number, p: any) => p.canSettle ? sum + p.amount : sum, 0);
+        const readyCount = previewData.filter((p: any) => p.canSettle).length;
 
         return NextResponse.json({
             success: true,

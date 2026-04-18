@@ -290,7 +290,7 @@ export default function AdminPayoutsPage() {
                 <div className="flex items-center gap-3">
                     <Button 
                         variant="outline" 
-                        loading={isReconciling}
+                        isLoading={isReconciling}
                         className="gap-2 h-11 border-gray-300" 
                         onClick={handleReconcile}
                     >
