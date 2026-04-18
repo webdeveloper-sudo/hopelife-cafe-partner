@@ -18,10 +18,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             return NextResponse.json({ error: "Partner is already approved" }, { status: 400 });
         }
 
-        // Approve the partner
+        // Fetch system config to apply dynamic bonuses respecting maintenance mode
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+        const maintenanceMode = config?.maintenanceMode ?? false;
+        const welcomeBonus = config?.welcomeBonus ?? 500;
+
+        // Apply welcome bonus only if maintenance mode is OFF and partner has no balance yet
+        const walletIncrement = (!maintenanceMode && partner.walletBalance === 0) ? welcomeBonus : 0;
+
+        // Approve the partner and credit bonus to multi-attribute wallet
         const updated = await prisma.partner.update({
             where: { id },
-            data: { status: "ACTIVE" }
+            data: {
+                status: "ACTIVE",
+                ...(walletIncrement > 0 ? { 
+                    walletBalance: { increment: walletIncrement },
+                    bonusAmount: { increment: walletIncrement },
+                    walletTotal: { increment: walletIncrement },
+                    incomeLogs: {
+                        create: {
+                            amount: walletIncrement,
+                            type: "WELCOME_BONUS",
+                            description: "Seed credit for joining the HOPE Partnership Program"
+                        }
+                    }
+                } : {})
+            }
         });
 
         // Generate set-password token (48 hours)
@@ -45,7 +67,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             );
         }
 
-        return NextResponse.json({ success: true, partner: updated, setPasswordUrl });
+        return NextResponse.json({
+            success: true,
+            partner: updated,
+            setPasswordUrl,
+            bonusApplied: walletIncrement > 0 ? walletIncrement : null
+        });
     } catch (err) {
         console.error("Approve partner error:", err);
         return NextResponse.json({ error: "Failed to approve partner." }, { status: 500 });

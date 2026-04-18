@@ -58,7 +58,7 @@ export default function Header() {
                         <nav className="flex items-center gap-2 sm:gap-4 relative z-10">
                             <Link
                                 href="/login"
-                                className="hidden md:flex text-sm font-bold text-gray-600 hover:text-hope-gold transition-all items-center gap-2 px-4 py-2 rounded-full hover:bg-hope-gold/5 border border-transparent hover:border-hope-gold/10"
+                                className="hidden md:flex text-sm font-bold text-gray-600 hover:text-hope-gold transition-all items-center gap-2 px-4 py-2 rounded-md hover:bg-hope-gold/5 border border-gray-300 hover:border-hope-gold/10"
                             >
                                 <LogIn className="w-4 h-4" />
                                 <span>Partner Login</span>
@@ -68,14 +68,14 @@ export default function Header() {
 
                             <Link
                                 href="/admin/login"
-                                className="hidden md:flex text-sm font-bold text-gray-400 hover:text-gray-900 transition-all items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200"
+                                className="hidden md:flex text-sm font-bold text-gray-400 hover:text-gray-900 transition-all items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-50 border border-gray-300 hover:border-gray-200"
                             >
                                 <Shield className="w-4 h-4" />
                                 <span>Admin</span>
                             </Link>
 
                             <Link href="/scan" className="ml-2">
-                                <Button size="sm" className="flex gap-2 rounded-full shadow-md shadow-hope-gold/20 hover:shadow-lg hover:shadow-hope-gold/40 transition-all hover:-translate-y-0.5 bg-gradient-to-r from-hope-gold to-hope-pink hover:from-hope-pink hover:to-hope-gold border-none h-10 px-5 ring-2 ring-transparent hover:ring-hope-gold/20" aria-label="Find your guest pass">
+                                <Button size="sm" className="flex gap-2 rounded-md shadow-md shadow-hope-gold/20 hover:shadow-lg hover:shadow-hope-gold/40 transition-all hover:-translate-y-0.5 bg-gradient-to-r from-hope-gold to-hope-pink hover:from-hope-pink hover:to-hope-gold border border-gray-300 h-10 px-5 ring-2 ring-transparent hover:ring-hope-gold/20" aria-label="Find your guest pass">
                                     <QrCode className="w-4 h-4" />
                                     <span className="font-bold text-gray-900">Guest Pass</span>
                                 </Button>

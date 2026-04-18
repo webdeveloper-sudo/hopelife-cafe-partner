@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 
+import { sendPartnerRejectionEmail } from "@/lib/email";
+
 export const runtime = 'nodejs';
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
+        const { reason } = await req.json();
         const prisma = getPrisma();
 
         const partner = await prisma.partner.findUnique({ where: { id } });
@@ -17,6 +20,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             where: { id },
             data: { status: "REJECTED" }
         });
+
+        // Send rejection email
+        if (partner.email) {
+            await sendPartnerRejectionEmail(partner.email, partner.name, reason || "Application does not meet our current requirements.");
+        }
 
         return NextResponse.json({ success: true, partner: updated });
     } catch (err) {

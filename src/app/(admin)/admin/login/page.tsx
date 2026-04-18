@@ -53,12 +53,12 @@ export default function AdminLoginPage() {
                 transition={{ duration: 0.5, type: "spring" }}
                 className="w-full max-w-md"
             >
-                <Card className="bg-white border-none shadow-[0_32px_128px_-16px_rgba(0,0,0,0.1)] overflow-hidden rounded-[2.5rem]">
+                <Card className="bg-white border border-gray-300 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.1)] overflow-hidden rounded-md">
                     {/* Brand Purple Plate - SOLID */}
-                    <div className="h-32 bg-hope-green" />
+                    <div className="h-32 bg-hope-green h-[80px]" />
 
                     <CardHeader className="text-center pt-0 -mt-16">
-                        <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border-8 border-white shadow-2xl relative z-10 transition-transform hover:scale-105 duration-500 overflow-hidden">
+                        <div className="w-32 h-32 bg-white rounded-md flex items-center justify-center mx-auto mb-6 border border-gray-300 shadow-2xl relative z-10 transition-transform hover:scale-105 duration-500 overflow-hidden">
                             <img 
                                 src="/logo.png" 
                                 alt="HOPE Cafe Logo" 
@@ -75,7 +75,7 @@ export default function AdminLoginPage() {
                                 <div className="relative">
                                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
                                     <Input
-                                        className="h-14 pl-14 bg-gray-50 border-gray-100 text-gray-900 placeholder-gray-400 focus:ring-hope-green/20 text-lg rounded-2xl transition-all focus:bg-white"
+                                        className="h-14 pl-14 bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-hope-green/20 text-lg rounded-md transition-all focus:bg-white"
                                         placeholder="admin@hopecafe.network"
                                         required
                                         type="email"
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
                                 <div className="relative">
                                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
                                     <Input
-                                        className="h-14 pl-14 bg-gray-50 border-gray-100 text-gray-900 placeholder-gray-400 focus:ring-hope-green/20 text-lg rounded-2xl transition-all focus:bg-white"
+                                        className="h-14 pl-14 bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-hope-green/20 text-lg rounded-md transition-all focus:bg-white"
                                         placeholder="••••••••"
                                         required
                                         type="password"
@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
                                 variant="primary"
                                 type="submit"
                                 size="lg"
-                                className="w-full h-16 text-xl mt-6 shadow-hope-green/40 bg-hope-green hover:bg-hope-green/90 transition-all active:scale-[0.98] text-white"
+                                className="w-full h-16 text-xl mt-6 shadow-hope-green/40 bg-hope-green hover:bg-hope-green/90 transition-all rounded-md active:scale-[0.98] text-white"
                                 isLoading={loading}
                             >
                                 Authorize <ArrowRight className="w-6 h-6 ml-3" />

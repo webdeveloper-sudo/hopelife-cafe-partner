@@ -80,7 +80,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
             <div className="w-full max-w-md">
                 {/* Header Branding */}
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-white overflow-hidden p-1 transition-transform hover:scale-105 duration-500">
+                    <div className="w-20 h-20 bg-white rounded-md flex items-center justify-center mx-auto mb-4 shadow-xl border border-gray-300 overflow-hidden p-1 transition-transform hover:scale-105 duration-500">
                         <img src="/logo.png" alt="HOPE Cafe Logo" className="w-full h-full object-cover" />
                     </div>
                     <h1 className="text-2xl font-black text-gray-900 tracking-tighter">HOPE Cafe</h1>
@@ -94,7 +94,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white p-8 rounded-[2rem] shadow-2xl shadow-gray-200/50 border border-gray-100"
+                            className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200/50 border border-gray-300"
                         >
                             <div className="mb-8 text-center">
                                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 text-green-600 mb-4">
@@ -115,13 +115,12 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                             type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
+                                            className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
                                             placeholder="John Doe"
                                             required
                                         />
                                     </div>
                                 </div>
-
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">WhatsApp Mobile Number</label>
                                     <div className="relative">
@@ -134,7 +133,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                             maxLength={10}
                                             value={mobile}
                                             onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                                            className="block w-full pl-20 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
+                                            className="block w-full pl-20 pr-4 py-4 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
                                             placeholder="99999 99999"
                                             required
                                         />
@@ -161,7 +160,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                             key="success"
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white p-8 rounded-[2rem] shadow-2xl shadow-gray-200/50 border border-gray-100 text-center"
+                            className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200/50 border border-gray-300 text-center"
                         >
                             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <CheckCircle2 className="w-10 h-10 text-green-500" />
@@ -172,7 +171,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                 <strong className="text-gray-900">+91 {mobile.slice(0, 5)} {mobile.slice(5)}</strong>
                             </p>
 
-                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-8">
+                            <div className="bg-gray-50 rounded-md p-4 border border-gray-300 mb-8">
                                 <p className="text-sm text-gray-600">Please open the WhatsApp message from HOPE Cafe and click the link to claim your benefits at the cashier.</p>
                             </div>
 

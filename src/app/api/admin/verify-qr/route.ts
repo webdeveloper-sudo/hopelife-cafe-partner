@@ -103,22 +103,48 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Pass ALREADY REDEEMED. This is a one-time discount only." }, { status: 400 });
             }
 
+            // Calculate effective commission (base slab + any earned bonus commission %)
+            const partnerCommissionSlab = (guest.partner.commissionSlab || 7.5) + (guest.partner.bonusCommission || 0);
             const guestDiscountSlab = guest.partner.guestDiscountSlab || guest.partner.commissionSlab || 7.5;
-            const partnerCommissionSlab = guest.partner.commissionSlab || 7.5;
 
             const guestDiscountAmount = billAmount * (guestDiscountSlab / 100);
             const partnerCommissionAmount = billAmount * (partnerCommissionSlab / 100);
 
-            const scanLog = await prisma.scanLog.create({
-                data: {
-                    guestId: guest.id,
-                    adminId: adminId || "SYSTEM",
-                    billAmount,
-                    discountAmount: guestDiscountAmount, // For backward compatibility in some views
-                    guestDiscountAmount,
-                    partnerCommissionAmount,
-                    status: "SETTLED"
-                }
+            const [scanLog] = await prisma.$transaction([
+                prisma.scanLog.create({
+                    data: {
+                        guestId: guest.id,
+                        adminId: adminId || "SYSTEM",
+                        billAmount,
+                        discountAmount: guestDiscountAmount,
+                        guestDiscountAmount,
+                        partnerCommissionAmount,
+                        status: "SETTLED"
+                    }
+                }),
+                prisma.partner.update({
+                    where: { id: guest.partnerId },
+                    data: {
+                        walletBalance: { increment: partnerCommissionAmount },
+                        earnedCommission: { increment: partnerCommissionAmount },
+                        walletTotal: { increment: partnerCommissionAmount }
+                    }
+                })
+            ]);
+
+            // Trigger Tier Upgrade Evaluation (Non-blocking but awaited for result logging)
+            let tierResult: any = null;
+            try {
+                const { evaluateTierUpgrade } = await import("@/lib/tier");
+                tierResult = await evaluateTierUpgrade(guest.partnerId);
+            } catch (tierErr) {
+                console.error("Tier upgrade evaluation failed:", tierErr);
+            }
+
+            // Fetch final balance to ensure accuracy in response (including potential bonuses)
+            const finalPartner = await prisma.partner.findUnique({ 
+                where: { id: guest.partnerId },
+                select: { walletBalance: true }
             });
 
             return NextResponse.json({
@@ -126,7 +152,12 @@ export async function POST(req: Request) {
                 message: "Transaction Completed",
                 scanLogId: scanLog.id,
                 discountApplied: guestDiscountAmount,
-                commissionEarned: partnerCommissionAmount
+                commissionEarned: partnerCommissionAmount,
+                newWalletBalance: finalPartner?.walletBalance || 0,
+                tierUpgrade: tierResult?.upgraded ? {
+                    newTier: tierResult.newTier,
+                    bonusAwarded: tierResult.bonusAwarded
+                } : null
             });
         }
 

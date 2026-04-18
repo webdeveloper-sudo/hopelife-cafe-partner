@@ -120,7 +120,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                className="relative w-full max-w-xl bg-white rounded-md border border-gray-300 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
                 {/* Header */}
                 <div className="px-8 pt-8 pb-4 flex justify-between items-center border-b border-gray-50">
@@ -136,7 +136,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                         size="icon" 
                         onClick={onClose} 
                         disabled={scanState === "verifying" || isSettling}
-                        className="rounded-2xl bg-gray-50 hover:bg-gray-100"
+                        className="rounded-md bg-gray-50 border border-gray-300 hover:bg-gray-100"
                     >
                         <X className="w-5 h-5 text-gray-400" />
                     </Button>
@@ -155,20 +155,20 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                             >
                                 {scanState === "idle" ? (
                                     <div className="text-center py-10 space-y-6">
-                                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-xl">
+                                        <div className="w-24 h-24 bg-gray-50 rounded-md flex items-center justify-center mx-auto border border-gray-300 shadow-xl">
                                             <ScanLine className="w-10 h-10 text-gray-300" />
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-gray-900">Ready to Validate</h3>
                                             <p className="text-sm text-gray-500 mt-2 max-w-xs mx-auto">Click below to open the camera. Ensure the guest pass is visible on their screen.</p>
                                         </div>
-                                        <Button onClick={() => setScanState("scanning")} className="w-full h-16 text-lg rounded-[1.25rem]">
+                                        <Button onClick={() => setScanState("scanning")} className="w-full h-16 text-lg rounded-md border border-gray-300">
                                             Open Scanner
                                         </Button>
                                     </div>
                                 ) : (
                                     <div className="space-y-6">
-                                        <div className="w-full aspect-square bg-black rounded-[2rem] overflow-hidden relative shadow-inner">
+                                        <div className="w-full aspect-square bg-black rounded-md border border-gray-300 overflow-hidden relative shadow-inner">
                                             <Scanner
                                                 onScan={handleScan}
                                                 components={{ finder: false }}
@@ -179,11 +179,11 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                             />
                                             {/* Scanning Overlay */}
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <div className="w-64 h-64 border-2 border-white/20 rounded-2xl relative">
-                                                    <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-hope-green rounded-tl-xl" />
-                                                    <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-hope-green rounded-tr-xl" />
-                                                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-hope-green rounded-bl-xl" />
-                                                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-hope-green rounded-br-xl" />
+                                                <div className="w-64 h-64 border-2 border-white/20 rounded-md relative">
+                                                    <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-hope-green rounded-tl-sm" />
+                                                    <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-hope-green rounded-tr-sm" />
+                                                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-hope-green rounded-bl-sm" />
+                                                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-hope-green rounded-br-sm" />
                                                 </div>
                                             </div>
                                             <motion.div
@@ -192,7 +192,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                                 className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-hope-green to-transparent z-10 blur-[1px]"
                                             />
                                         </div>
-                                        <Button variant="outline" onClick={() => setScanState("idle")} className="w-full h-14 rounded-2xl border-gray-100">
+                                        <Button variant="outline" onClick={() => setScanState("idle")} className="w-full h-14 rounded-md border border-gray-300">
                                             Cancel Calibration
                                         </Button>
                                     </div>
@@ -227,7 +227,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 animate={{ opacity: 1, y: 0 }}
                                 className="text-center py-10"
                             >
-                                <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                                <div className="w-24 h-24 bg-red-50 rounded-md border border-gray-300 flex items-center justify-center mx-auto mb-8">
                                     <AlertCircle className="w-12 h-12 text-red-500" />
                                 </div>
                                 <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Pass Code Expired</h3>
@@ -235,7 +235,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                     This referral code has exceeded its 24-hour validity window. <br/>
                                     <span className="text-red-600 font-bold mt-2 block">Kindly ask the guest to request a new referral from their partner.</span>
                                 </p>
-                                <Button onClick={handleReset} className="w-full h-14 bg-gray-900 text-white rounded-2xl border-none font-black uppercase tracking-widest">
+                                <Button onClick={handleReset} className="w-full h-14 bg-gray-900 text-white rounded-md border border-gray-300 font-black uppercase tracking-widest">
                                     Scan Another Pass
                                 </Button>
                             </motion.div>
@@ -249,13 +249,13 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 animate={{ opacity: 1, x: 0 }}
                                 className="space-y-8"
                             >
-                                <div className="p-8 bg-green-50/50 border border-green-100/50 rounded-[2rem] relative overflow-hidden group">
+                                <div className="p-8 bg-green-50/50 border border-gray-300 rounded-md relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                         <CheckCircle2 className="w-16 h-16 text-green-600" />
                                     </div>
                                     <div className="relative z-10 flex flex-col gap-6">
                                         <div className="flex items-center gap-5">
-                                            <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center font-black text-hope-green text-2xl border border-green-100">
+                                            <div className="w-14 h-14 bg-white rounded-md shadow-sm flex items-center justify-center font-black text-hope-green text-2xl border border-gray-300">
                                                 {scannedData.name[0]}
                                             </div>
                                             <div>
@@ -302,7 +302,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                                 type="number"
                                                 value={billAmount}
                                                 onChange={(e) => setBillAmount(e.target.value)}
-                                                className="block w-full pl-16 pr-8 h-20 bg-gray-50 border-none rounded-[1.5rem] text-3xl font-black text-gray-900 focus:ring-4 focus:ring-hope-green/10 transition-all placeholder:text-gray-200"
+                                                className="block w-full pl-16 pr-8 h-20 bg-gray-50 border border-gray-300 rounded-md text-3xl font-black text-gray-900 focus:ring-4 focus:ring-hope-green/10 transition-all placeholder:text-gray-200"
                                                 placeholder="0.00"
                                             />
                                         </div>
@@ -312,7 +312,7 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                         <motion.div 
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-white border-2 border-dashed border-gray-100 rounded-[2rem] p-6 space-y-3"
+                                            className="bg-white border border-gray-300 border-dashed rounded-md p-6 space-y-3"
                                         >
                                             <div className="flex justify-between items-center text-sm font-bold text-gray-500">
                                                 <span>Subtotal</span>
@@ -334,14 +334,14 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                             variant="outline" 
                                             onClick={handleReset} 
                                             disabled={isSettling}
-                                            className="flex-1 h-14 rounded-2xl border-gray-100"
+                                            className="flex-1 h-14 rounded-md border border-gray-300"
                                         >
                                             Back to Scan
                                         </Button>
                                         <Button 
                                             disabled={!billAmount || isSettling} 
                                             onClick={handleSettle}
-                                            className="flex-[2] h-14 rounded-2xl bg-hope-green hover:bg-hope-green/90 shadow-xl shadow-hope-green/10 border-none font-black uppercase tracking-widest gap-2"
+                                            className="flex-[2] h-14 rounded-md bg-hope-green hover:bg-hope-green/90 shadow-xl shadow-hope-green/10 border border-gray-300 font-black uppercase tracking-widest gap-2"
                                         >
                                             {isSettling ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5" /> Settle Bill</>}
                                         </Button>
@@ -358,15 +358,15 @@ export default function QRScannerModal({ isOpen, onClose }: QRScannerModalProps)
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="text-center py-10"
                             >
-                                <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-10 relative">
+                                <div className="w-24 h-24 bg-green-50 rounded-md border border-gray-300 flex items-center justify-center mx-auto mb-10 relative">
                                     <CheckCircle2 className="w-12 h-12 text-green-500 z-10" />
-                                    <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
+                                    <div className="absolute inset-0 bg-green-500/20 rounded-md animate-ping" />
                                 </div>
                                 <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Transaction Successful!</h3>
                                 <p className="text-gray-500 font-medium mb-12">The referral has been recorded and the partner's commission has been credited.</p>
                                 
                                 <div className="space-y-4">
-                                    <Button onClick={handleReset} className="w-full h-16 text-lg rounded-2xl font-black uppercase tracking-widest bg-gray-900 text-white border-none gap-3">
+                                    <Button onClick={handleReset} className="w-full h-16 text-lg rounded-md border border-gray-300 font-black uppercase tracking-widest bg-gray-900 text-white gap-3">
                                         Scan Next <ArrowRight className="w-5 h-5" />
                                     </Button>
                                     <Button variant="ghost" onClick={onClose} className="w-full text-gray-400 font-bold uppercase tracking-widest text-[11px]">

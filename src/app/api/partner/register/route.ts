@@ -48,6 +48,10 @@ export async function POST(req: Request) {
         const slug = partnerName.toUpperCase().replace(/[^A-Z0-9\s]/g, "").split(" ").map((w: string) => w.slice(0, 3)).join("").slice(0, 8);
         const partnerCode = `${slug}${Date.now().toString().slice(-4)}`;
 
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+        const baseComm = config?.baseCommission ?? 7.5;
+        const baseDisc = config?.baseGuestDiscount ?? 7.5;
+
         const newPartner = await prisma.partner.create({
             data: {
                 name: partnerName,
@@ -59,8 +63,8 @@ export async function POST(req: Request) {
                 address: address || null,
                 city: city || null,
                 pincode: pincode || null,
-                commissionSlab: parseFloat(commissionSlab) || 7.5,
-                guestDiscountSlab: parseFloat(commissionSlab) || 7.5,
+                commissionSlab: parseFloat(commissionSlab) || baseComm,
+                guestDiscountSlab: parseFloat(commissionSlab) || baseDisc,
                 status: "PENDING",
                 walletBalance: 0,
             }

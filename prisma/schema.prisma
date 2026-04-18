@@ -16,28 +16,53 @@ model Admin {
 }
 
 model Partner {
-  id                String     @id @default(uuid())
-  partnerCode       String     @unique
+  id                String   @id @default(uuid())
+  partnerCode       String   @unique
   name              String
   contactName       String?
-  mobile            String     @unique
-  email             String?    @unique
-  password          String?    // Set after admin approval via email link
-  commissionSlab    Float      @default(7.5)
-  guestDiscountSlab Float      @default(7.5)
+  mobile            String   @unique
+  email             String?  @unique
+  password          String?
+  commissionSlab    Float    @default(7.5)
+  guestDiscountSlab Float    @default(7.5)
   bankAccount       String?
   ifsc              String?
-  status            String     @default("PENDING") // ACTIVE, REJECTED, PENDING
-  referralGoal      Int        @default(10)
-  currentTier       String     @default("BRONZE") // BRONZE, SILVER, GOLD, DIAMOND, ELITE
+  status            String   @default("PENDING")
+  referralGoal      Int      @default(10)
+  currentTier       String   @default("BRONZE")
   businessType      String?
   address           String?
   city              String?
   pincode           String?
-  walletBalance     Float      @default(0)
-  createdAt         DateTime   @default(now())
+  walletBalance           Float      @default(0)
+  bonusAmount             Float      @default(0)
+  earnedCommission        Float      @default(0)
+  walletTotal             Float      @default(0)
+
+  bonusCommission         Float      @default(0)
+  retentionStreak         Int        @default(0)
+  lastStreakEvaluated     DateTime?
+  claimedTierBonuses      Json?      @default("[]")
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @default(now()) @updatedAt
+  incomeLogs              IncomeLog[]
+  accountHolderName       String?
+  bankName               String?
+  upiId                  String?
+  razorpayContactId      String?
+  razorpayFundAccountId  String?
   guests            Guest[]
   payouts           Payout[]
+}
+
+model IncomeLog {
+  id          String   @id @default(uuid())
+  partnerId   String
+  amount      Float
+  type        String   // "WELCOME_BONUS", "TIER_REWARD"
+  description String?
+  createdAt   DateTime @default(now())
+  partner     Partner  @relation(fields: [partnerId], references: [id])
 }
 
 model PartnerOTP {
@@ -51,45 +76,62 @@ model PartnerOTP {
 }
 
 model Guest {
-  id              String       @id @default(uuid())
-  name            String
-  mobileNumber    String       @unique
-  partnerId       String
-  partner         Partner      @relation(fields: [partnerId], references: [id])
-  createdAt       DateTime     @default(now())
-  dynamicQr       DynamicQR?
-  scanLogs        ScanLog[]
+  id           String     @id @default(uuid())
+  name         String
+  mobileNumber String     @unique
+  partnerId    String
+  createdAt    DateTime   @default(now())
+  dynamicQr    DynamicQR?
+  partner      Partner    @relation(fields: [partnerId], references: [id])
+  scanLogs     ScanLog[]
 }
 
 model DynamicQR {
-  id              String     @id @default(uuid())
-  guestId         String     @unique
-  guest           Guest      @relation(fields: [guestId], references: [id])
-  secretKey       String
-  expiresAt       DateTime
-  createdAt       DateTime   @default(now())
+  id        String   @id @default(uuid())
+  guestId   String   @unique
+  secretKey String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  guest     Guest    @relation(fields: [guestId], references: [id])
 }
 
 model ScanLog {
-  id                       String     @id @default(uuid())
-  guestId                  String
-  guest                    Guest      @relation(fields: [guestId], references: [id])
-  adminId                  String
-  billAmount               Float
-  discountAmount           Float
-  guestDiscountAmount      Float      @default(0)
-  partnerCommissionAmount  Float      @default(0)
-  status                   String     @default("SETTLED") // SETTLED, PAID
-  createdAt                DateTime   @default(now())
+  id                      String   @id @default(uuid())
+  guestId                 String
+  adminId                 String
+  billAmount              Float
+  discountAmount          Float
+  guestDiscountAmount     Float    @default(0)
+  partnerCommissionAmount Float    @default(0)
+  status                  String   @default("SETTLED")
+  createdAt               DateTime @default(now())
+  guest                   Guest    @relation(fields: [guestId], references: [id])
 }
 
 model Payout {
-  id              String     @id @default(uuid())
-  partnerId       String
-  partner         Partner    @relation(fields: [partnerId], references: [id])
-  amount          Float
-  status          String     @default("COMPLETED")
-  method          String     @default("BANK_TRANSFER")
-  logsCount       Int        @default(0)
-  createdAt       DateTime   @default(now())
+  id               String    @id @default(uuid())
+  partnerId        String
+  amount           Float
+  status           String    @default("COMPLETED")
+  method           String    @default("BANK_TRANSFER")
+  logsCount        Int       @default(0)
+  razorpayPayoutId String?
+  idempotencyKey   String?   @unique
+  failureReason    String?
+  settledAt        DateTime?
+  retryCount       Int       @default(0)
+  createdAt        DateTime  @default(now())
+  partner          Partner   @relation(fields: [partnerId], references: [id])
+}
+
+model SystemConfig {
+  id                String   @id @default("GLOBAL")
+  baseCommission    Float    @default(7.5)
+  baseGuestDiscount Float    @default(7.5)
+  welcomeBonus      Float    @default(500)
+  retentionBonus    Float    @default(1.0)
+  minPayoutAmount   Float    @default(100)
+  tiers             Json?
+  maintenanceMode   Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
 }

@@ -93,13 +93,13 @@ export default function Home() {
             className="flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link href="/register" className="w-full sm:w-auto relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-hope-green to-hope-pink rounded-full blur-lg opacity-40 group-hover:opacity-60 group-hover:blur-xl transition-all duration-500" />
-              <Button size="lg" className="w-full relative bg-gradient-to-r from-hope-green to-hope-pink hover:from-hope-pink hover:to-hope-green border-0 h-14 px-10 text-lg rounded-full shadow-xl transition-all hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-r from-hope-green to-hope-pink rounded-md blur-lg opacity-40 group-hover:opacity-60 group-hover:blur-xl transition-all duration-500" />
+              <Button size="lg" className="w-full relative bg-gradient-to-r from-hope-green to-hope-pink hover:from-hope-pink hover:to-hope-green border border-gray-300 h-14 px-10 text-lg rounded-md shadow-xl transition-all hover:-translate-y-1">
                 Become a Partner <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Link href="/login" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full h-14 px-10 text-lg rounded-full border-2 border-gray-200 hover:border-hope-purple/50 hover:bg-purple-50/50 text-gray-700 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
+              <Button variant="outline" size="lg" className="w-full h-14 px-10 text-lg rounded-md border border-gray-300 hover:border-hope-purple/50 hover:bg-purple-50/50 text-gray-700 bg-white/50 backdrop-blur-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
                 Partner Dashboard
               </Button>
             </Link>
@@ -136,15 +136,15 @@ export default function Home() {
             ].map((benefit, idx) => (
               <motion.div key={idx} variants={fadeInUp} className="group h-full">
                 <div className={cn(
-                  "relative h-full bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-10 text-center transition-all duration-500 border-2 border-transparent hover:-translate-y-3",
+                   "relative h-full bg-white/80 backdrop-blur-xl rounded-md p-10 text-center transition-all duration-500 border border-gray-300 hover:-translate-y-3",
                   benefit.border,
                   benefit.featured ? "shadow-[0_20px_60px_-15px_rgba(255,183,3,0.3)]" : "shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]"
                 )}>
                   {/* Subtle hover gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-md" />
 
                   <div className="relative z-10">
-                    <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-inner transition-transform duration-500 group-hover:scale-110", benefit.bg)}>
+                    <div className={cn("w-20 h-20 rounded-md border border-gray-300 flex items-center justify-center mx-auto mb-8 shadow-inner transition-transform duration-500 group-hover:scale-110", benefit.bg)}>
                       <benefit.icon className={cn("w-10 h-10 transition-transform duration-500 group-hover:-rotate-6", benefit.color)} />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">{benefit.title}</h3>
@@ -187,8 +187,8 @@ export default function Home() {
               { icon: "🎉", label: "Event Organizers", desc: "Group dining & events" },
             ].map((item, idx) => (
               <motion.div key={idx} variants={fadeInUp} className="w-[calc(50%-8px)] sm:w-[calc(33.33%-11px)] lg:w-[calc(25%-12px)]">
-                <div className="group flex items-start gap-3 px-5 py-5 bg-white border border-purple-100 rounded-2xl shadow-sm hover:shadow-md hover:border-hope-purple/30 hover:-translate-y-1 transition-all cursor-default h-full">
-                  <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shrink-0 text-xl">
+                <div className="group flex items-start gap-3 px-5 py-5 bg-white border border-gray-300 rounded-md shadow-sm hover:shadow-md hover:border-hope-purple/30 hover:-translate-y-1 transition-all cursor-default h-full">
+                  <div className="w-10 h-10 bg-purple-50 rounded-md border border-gray-300 flex items-center justify-center shrink-0 text-xl">
                     {item.icon}
                   </div>
                   <div>
@@ -247,15 +247,15 @@ export default function Home() {
                 className="relative z-10 flex flex-col items-center group cursor-default"
               >
                 {/* Number Node */}
-                <div className="w-24 h-24 bg-white rounded-3xl shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center mb-8 relative group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-hope-purple/20 transition-all duration-500 border border-gray-50 ring-4 ring-white">
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-hope-purple/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-24 h-24 bg-white rounded-md shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center mb-8 relative group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-hope-purple/20 transition-all duration-500 border border-gray-300 ring-4 ring-white">
+                  <div className="absolute inset-0 rounded-md bg-gradient-to-tr from-hope-purple/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <span className="text-xs font-semibold text-gray-400 mb-1 group-hover:text-hope-purple/80 transition-colors">Step</span>
                   <span className="text-4xl font-bold text-gray-900 group-hover:text-hope-purple transition-colors z-10 leading-none">{step.id}</span>
                 </div>
 
                 {/* Content Card */}
-                <div className="bg-white/70 backdrop-blur-xl p-8 rounded-[2rem] text-center shadow-lg shadow-gray-100/50 border border-white group-hover:border-hope-purple/20 transition-all duration-500 w-full flex-1">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 group-hover:bg-hope-purple/10 flex items-center justify-center mx-auto mb-6 transition-colors duration-500">
+                <div className="bg-white/70 backdrop-blur-xl p-8 rounded-md text-center shadow-lg shadow-gray-100/50 border border-gray-300 group-hover:border-hope-purple/20 transition-all duration-500 w-full flex-1">
+                  <div className="w-12 h-12 rounded-md border border-gray-300 bg-gray-50 group-hover:bg-hope-purple/10 flex items-center justify-center mx-auto mb-6 transition-colors duration-500">
                     <step.icon className="w-6 h-6 text-gray-600 group-hover:text-hope-purple transition-colors duration-500" />
                   </div>
                   <h4 className="text-2xl font-bold text-gray-900 mb-4">{step.title}</h4>
@@ -307,7 +307,7 @@ export default function Home() {
                     key={i}
                     className="flex gap-4 items-center group"
                   >
-                    <div className="w-8 h-8 rounded-full bg-white border border-purple-100 flex items-center justify-center shadow-sm group-hover:bg-hope-purple/10 group-hover:border-hope-purple/20 transition-colors">
+                    <div className="w-8 h-8 rounded-md bg-white border border-gray-300 flex items-center justify-center shadow-sm group-hover:bg-hope-purple/10 group-hover:border-hope-purple/20 transition-colors">
                       <CheckCircle2 className="w-4 h-4 text-hope-purple" />
                     </div>
                     <span className="text-base font-bold text-gray-700 group-hover:text-gray-900 transition-colors">{item}</span>
@@ -324,8 +324,8 @@ export default function Home() {
               className="xl:col-span-3 relative"
             >
               <div className="absolute inset-0 bg-hope-purple/20 rounded-[3rem] blur-2xl -z-10" />
-              <div className="bg-white/40 backdrop-blur-3xl border border-white/50 rounded-[2.5rem] p-2 shadow-2xl overflow-hidden">
-                <div className="bg-white rounded-[2.25rem] overflow-hidden">
+              <div className="bg-white/40 backdrop-blur-3xl border border-gray-300 rounded-md p-2 shadow-2xl overflow-hidden">
+                <div className="bg-white rounded-md border border-gray-300 overflow-hidden">
                   <EarningsCalculator />
                 </div>
               </div>
@@ -364,7 +364,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="max-w-4xl mx-auto bg-gray-50/50 rounded-3xl p-4 md:p-8 border border-gray-100/50 shadow-sm"
+            className="max-w-4xl mx-auto bg-gray-50/50 rounded-md p-4 md:p-8 border border-gray-300 shadow-sm"
           >
             <FAQ />
           </motion.div>

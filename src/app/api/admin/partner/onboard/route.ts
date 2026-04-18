@@ -16,6 +16,17 @@ export async function POST(req: Request) {
 
         const prisma = getPrisma();
 
+        // Fetch system config to get dynamic bonus values and maintenance mode
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+        const maintenanceMode = config?.maintenanceMode ?? false;
+        const welcomeBonus = config?.welcomeBonus ?? 500;
+        const baseCommission = config?.baseCommission ?? 7.5;
+        const baseGuestDiscount = config?.baseGuestDiscount ?? 7.5;
+
+        // Determine the effective commission slab
+        const effectiveCommission = commissionSlab ? parseFloat(commissionSlab) : baseCommission;
+        const effectiveDiscount   = commissionSlab ? parseFloat(commissionSlab) : baseGuestDiscount;
+
         // Check duplicates
         const existingMobile = await prisma.partner.findUnique({ where: { mobile } });
         if (existingMobile) {
@@ -30,6 +41,9 @@ export async function POST(req: Request) {
         const slug = partnerName.toUpperCase().replace(/[^A-Z0-9\s]/g, "").split(" ").map((w: string) => w.slice(0, 3)).join("").slice(0, 8);
         const partnerCode = `${slug}${Date.now().toString().slice(-4)}`;
 
+        // When maintenance mode is OFF, credit welcomeBonus to walletBalance; else start at 0
+        const initialWallet = maintenanceMode ? 0 : welcomeBonus;
+
         const partner = await prisma.partner.create({
             data: {
                 name: partnerName,
@@ -41,10 +55,12 @@ export async function POST(req: Request) {
                 address: address || null,
                 city: city || null,
                 pincode: pincode || null,
-                commissionSlab: parseFloat(commissionSlab) || 7.5,
-                guestDiscountSlab: parseFloat(commissionSlab) || 7.5,
+                commissionSlab: effectiveCommission,
+                guestDiscountSlab: effectiveDiscount,
                 status: "ACTIVE",
-                walletBalance: 500,
+                walletBalance: initialWallet,
+                bonusCommission: 0,
+                retentionStreak: 0,
             }
         });
 
@@ -62,7 +78,12 @@ export async function POST(req: Request) {
         // Send welcome email immediately
         await sendPartnerApprovalEmail(email, partnerName, contactName, setPasswordUrl);
 
-        return NextResponse.json({ success: true, partnerCode: partner.partnerCode, setPasswordUrl });
+        return NextResponse.json({
+            success: true,
+            partnerCode: partner.partnerCode,
+            setPasswordUrl,
+            bonusApplied: maintenanceMode ? null : welcomeBonus
+        });
     } catch (err) {
         console.error("Admin onboard partner error:", err);
         return NextResponse.json({ error: "Failed to onboard partner." }, { status: 500 });

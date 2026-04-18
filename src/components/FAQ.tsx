@@ -35,8 +35,8 @@ export default function FAQ() {
                     <div
                         key={idx}
                         className={cn(
-                            "rounded-3xl border-2 transition-all duration-300",
-                            isOpen ? "border-hope-green bg-white shadow-xl shadow-hope-green/5" : "border-gray-50 bg-gray-50/50"
+                            "rounded-md border-2 transition-all duration-300",
+                            isOpen ? "border-hope-green bg-white shadow-xl shadow-hope-green/5" : "border-gray-300 bg-gray-50/50"
                         )}
                     >
                         <button
@@ -51,7 +51,7 @@ export default function FAQ() {
                                 {faq.question}
                             </span>
                              <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                                "w-10 h-10 rounded-md border border-gray-300 flex items-center justify-center transition-all",
                                 isOpen ? "bg-hope-green text-white rotate-180" : "bg-white text-gray-400"
                             )}>
                                 <ChevronDown className="w-5 h-5" />

@@ -78,11 +78,11 @@ export default function GlobalSearch() {
         <>
             <button 
                 onClick={() => setOpen(true)}
-                className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:shadow-lg hover:shadow-gray-200/50 transition-all group w-64 text-left"
+                className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-md hover:bg-white hover:shadow-lg hover:shadow-gray-200/50 transition-all group w-64 text-left"
             >
                 <Search className="w-4 h-4 text-gray-400 group-hover:text-hope-green" />
                 <span className="text-xs font-bold text-gray-400 flex-1">Global Command Hub...</span>
-                <div className="flex items-center gap-1 bg-white border border-gray-100 px-1.5 py-0.5 rounded-lg">
+                <div className="flex items-center gap-1 bg-white border border-gray-300 px-1.5 py-0.5 rounded-md">
                     <Command className="w-2.5 h-2.5 text-gray-400" />
                     <span className="text-[9px] font-black text-gray-400">K</span>
                 </div>
@@ -103,7 +103,7 @@ export default function GlobalSearch() {
                             initial={{ scale: 0.95, opacity: 0, y: -20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: -20 }}
-                            className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white"
+                            className="relative w-full max-w-2xl bg-white rounded-md shadow-2xl overflow-hidden border border-gray-300"
                         >
                             <div className="p-6 border-b border-gray-50 flex items-center gap-4">
                                 <Search className="w-6 h-6 text-hope-green" />
@@ -118,7 +118,7 @@ export default function GlobalSearch() {
                                 {loading ? (
                                     <div className="w-5 h-5 border-2 border-hope-green border-t-transparent rounded-full animate-spin" />
                                 ) : (
-                                    <button onClick={() => setOpen(false)} className="p-2 hover:bg-gray-50 rounded-xl transition-colors">
+                                    <button onClick={() => setOpen(false)} className="p-2 hover:bg-gray-50 rounded-md border border-gray-300 transition-colors">
                                         <X className="w-5 h-5 text-gray-400" />
                                     </button>
                                 )}
@@ -135,15 +135,15 @@ export default function GlobalSearch() {
                                     <div className="py-12 text-center text-gray-300 space-y-4">
                                         <div className="flex justify-center gap-6">
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400"><Users className="w-5 h-5" /></div>
+                                                <div className="w-10 h-10 rounded-md bg-gray-50 border border-gray-300 flex items-center justify-center text-gray-400"><Users className="w-5 h-5" /></div>
                                                 <span className="text-[10px] font-black uppercase">Partners</span>
                                             </div>
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400"><User className="w-5 h-5" /></div>
+                                                <div className="w-10 h-10 rounded-md bg-gray-50 border border-gray-300 flex items-center justify-center text-gray-400"><User className="w-5 h-5" /></div>
                                                 <span className="text-[10px] font-black uppercase">Guests</span>
                                             </div>
                                             <div className="flex flex-col items-center gap-2">
-                                                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400"><Wallet className="w-5 h-5" /></div>
+                                                <div className="w-10 h-10 rounded-md bg-gray-50 border border-gray-300 flex items-center justify-center text-gray-400"><Wallet className="w-5 h-5" /></div>
                                                 <span className="text-[10px] font-black uppercase">Payouts</span>
                                             </div>
                                         </div>
@@ -158,13 +158,13 @@ export default function GlobalSearch() {
                                             onClick={() => handleSelect(res)}
                                             onMouseEnter={() => setSelectedIndex(i)}
                                             className={cn(
-                                                "flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border border-transparent",
+                                                "flex items-center justify-between p-4 rounded-md cursor-pointer transition-all border border-gray-300",
                                                 i === selectedIndex ? "bg-hope-green/5 border-hope-green/10 translate-x-1" : "hover:bg-gray-50"
                                             )}
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div className={cn(
-                                                    "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
+                                                    "w-10 h-10 rounded-md border border-gray-300 flex items-center justify-center shadow-sm",
                                                     res.type === "PARTNER" ? "bg-orange-50 text-orange-500" :
                                                     res.type === "GUEST" ? "bg-blue-50 text-blue-500" : "bg-purple-50 text-purple-500"
                                                 )}>
@@ -177,7 +177,7 @@ export default function GlobalSearch() {
                                                 </div>
                                             </div>
                                             <div className={cn(
-                                                "w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center transition-all shadow-sm",
+                                                "w-8 h-8 rounded-md bg-white border border-gray-300 flex items-center justify-center transition-all shadow-sm",
                                                 i === selectedIndex ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
                                             )}>
                                                 <ArrowRight className="w-4 h-4 text-hope-green" />

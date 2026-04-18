@@ -1,19 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {
-    User,
-    Building2,
-    Lock,
-    Bell,
-    CreditCard,
-    Save,
-    Camera,
-    Settings
+import { 
+    User, 
+    Building2, 
+    CreditCard, 
+    Save, 
+    CheckCircle2, 
+    AlertCircle, 
+    Loader2 
 } from "lucide-react";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -21,10 +19,7 @@ import { cn } from "@/lib/utils";
 
 const container = {
     hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1 }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
 const item = {
@@ -33,248 +28,218 @@ const item = {
 };
 
 export default function PartnerSettingsPage() {
-    const [partner, setPartner] = React.useState<any>(null);
-    const [activeTab, setActiveTab] = React.useState("Account Info");
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [formData, setFormData] = useState({
+        name: "",
+        contactName: "",
+        email: "",
+        mobile: "",
+        address: "",
+        city: "",
+        pincode: "",
+        bankName: "",
+        accountHolderName: "",
+        bankAccount: "",
+        ifsc: "",
+        upiId: ""
+    });
 
-    React.useEffect(() => {
-        const sessionRaw = localStorage.getItem("hope_partner_session");
-        if (sessionRaw) {
-            const session = JSON.parse(sessionRaw);
-            // In a real app, we'd fetch full details from API. For now, we'll use session + a mock fetch simulation
-            setPartner({
-                name: session.name || "Grand Hope Cafe",
-                email: session.email || "demo@partner.hub",
-                mobile: session.mobile || "+91 00000 00000",
-                partnerCode: session.partnerCode || "demo",
-                bankAccount: session.bankAccount || "9823481230123",
-                ifsc: session.ifsc || "UTIB0001243"
-            });
-        }
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch("/api/partner/stats");
+                const data = await res.json();
+                if (data.success) {
+                    const p = data.partnerDetails;
+                    setFormData({
+                        name: p.name || "",
+                        contactName: p.contactName || p.name || "",
+                        email: p.email || "",
+                        mobile: p.mobile || "",
+                        address: p.address || "",
+                        city: p.city || "",
+                        pincode: p.pincode || "",
+                        bankName: p.bankName || "",
+                        accountHolderName: p.accountHolderName || "",
+                        bankAccount: p.bankAccount || "",
+                        ifsc: p.ifsc || "",
+                        upiId: p.upiId || ""
+                    });
+                }
+            } catch {
+                toast.error("Failed to load profile details.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
     }, []);
 
-    if (!partner) return <div className="min-h-[50vh] flex items-center justify-center text-gray-400">Loading settings...</div>;
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-    const initials = partner.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch("/api/partner/profile", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast.success("Profile updated successfully! ✨");
+            } else {
+                toast.error(data.error || "Update failed.");
+            }
+        } catch {
+            toast.error("An error occurred while saving.");
+        } finally {
+            setSaving(false);
+        }
+    };
 
-    const tabs = [
-        { label: "Account Info", icon: User },
-        { label: "Business Details", icon: Building2 },
-        { label: "Bank & Payouts", icon: CreditCard },
-        { label: "Security", icon: Lock },
-        { label: "Notifications", icon: Bell },
-    ];
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <Loader2 className="w-8 h-8 text-hope-purple animate-spin" />
+            </div>
+        );
+    }
 
     return (
-        <motion.div variants={container} initial="hidden" animate="show" className="space-y-8 max-w-5xl mx-auto">
+        <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl mx-auto space-y-10">
+            
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Hub Settings</h1>
-                    <p className="text-gray-500 mt-1 font-medium">Manage your profile, bank details and notification preferences.</p>
+                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Partner Profile</h1>
+                    <p className="text-gray-500 mt-1 font-medium">Manage your personal and payout information.</p>
                 </div>
-                <Button className="h-12 gap-2 bg-gray-900 hover:bg-black text-white px-8 rounded-2xl shadow-xl shadow-black/10 transition-all active:scale-95" onClick={() => toast.success("All changes saved successfully.")}>
-                    <Save className="w-4 h-4" /> Save All Changes
+                <Button 
+                    onClick={handleSave} 
+                    disabled={saving}
+                    className="h-12 bg-hope-purple hover:bg-hope-purple/90 text-white px-8 font-black uppercase tracking-widest text-xs gap-3 shadow-xl shadow-hope-purple/20"
+                >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save All Changes
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Sidebar - Profile Summary */}
+            <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Personal Information */}
                 <motion.div variants={item} className="space-y-6">
-                    <Card className="border-none bg-white shadow-xl shadow-gray-200/50 overflow-hidden">
-                        <CardContent className="p-0">
-                            <div className="h-24 bg-gradient-to-r from-hope-green to-hope-green" />
-                            <div className="p-8 -mt-16 text-center">
-                                <div className="relative inline-block group">
-                                    <div className="w-32 h-32 rounded-3xl bg-white p-1 shadow-2xl relative z-10">
-                                        <div className="w-full h-full rounded-2xl bg-gray-100 flex items-center justify-center font-black text-gray-400 text-4xl overflow-hidden">
-                                            {initials}
-                                        </div>
-                                    </div>
-                                    <button className="absolute bottom-1 right-1 z-20 w-10 h-10 bg-gray-950 text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-90 transition-all">
-                                        <Camera className="w-5 h-5" />
-                                    </button>
+                    <Card className="border border-gray-300 rounded-md shadow-sm overflow-hidden h-full">
+                        <CardHeader className="bg-gray-50/50 p-6 border-b border-gray-300">
+                            <div className="flex items-center gap-3">
+                                <User className="w-5 h-5 text-hope-purple" />
+                                <CardTitle className="text-sm font-black text-gray-900 uppercase tracking-widest">Personal Details</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-6">
+                            <div className="grid grid-cols-1 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Partner/Business Name</label>
+                                    <Input name="name" value={formData.name} onChange={handleChange} className="h-12 border-gray-300" />
                                 </div>
-                                <h3 className="text-xl font-black text-gray-900 mt-6 tracking-tight">{partner.name}</h3>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Partner Code: {partner.partnerCode}</p>
-
-                                <div className="mt-8 flex items-center justify-center gap-2">
-                                    <span className="px-4 py-2 bg-green-50 text-green-600 rounded-2xl text-[10px] font-black uppercase tracking-widest">Verified Hub</span>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Contact Person</label>
+                                    <Input name="contactName" value={formData.contactName} onChange={handleChange} className="h-12 border-gray-300" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email (Login)</label>
+                                        <Input value={formData.email} disabled className="h-12 bg-gray-50 border-gray-200 text-gray-400" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mobile Number</label>
+                                        <Input name="mobile" value={formData.mobile} onChange={handleChange} className="h-12 border-gray-300" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Address Line</label>
+                                    <Input name="address" value={formData.address} onChange={handleChange} className="h-12 border-gray-300" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">City</label>
+                                        <Input name="city" value={formData.city} onChange={handleChange} className="h-12 border-gray-300" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pincode</label>
+                                        <Input name="pincode" value={formData.pincode} onChange={handleChange} className="h-12 border-gray-300" />
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
+                </motion.div>
 
-                    <Card className="border-none bg-white shadow-xl shadow-gray-200/50">
-                        <CardContent className="p-4 space-y-1">
-                            {tabs.map((tab, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setActiveTab(tab.label)}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all",
-                                        activeTab === tab.label ? "bg-hope-green/10 text-hope-green" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                                    )}
-                                >
-                                    <tab.icon className="w-5 h-5" />
-                                    {tab.label}
-                                </button>
-                            ))}
+                {/* Settlement Information */}
+                <motion.div variants={item} className="space-y-6">
+                    <Card className="border border-gray-300 rounded-md shadow-sm overflow-hidden h-full">
+                        <CardHeader className="bg-gray-50/50 p-6 border-b border-gray-300">
+                            <div className="flex items-center gap-3">
+                                <CreditCard className="w-5 h-5 text-hope-purple" />
+                                <CardTitle className="text-sm font-black text-gray-900 uppercase tracking-widest">Payout & Settlement</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-6">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Bank Transfer Details</p>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Holder Name</label>
+                                    <Input name="accountHolderName" value={formData.accountHolderName} onChange={handleChange} className="h-12 border-gray-300" placeholder="e.g. Grand Hope Cafe Ltd" />
+                                </div>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Bank Name</label>
+                                        <Input name="bankName" value={formData.bankName} onChange={handleChange} className="h-12 border-gray-300" placeholder="e.g. HDFC Bank" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Number</label>
+                                            <Input name="bankAccount" value={formData.bankAccount} onChange={handleChange} className="h-12 border-gray-300" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">IFSC Code</label>
+                                            <Input name="ifsc" value={formData.ifsc} onChange={handleChange} className="h-12 border-gray-300" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 pt-4">Direct UPI Transfer</p>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">UPI ID (VPA)</label>
+                                <div className="relative">
+                                    <Input name="upiId" value={formData.upiId} onChange={handleChange} className="h-12 border-gray-300 pl-10" placeholder="e.g. example@okaxis" />
+                                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+                                </div>
+                                <p className="text-[10px] text-gray-400 font-medium">Payouts will prioritize UPI if available for faster settlement.</p>
+                            </div>
+
+                            <div className="mt-8 p-6 bg-blue-50/50 rounded-md border border-blue-100 space-y-3">
+                                <div className="flex gap-3">
+                                    <AlertCircle className="w-5 h-5 text-blue-500 shrink-0" />
+                                    <div>
+                                        <p className="text-xs font-black text-blue-900 uppercase tracking-tight">Financial Accuracy Notice</p>
+                                        <p className="text-[10px] text-blue-700 font-medium leading-relaxed mt-1">
+                                            Please ensure these details are verified. Incorrect banking information may lead to payment reversals or delays in your settlement cycle.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </motion.div>
+            </form>
 
-                {/* Main Settings Form */}
-                <motion.div variants={item} className="lg:col-span-2 space-y-8">
-                    {activeTab === "Account Info" && (
-                        <Card className="border-none bg-white shadow-2xl shadow-gray-200/50">
-                            <CardHeader className="p-8 border-b border-gray-50">
-                                <CardTitle className="text-xl font-black">Personal Information</CardTitle>
-                                <p className="text-sm text-gray-500 font-medium">Update your account identity and contact details.</p>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
-                                        <Input defaultValue={partner.name} className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Contact Email</label>
-                                        <Input defaultValue={partner.email} className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
-                                    <Input defaultValue={partner.mobile} className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {activeTab === "Bank & Payouts" && (
-                        <Card className="border-none bg-white shadow-2xl shadow-gray-200/50">
-                            <CardHeader className="p-8 border-b border-gray-50">
-                                <CardTitle className="text-xl font-black">Bank Settlement Details</CardTitle>
-                                <p className="text-sm text-gray-500 font-medium">Direct weekly payouts are processed to this account.</p>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-6">
-                                <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-3xl flex items-center gap-6">
-                                    <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
-                                        <CreditCard className="w-6 h-6" strokeWidth={2.5} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-black text-gray-900 leading-tight">Primary Settlement Account</p>
-                                        <p className="text-xs font-medium text-gray-500 mt-1">Active for weekly payouts</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Account Number</label>
-                                        <Input defaultValue={partner.bankAccount} className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" type="password" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">IFSC Code</label>
-                                        <Input defaultValue={partner.ifsc} className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white uppercase font-bold" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {activeTab === "Business Details" && (
-                        <Card className="border-none bg-white shadow-2xl shadow-gray-200/50">
-                            <CardHeader className="p-8 border-b border-gray-50">
-                                <CardTitle className="text-xl font-black">Business Details</CardTitle>
-                                <p className="text-sm text-gray-500 font-medium">Verify your business registration and licensing info.</p>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Legal Business Name</label>
-                                    <Input defaultValue={partner.name} className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">GST / PAN Number</label>
-                                        <Input placeholder="Enter GSTIN Number" className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Establishment Type</label>
-                                        <select className="w-full h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold px-4 text-sm outline-none appearance-none cursor-pointer hover:bg-gray-100 transition-all">
-                                            <option value="" disabled selected>Select Business Type</option>
-                                            <option>🤝 Partner Business</option>
-                                            <option>🏡 Homestays & Guest Houses</option>
-                                            <option>🏝️ Resorts & Boutique Stays</option>
-                                            <option>🛏️ Hostels & Backpacker Lodges</option>
-                                            <option>🚕 Taxi & Car Rentals</option>
-                                            <option>🛵 Bike & Scooter Rentals</option>
-                                            <option>🗺️ Tour & Travel Agencies</option>
-                                            <option>👤 Local Travel Guides</option>
-                                            <option>🧘 Yoga & Wellness Centers</option>
-                                            <option>🏄 Adventure Activity Centers</option>
-                                            <option>🛶 Water Sports Centers</option>
-                                            <option>🎉 Event Organizers</option>
-                                            <option>🏢 Corporate Offices</option>
-                                            <option>🛍️ Retail & Lifestyle Stores</option>
-                                            <option>✨ Other Services</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {activeTab === "Security" && (
-                        <Card className="border-none bg-white shadow-2xl shadow-gray-200/50">
-                            <CardHeader className="p-8 border-b border-gray-50">
-                                <CardTitle className="text-xl font-black">Security Settings</CardTitle>
-                                <p className="text-sm text-gray-500 font-medium">Manage your password and account security.</p>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Current Password</label>
-                                    <Input type="password" placeholder="••••••••" className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">New Password</label>
-                                        <Input type="password" placeholder="New Password" className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Confirm New Password</label>
-                                        <Input type="password" placeholder="Confirm Password" className="h-12 rounded-2xl bg-gray-50 border-transparent focus:bg-white font-bold" />
-                                    </div>
-                                </div>
-                                <Button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold h-12 rounded-2xl">Update Password</Button>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {activeTab === "Notifications" && (
-                        <Card className="border-none bg-white shadow-2xl shadow-gray-200/50">
-                            <CardHeader className="p-8 border-b border-gray-50">
-                                <CardTitle className="text-xl font-black">Notifications</CardTitle>
-                                <p className="text-sm text-gray-500 font-medium">Control which alerts you receive.</p>
-                            </CardHeader>
-                            <CardContent className="p-8 space-y-4">
-                                {[
-                                    { title: "Referral Alerts", desc: "Get notified when a guest scans your QR code." },
-                                    { title: "Payout Updates", desc: "Receive alerts when your commission is settled." },
-                                    { title: "Marketing Emails", desc: "Stay updated with new offers and system updates." }
-                                ].map((notif, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">{notif.title}</p>
-                                            <p className="text-xs text-gray-500">{notif.desc}</p>
-                                        </div>
-                                        <div className="w-12 h-6 bg-hope-green rounded-full relative cursor-pointer">
-                                            <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full transition-all" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
-                    )}
-                </motion.div>
-            </div>
         </motion.div>
     );
 }

@@ -64,8 +64,8 @@ function SetPasswordForm() {
     if (!token || !email) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                <div className="bg-white rounded-2xl p-10 text-center max-w-md shadow-xl">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="bg-white rounded-md p-10 text-center max-w-md shadow-xl border border-gray-300">
+                    <div className="w-16 h-16 bg-red-100 rounded-md border border-gray-300 flex items-center justify-center mx-auto mb-4">
                         <Lock className="w-8 h-8 text-red-500" />
                     </div>
                     <h2 className="text-xl font-black text-gray-900 mb-2">Invalid Link</h2>
@@ -79,12 +79,12 @@ function SetPasswordForm() {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-                    <div className="bg-white rounded-[2rem] shadow-2xl shadow-gray-200/60 overflow-hidden">
+                    <div className="bg-white rounded-md shadow-2xl shadow-gray-200/60 overflow-hidden border border-gray-300">
                         {/* Header */}
                         <div className="bg-gradient-to-br from-[#1a6b3a] to-[#2aab5a] p-8 text-center">
                             {done ? (
                                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 15 }}>
-                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                                    <div className="w-20 h-20 bg-white rounded-md border border-gray-300 flex items-center justify-center mx-auto mb-4 shadow-xl">
                                         <CheckCircle2 className="w-12 h-12 text-[#1a6b3a]" />
                                     </div>
                                     <h2 className="text-2xl font-black text-white">Password Set!</h2>
@@ -92,7 +92,7 @@ function SetPasswordForm() {
                                 </motion.div>
                             ) : (
                                 <>
-                                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <div className="w-16 h-16 bg-white/20 rounded-md border border-white/20 flex items-center justify-center mx-auto mb-4">
                                         <ShieldCheck className="w-9 h-9 text-white" />
                                     </div>
                                     <h2 className="text-2xl font-black text-white">Set Your Password</h2>
@@ -104,8 +104,8 @@ function SetPasswordForm() {
                         {!done && (
                             <div className="p-8">
                                 {/* Email display */}
-                                <div className="bg-gray-50 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-[#1a6b3a]/10 rounded-lg flex items-center justify-center">
+                                <div className="bg-gray-50 rounded-md border border-gray-300 px-4 py-3 mb-6 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-[#1a6b3a]/10 rounded-md border border-gray-300 flex items-center justify-center">
                                         <Lock className="w-4 h-4 text-[#1a6b3a]" />
                                     </div>
                                     <div>
@@ -137,7 +137,7 @@ function SetPasswordForm() {
                                             <div className="space-y-1">
                                                 <div className="flex gap-1">
                                                     {[1, 2, 3, 4].map(i => (
-                                                        <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColors[strength] : "bg-gray-200"}`} />
+                                                        <div key={i} className={`h-1 flex-1 rounded-md border border-gray-300 transition-all duration-300 ${i <= strength ? strengthColors[strength] : "bg-gray-200"}`} />
                                                     ))}
                                                 </div>
                                                 <p className={`text-[10px] font-bold ${strength <= 1 ? "text-red-500" : strength === 2 ? "text-amber-500" : strength === 3 ? "text-blue-500" : "text-green-500"}`}>

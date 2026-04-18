@@ -58,12 +58,12 @@ export default function ScanPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl shadow-black/5 border border-gray-100 overflow-hidden"
+                className="w-full max-w-md bg-white rounded-md shadow-2xl shadow-black/5 border border-gray-300 overflow-hidden"
             >
                 {/* Header */}
                 <div className="bg-gradient-to-br from-hope-green to-hope-pink p-8 text-center relative overflow-hidden">
                     <div className="absolute -top-8 -right-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-md border border-white/20 flex items-center justify-center mx-auto mb-4 shadow-lg">
                         <QrCode className="w-8 h-8 text-white" />
                     </div>
                     <h1 className="text-2xl font-black text-white tracking-tight">Find Your Live Pass</h1>
@@ -103,7 +103,7 @@ export default function ScanPage() {
                                                 setError(null);
                                                 setMobile(e.target.value.replace(/\D/g, "").slice(0, 10));
                                             }}
-                                            className="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-hope-green focus:outline-none font-bold text-gray-900 text-lg transition-all"
+                                            className="w-full pl-12 pr-4 py-4 rounded-md border border-gray-300 bg-gray-50 focus:bg-white focus:border-hope-green focus:outline-none font-bold text-gray-900 text-lg transition-all"
                                         />
                                     </div>
                                 </div>
@@ -115,7 +115,7 @@ export default function ScanPage() {
                                             initial={{ opacity: 0, y: -8 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0 }}
-                                            className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl"
+                                            className="flex items-start gap-3 p-4 bg-red-50 border border-gray-300 rounded-md"
                                         >
                                             <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                                             <p className="text-sm font-semibold text-red-700">{error}</p>
@@ -126,7 +126,7 @@ export default function ScanPage() {
                                 <button
                                     type="submit"
                                     disabled={loading || mobile.length < 10}
-                                    className="w-full h-14 bg-gradient-to-r from-hope-green to-hope-pink hover:from-hope-pink hover:to-hope-green text-white font-black text-lg rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-hope-green/30 hover:shadow-xl hover:shadow-hope-green/40 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                                    className="w-full h-14 bg-gradient-to-r from-hope-green to-hope-pink hover:from-hope-pink hover:to-hope-green text-white font-black text-lg rounded-md border border-gray-300 flex items-center justify-center gap-3 shadow-lg shadow-hope-green/30 hover:shadow-xl hover:shadow-hope-green/40 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                                 >
                                     {loading ? (
                                         <><Loader2 className="w-5 h-5 animate-spin" /> Looking up…</>
@@ -147,7 +147,7 @@ export default function ScanPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="space-y-6 text-center"
                             >
-                                <div className="flex flex-col items-center gap-3 p-6 bg-green-50 rounded-2xl border border-green-100">
+                                <div className="flex flex-col items-center gap-3 p-6 bg-green-50 rounded-md border border-gray-300">
                                     <CheckCircle2 className="w-14 h-14 text-green-500" />
                                     <div>
                                         <h3 className="text-xl font-black text-green-900">Pass Found!</h3>
@@ -159,7 +159,7 @@ export default function ScanPage() {
 
                                 <button
                                     onClick={handleGoToPass}
-                                    className="w-full h-14 bg-gradient-to-r from-hope-green to-hope-pink hover:from-hope-pink hover:to-hope-green text-white font-black text-lg rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-hope-green/30 transition-all hover:-translate-y-0.5"
+                                    className="w-full h-14 bg-gradient-to-r from-hope-green to-hope-pink hover:from-hope-pink hover:to-hope-green text-white font-black text-lg rounded-md border border-gray-300 flex items-center justify-center gap-3 shadow-lg shadow-hope-green/30 transition-all hover:-translate-y-0.5"
                                 >
                                     <QrCode className="w-5 h-5" /> Open My Live Pass
                                 </button>

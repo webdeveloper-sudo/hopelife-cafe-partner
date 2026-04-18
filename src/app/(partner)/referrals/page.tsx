@@ -137,9 +137,9 @@ export default function ReferralsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, idx) => (
                     <motion.div key={idx} variants={item}>
-                        <Card className="border-none bg-white shadow-xl shadow-gray-200/40 hover:-translate-y-1 transition-transform cursor-default group">
+                        <Card className="border border-gray-300 bg-white shadow-xl shadow-gray-200/40 hover:-translate-y-1 transition-transform cursor-default group rounded-md">
                             <CardContent className="p-8 flex items-center gap-6">
-                                <div className={cn("w-16 h-16 rounded-[1.25rem] flex items-center justify-center transition-transform group-hover:scale-110", stat.bg)}>
+                                <div className={cn("w-16 h-16 rounded-md border border-gray-300 flex items-center justify-center transition-transform group-hover:scale-110", stat.bg)}>
                                     <stat.icon className={cn("w-8 h-8", stat.color)} />
                                 </div>
                                 <div>
@@ -154,18 +154,18 @@ export default function ReferralsPage() {
 
             {/* Filters */}
             <motion.div variants={item}>
-                <Card className="border-none bg-white shadow-xl shadow-gray-200/30">
+                <Card className="border border-gray-300 bg-white shadow-xl shadow-gray-200/30 rounded-md">
                     <CardContent className="p-4 flex flex-col md:flex-row gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <Input 
-                                className="pl-14 h-14 bg-gray-50/50 border-transparent focus:bg-white text-base font-medium" 
+                                className="pl-14 h-14 bg-gray-50/50 border border-gray-300 rounded-md focus:bg-white text-base font-medium" 
                                 placeholder="Search by name or mobile number..." 
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
-                        <Button variant="secondary" className="gap-2 h-14 px-8 rounded-2xl">
+                        <Button variant="secondary" className="gap-2 h-14 px-8 rounded-md border border-gray-300">
                             <Filter className="w-4 h-4" /> Filters
                         </Button>
                     </CardContent>
@@ -174,19 +174,19 @@ export default function ReferralsPage() {
 
             {/* Table */}
             <motion.div variants={item}>
-                <Card className="border-none bg-white shadow-2xl shadow-gray-200/50 overflow-hidden rounded-[2rem]">
+                <Card className="border border-gray-300 bg-white shadow-2xl shadow-gray-200/50 overflow-hidden rounded-md">
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
-                                    <tr className="bg-gray-50/70 border-b border-gray-100">
+                                    <tr className="bg-gray-50/70 border-b border-gray-300">
                                         <th className="px-10 py-6 font-black text-[10px] text-gray-400 uppercase tracking-[0.2em]">Guest Profile</th>
                                         <th className="px-10 py-6 font-black text-[10px] text-gray-400 uppercase tracking-[0.2em] text-center">Referral Time/Date</th>
                                         <th className="px-10 py-6 font-black text-[10px] text-gray-400 uppercase tracking-[0.2em] text-center">Visit Frequency</th>
                                         <th className="px-10 py-6 font-black text-[10px] text-gray-400 uppercase tracking-[0.2em] text-right">Last Visit</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-gray-300">
                                     {loading ? (
                                         [1,2,3].map(i => (
                                             <tr key={i}>
@@ -205,7 +205,7 @@ export default function ReferralsPage() {
                                             <tr key={i} className="group hover:bg-gray-50/40 transition-all">
                                                 <td className="px-10 py-8">
                                                     <div className="flex items-center gap-5">
-                                                        <div className="w-12 h-12 bg-hope-green/10 rounded-2xl flex items-center justify-center font-black text-hope-green text-xl transition-transform group-hover:scale-110">
+                                                        <div className="w-12 h-12 bg-hope-green/10 rounded-md border border-gray-300 flex items-center justify-center font-black text-hope-green text-xl transition-transform group-hover:scale-110">
                                                             {row.name[0]}
                                                         </div>
                                                         <div>
@@ -215,7 +215,7 @@ export default function ReferralsPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-10 py-8 text-center">
-                                                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl text-xs font-bold text-gray-600">
+                                                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-md border border-gray-300 text-xs font-bold text-gray-600">
                                                         <Clock className="w-3 h-3" /> {row.date}
                                                     </span>
                                                 </td>
@@ -259,7 +259,7 @@ export default function ReferralsPage() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg bg-white rounded-md border border-gray-300 shadow-2xl overflow-hidden"
                         >
                             <div className="p-10">
                                 <div className="flex justify-between items-start mb-8">
@@ -267,7 +267,7 @@ export default function ReferralsPage() {
                                         <h2 className="text-3xl font-black text-gray-900 tracking-tight">Direct Referral</h2>
                                         <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Onboard a guest immediately</p>
                                     </div>
-                                    <Button variant="ghost" size="icon" onClick={() => setIsAdding(false)} className="rounded-2xl bg-gray-100 hover:bg-gray-200">
+                                    <Button variant="ghost" size="icon" onClick={() => setIsAdding(false)} className="rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200">
                                         <XCircle className="w-6 h-6 text-gray-400" />
                                     </Button>
                                 </div>
@@ -283,7 +283,7 @@ export default function ReferralsPage() {
                                                 type="text"
                                                 value={newName}
                                                 onChange={(e) => setNewName(e.target.value)}
-                                                className="block w-full pl-14 h-16 bg-gray-50 border-none rounded-2xl text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green shadow-inner"
+                                                className="block w-full pl-14 h-16 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green shadow-inner"
                                                 placeholder="e.g. Johnathan Doe"
                                                 required
                                             />
@@ -301,7 +301,7 @@ export default function ReferralsPage() {
                                                 maxLength={10}
                                                 value={newMobile}
                                                 onChange={(e) => setNewMobile(e.target.value.replace(/\D/g, ''))}
-                                                className="block w-full pl-14 h-16 bg-gray-50 border-none rounded-2xl text-lg font-bold text-gray-900 tracking-[0.1em] focus:ring-2 focus:ring-hope-green shadow-inner"
+                                                className="block w-full pl-14 h-16 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 tracking-[0.1em] focus:ring-2 focus:ring-hope-green shadow-inner"
                                                 placeholder="99999 99999"
                                                 required
                                             />
@@ -312,7 +312,7 @@ export default function ReferralsPage() {
                                         <Button
                                             type="submit"
                                             disabled={newMobile.length !== 10 || !newName.trim() || submitting}
-                                            className="w-full h-16 text-lg bg-hope-green hover:bg-hope-green/90 shadow-xl shadow-hope-green/20 border-none rounded-2xl font-black uppercase tracking-widest gap-3"
+                                            className="w-full h-16 text-lg bg-hope-green hover:bg-hope-green/90 shadow-xl shadow-hope-green/20 border border-gray-300 rounded-md font-black uppercase tracking-widest gap-3"
                                         >
                                             {submitting ? (
                                                 <Loader2 className="w-6 h-6 animate-spin" />

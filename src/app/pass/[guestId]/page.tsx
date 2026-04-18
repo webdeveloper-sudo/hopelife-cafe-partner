@@ -107,7 +107,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
 
                 // Title
                 ctx.fillStyle = "#111827";
-                ctx.font = "bold 60px Inter, sans-serif";
+                ctx.font = "bold 60px Poppins, sans-serif";
                 ctx.textAlign = "center";
                 ctx.fillText("HOPE CAFE GUEST PASS", canvas.width / 2, 120);
 
@@ -116,9 +116,9 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
 
                 // Footer Info
                 ctx.fillStyle = "#6b7280";
-                ctx.font = "bold 40px Inter, sans-serif";
+                ctx.font = "bold 40px Poppins, sans-serif";
                 ctx.fillText(`GUEST: ${guestData?.name?.toUpperCase()}`, canvas.width / 2, 1050);
-                ctx.font = "bold 35px Inter, sans-serif";
+                ctx.font = "bold 35px Poppins, sans-serif";
                 ctx.fillText(`VIA: ${guestData?.partnerName?.toUpperCase()}`, canvas.width / 2, 1110);
                 
                 const pngUrl = canvas.toDataURL("image/png");
@@ -144,14 +144,14 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
     if (error || !guestData || guestData.isExpired) {
         return (
             <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6 text-white text-center">
-                <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-8">
+                <div className="w-24 h-24 bg-red-500/10 rounded-md border border-gray-300 flex items-center justify-center mb-8">
                     <AlertCircle className="w-12 h-12 text-red-500" />
                 </div>
                 <h1 className="text-3xl font-black mb-4">Pass Expired or Invalid</h1>
                 <p className="text-gray-400 max-w-sm mb-10 leading-relaxed">
                     Referral passes are valid for 24 hours only. Please contact your partner/referrer to request a fresh invitation link.
                 </p>
-                <Button variant="outline" className="text-white border-white/20 px-8 h-12 rounded-2xl" onClick={() => window.location.reload()}>
+                <Button variant="outline" className="text-white border border-gray-300 px-8 h-12 rounded-md" onClick={() => window.location.reload()}>
                     Refresh Page
                 </Button>
             </div>
@@ -182,11 +182,11 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                         <div className="text-center mb-10 w-full">
                             <div className="flex justify-center mb-6">
                                 {guestData.isRedeemed ? (
-                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-100 border border-gray-200 text-gray-500 rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
+                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-100 border border-gray-300 text-gray-500 rounded-md text-[10px] font-black tracking-[0.2em] uppercase">
                                         <AlertCircle className="w-3.5 h-3.5" /> Pass Already Redeemed
                                     </div>
                                 ) : (
-                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 border border-green-100 text-green-700 rounded-full text-[10px] font-black tracking-[0.2em] uppercase">
+                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 border border-gray-300 text-green-700 rounded-md text-[10px] font-black tracking-[0.2em] uppercase">
                                         <CheckCircle2 className="w-3.5 h-3.5" /> High Priority Pass
                                     </div>
                                 )}
@@ -201,7 +201,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
 
                         {/* QR Code Card */}
                         <div className={cn(
-                            "group p-8 rounded-[2.5rem] shadow-2xl relative z-10 mx-auto w-full max-w-[320px] mb-10 transition-all duration-700 bg-white border border-gray-100",
+                            "group p-8 rounded-md shadow-2xl relative z-10 mx-auto w-full max-w-[320px] mb-10 transition-all duration-700 bg-white border border-gray-300",
                             guestData.isRedeemed && "grayscale opacity-40 shadow-none border-dashed"
                         )}>
                             <div className="relative aspect-square flex items-center justify-center" ref={qrRef}>
@@ -212,7 +212,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                                         className="absolute top-0 left-[-10%] right-[-10%] h-[2px] bg-gradient-to-r from-transparent via-hope-green to-transparent z-20 pointer-events-none blur-[1px]"
                                     />
                                 )}
-                                <div className="p-2 bg-white rounded-2xl">
+                                <div className="p-2 bg-white rounded-md border border-gray-300">
                                     <QRCode
                                         value={guestData.isRedeemed ? "REDEEMED-PASS" : qrData}
                                         size={256}
@@ -229,9 +229,9 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                                         <Timer className="w-4 h-4 animate-pulse" />
                                         <span className="font-black text-[11px] tracking-widest uppercase">Securing Refresh: {timeLeft}s</span>
                                     </div>
-                                    <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="w-full h-1 bg-gray-100 rounded-md overflow-hidden">
                                         <motion.div
-                                            className="h-full bg-hope-green"
+                                            className="h-full bg-hope-green rounded-md"
                                             initial={{ width: "100%" }}
                                             animate={{ width: `${(timeLeft / 60) * 100}%` }}
                                             transition={{ duration: 1, ease: "linear" }}
@@ -243,7 +243,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
 
                         {/* Guest ID Card Bottom */}
                         <div className="w-full px-4 space-y-6">
-                            <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/40 border border-gray-100 relative overflow-hidden group">
+                            <div className="bg-white rounded-md p-8 shadow-xl shadow-gray-200/40 border border-gray-300 relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110" />
                                 
                                 <div className="relative z-10 space-y-6">
@@ -276,7 +276,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                                 <div className="space-y-4">
                                     <Button 
                                         onClick={handleDownloadPass}
-                                        className="w-full h-16 bg-gray-900 hover:bg-black text-white rounded-2xl shadow-xl shadow-gray-900/10 border-none font-black uppercase tracking-widest gap-3"
+                                        className="w-full h-16 bg-gray-900 hover:bg-black text-white rounded-md border border-gray-300 shadow-xl shadow-gray-900/10 font-black uppercase tracking-widest gap-3"
                                     >
                                         <Download className="w-5 h-5" /> Download Offline Pass
                                     </Button>

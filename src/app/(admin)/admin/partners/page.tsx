@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const BUSINESS_TYPES = [
     { value: "homestay", label: "Homestays & Guest Houses" },
@@ -62,7 +63,7 @@ const StatusBadge = ({ status }: { status: string }) => {
         REJECTED: "bg-red-500",
     };
     return (
-        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border", styles[status] || "bg-gray-100 text-gray-600 border-gray-200")}>
+        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-gray-300", styles[status] || "bg-gray-100 text-gray-600")}>
             <div className={cn("w-1.5 h-1.5 rounded-full", dots[status] || "bg-gray-400")} />
             {status}
         </span>
@@ -70,6 +71,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function AdminPartnersPage() {
+    const router = useRouter();
     const [partners, setPartners] = useState<Partner[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<FilterTab>("all");
@@ -186,7 +188,7 @@ export default function AdminPartnersPage() {
     const np = (key: keyof typeof newPartner) => ({
         value: newPartner[key] as string,
         onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setNewPartner(f => ({ ...f, [key]: e.target.value })),
-        className: "h-12 rounded-2xl border-gray-100 focus:border-[#1a6b3a]",
+        className: "h-12 rounded-md border border-gray-300 focus:border-[#1a6b3a]",
     });
 
     return (
@@ -198,17 +200,17 @@ export default function AdminPartnersPage() {
                     <p className="text-gray-500 mt-1">Approve applications and manage the partner directory.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2 h-11 border-gray-100" onClick={exportCSV}>
+                    <Button variant="outline" className="gap-2 h-11 border border-gray-300 rounded-md" onClick={exportCSV}>
                         <Download className="w-4 h-4" /> Export CSV
                     </Button>
-                    <Button className="gap-2 h-11 bg-gray-900 hover:bg-black text-white px-6 rounded-2xl" onClick={() => setShowOnboard(true)}>
+                    <Button className="gap-2 h-11 bg-gray-900 hover:bg-black text-white px-6 rounded-md border border-gray-300" onClick={() => setShowOnboard(true)}>
                         <Plus className="w-4 h-4" /> New Partner
                     </Button>
                 </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: "Total Partners", value: counts.all, icon: Users, color: "text-blue-500", bg: "bg-blue-50" },
                     { label: "Approved", value: counts.approved, icon: ShieldCheck, color: "text-green-600", bg: "bg-green-50" },
@@ -216,9 +218,9 @@ export default function AdminPartnersPage() {
                     { label: "Avg Commission", value: partners.length > 0 ? `${(partners.filter(p => p.status === "ACTIVE").reduce((a, p) => a + p.commissionSlab, 0) / (counts.approved || 1)).toFixed(1)}%` : "0%", icon: Percent, color: "text-purple-500", bg: "bg-purple-50" },
                 ].map((s, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                        <Card className="border-none bg-white shadow-lg shadow-gray-200/40 rounded-3xl">
+                        <Card className="border border-gray-300 bg-white shadow-lg shadow-gray-200/40 rounded-md">
                             <CardContent className="p-6">
-                                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-4", s.bg)}>
+                                <div className={cn("w-12 h-12 rounded-md border border-gray-300 flex items-center justify-center mb-4", s.bg)}>
                                     <s.icon className={cn("w-6 h-6", s.color)} />
                                 </div>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{s.label}</p>
@@ -227,23 +229,23 @@ export default function AdminPartnersPage() {
                         </Card>
                     </motion.div>
                 ))}
-            </div>
+            </div> */}
 
             {/* List */}
-            <Card className="border-none bg-white shadow-2xl shadow-gray-200/40 rounded-[2rem] overflow-hidden">
+            <Card className="border border-gray-300 bg-white shadow-2xl shadow-gray-200/40 rounded-md overflow-hidden">
                 <CardHeader className="bg-gray-50/50 border-b border-gray-100 p-6">
                     <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                         {/* Filter tabs */}
-                        <div className="flex bg-gray-100 rounded-2xl p-1 gap-1">
+                        <div className="flex bg-gray-100 rounded-md border border-gray-300 p-1 gap-1">
                             {(["all", "approved", "pending"] as FilterTab[]).map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setFilter(tab)}
                                     className={cn(
-                                        "px-5 py-2 rounded-xl text-sm font-black uppercase tracking-wider transition-all",
+                                        "px-5 py-2 rounded-md border border-gray-300 text-sm font-black uppercase tracking-wider transition-all",
                                         filter === tab
-                                            ? "bg-white text-gray-900 shadow-sm"
-                                            : "text-gray-400 hover:text-gray-600"
+                                            ? "bg-white text-gray-900 shadow-sm border-gray-300"
+                                            : "text-gray-400 hover:text-gray-600 border-transparent"
                                     )}
                                 >
                                     {tab} <span className="ml-1 opacity-60">({counts[tab]})</span>
@@ -253,7 +255,7 @@ export default function AdminPartnersPage() {
                         {/* Search */}
                         <div className="relative w-full md:w-80">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <Input value={search} onChange={e => setSearch(e.target.value)} className="pl-10 h-11 rounded-2xl bg-white border-gray-100" placeholder="Search partners..." />
+                            <Input value={search} onChange={e => setSearch(e.target.value)} className="pl-10 h-11 rounded-md border-gray-300 bg-white" placeholder="Search partners..." />
                         </div>
                     </div>
                 </CardHeader>
@@ -279,12 +281,12 @@ export default function AdminPartnersPage() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: i * 0.03 }}
-                                    onClick={() => setSelectedPartner(p)}
+                                    onClick={() => router.push(`/admin/partners/${p.id}`)}
                                     className="group hover:bg-gray-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-8 py-5">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 group-hover:scale-110 transition-transform">
+                                            <div className="w-10 h-10 bg-gray-900 rounded-md border border-gray-300 flex items-center justify-center text-white font-black text-sm shrink-0 group-hover:scale-110 transition-transform">
                                                 {p.name[0]}
                                             </div>
                                             <div>
@@ -294,7 +296,7 @@ export default function AdminPartnersPage() {
                                         </div>
                                     </td>
                                     <td className="px-4 py-5 hidden md:table-cell">
-                                        <span className="text-[10px] font-black text-gray-400 border border-gray-100 px-3 py-1 rounded-full uppercase">
+                                        <span className="text-[10px] font-black text-gray-400 border border-gray-300 px-3 py-1 rounded-md uppercase">
                                             {p.businessType?.replace(/_/g, " ") || "N/A"}
                                         </span>
                                     </td>
@@ -305,7 +307,7 @@ export default function AdminPartnersPage() {
                                                 className="text-gray-300 hover:text-red-500 disabled:opacity-20 transition-all hover:scale-110">
                                                 <MinusCircle className="w-4 h-4" />
                                             </button>
-                                            <span className="text-sm font-black text-gray-900 w-14 text-center bg-gray-50 py-1.5 rounded-lg border border-gray-100">{p.commissionSlab}%</span>
+                                            <span className="text-sm font-black text-gray-900 w-14 text-center bg-gray-50 py-1.5 rounded-md border border-gray-300">{p.commissionSlab}%</span>
                                             <button onClick={e => { e.stopPropagation(); updateSlab(p.id, "commission", p.commissionSlab + 0.5); }}
                                                 disabled={updatingId === `${p.id}-commission` || p.commissionSlab >= 40}
                                                 className="text-gray-300 hover:text-green-500 disabled:opacity-20 transition-all hover:scale-110">
@@ -324,117 +326,6 @@ export default function AdminPartnersPage() {
                 </CardContent>
             </Card>
 
-            {/* ── PARTNER DETAIL POPUP ── */}
-            <AnimatePresence>
-                {selectedPartner && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setSelectedPartner(null)}
-                            className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" />
-                        <motion.div initial={{ opacity: 0, scale: 0.92, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden z-10">
-
-                            {/* Partner header */}
-                            <div className="bg-gradient-to-br from-gray-900 to-gray-700 p-8 text-white relative">
-                                <button onClick={() => setSelectedPartner(null)} className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                                    <X className="w-4 h-4" />
-                                </button>
-                                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl font-black mb-4">
-                                    {selectedPartner.name[0]}
-                                </div>
-                                <h3 className="text-xl font-black">{selectedPartner.name}</h3>
-                                <p className="text-white/60 text-sm font-bold uppercase tracking-wide mt-1">Code: {selectedPartner.partnerCode}</p>
-                                <div className="mt-3"><StatusBadge status={selectedPartner.status} /></div>
-                            </div>
-
-                            {/* Details */}
-                            <div className="p-6 space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    {[
-                                        { icon: User, label: "Contact", value: selectedPartner.contactName || "—" },
-                                        { icon: Phone, label: "Mobile", value: selectedPartner.mobile },
-                                        { icon: Mail, label: "Email", value: selectedPartner.email || "—" },
-                                        { icon: Building2, label: "Business Type", value: selectedPartner.businessType?.replace(/_/g, " ") || "—" },
-                                        { icon: MapPin, label: "Location", value: [selectedPartner.city, selectedPartner.pincode].filter(Boolean).join(" ") || "—" },
-                                        { icon: Percent, label: "Commission", value: `${selectedPartner.commissionSlab}%` },
-                                    ].map(({ icon: Icon, label, value }) => (
-                                        <div key={label} className="bg-gray-50 rounded-xl p-3">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Icon className="w-3.5 h-3.5 text-gray-400" />
-                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{label}</p>
-                                            </div>
-                                            <p className="text-sm font-bold text-gray-900 truncate">{value}</p>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Address */}
-                                {selectedPartner.address && (
-                                    <div className="bg-gray-50 rounded-xl p-3">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Address</p>
-                                        </div>
-                                        <p className="text-sm font-bold text-gray-900">{selectedPartner.address}</p>
-                                    </div>
-                                )}
-
-                                {/* Reg date */}
-                                <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
-                                    <Calendar className="w-4 h-4 text-gray-400" />
-                                    <div>
-                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Registered</p>
-                                        <p className="text-sm font-bold text-gray-900">
-                                            {new Date(selectedPartner.createdAt).toLocaleString("en-IN", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Action buttons */}
-                            {selectedPartner.status === "PENDING" && (
-                                <div className="px-6 pb-6 grid grid-cols-2 gap-3">
-                                    <Button
-                                        onClick={() => handleReject(selectedPartner.id)}
-                                        isLoading={actionLoading === `reject-${selectedPartner.id}`}
-                                        className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-2xl h-12 font-bold text-sm"
-                                        variant="outline"
-                                    >
-                                        <XCircle className="w-4 h-4 mr-2" /> Reject
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleApprove(selectedPartner.id)}
-                                        isLoading={actionLoading === `approve-${selectedPartner.id}`}
-                                        className="bg-green-600 hover:bg-green-700 text-white rounded-2xl h-12 font-bold text-sm"
-                                    >
-                                        <CheckCircle className="w-4 h-4 mr-2" /> Approve
-                                    </Button>
-                                </div>
-                            )}
-                            {selectedPartner.status === "ACTIVE" && (
-                                <div className="px-6 pb-6">
-                                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-                                        <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
-                                        <p className="text-sm font-bold text-green-700">This partner is approved and active</p>
-                                    </div>
-                                </div>
-                            )}
-                            {selectedPartner.status === "REJECTED" && (
-                                <div className="px-6 pb-6">
-                                    <Button
-                                        onClick={() => handleApprove(selectedPartner.id)}
-                                        isLoading={actionLoading === `approve-${selectedPartner.id}`}
-                                        className="w-full bg-green-600 hover:bg-green-700 text-white rounded-2xl h-12 font-bold text-sm"
-                                    >
-                                        <CheckCircle className="w-4 h-4 mr-2" /> Approve Anyway
-                                    </Button>
-                                </div>
-                            )}
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
 
             {/* ── ONBOARD SLIDE-OVER ── */}
             <AnimatePresence>
@@ -452,7 +343,7 @@ export default function AdminPartnersPage() {
                                     <h3 className="text-2xl font-black text-gray-900">Onboard Partner</h3>
                                     <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Added immediately as Active</p>
                                 </div>
-                                <button onClick={() => setShowOnboard(false)} className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors">
+                                <button onClick={() => setShowOnboard(false)} className="w-10 h-10 bg-gray-100 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-200 transition-colors">
                                     <X className="w-5 h-5 text-gray-500" />
                                 </button>
                             </div>
@@ -481,7 +372,7 @@ export default function AdminPartnersPage() {
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Business Type *</label>
                                     <select required value={newPartner.businessType} onChange={e => setNewPartner(f => ({ ...f, businessType: e.target.value }))}
-                                        className="flex h-12 w-full rounded-2xl border-2 bg-white px-4 text-sm border-gray-100 focus:border-[#1a6b3a] outline-none transition-all">
+                                        className="flex h-12 w-full rounded-md border border-gray-300 bg-white px-4 text-sm focus:border-[#1a6b3a] outline-none transition-all">
                                         <option value="">Select category</option>
                                         {BUSINESS_TYPES.map(bt => <option key={bt.value} value={bt.value}>{bt.label}</option>)}
                                     </select>
@@ -506,18 +397,18 @@ export default function AdminPartnersPage() {
                                         <Input type="number" min="1" max="40" step="0.5"
                                             value={newPartner.commissionSlab}
                                             onChange={e => setNewPartner(f => ({ ...f, commissionSlab: parseFloat(e.target.value) }))}
-                                            className="h-12 rounded-2xl border-gray-100 text-center font-bold w-28" />
+                                            className="h-12 rounded-md border border-gray-300 text-center font-bold w-28" />
                                         <p className="text-xs text-gray-400">Standard rate is 7.5%</p>
                                     </div>
                                 </div>
 
                                 <div className="pt-4 border-t border-gray-100">
-                                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-5">
+                                    <div className="bg-green-50 border border-gray-300 rounded-md p-4 mb-5">
                                         <p className="text-xs text-green-700 font-bold">
                                             ✅ This partner will be saved as <strong>Active</strong> immediately. A welcome email with a set-password link will be sent to the email above.
                                         </p>
                                     </div>
-                                    <Button type="submit" className="w-full h-13 font-black text-base rounded-2xl" isLoading={isOnboarding}>
+                                    <Button type="submit" className="w-full h-13 font-black text-base rounded-md border border-gray-300" isLoading={isOnboarding}>
                                         Onboard Partner
                                     </Button>
                                 </div>

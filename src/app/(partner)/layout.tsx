@@ -12,7 +12,8 @@ import {
     Settings,
     HelpCircle,
     LogOut,
-    ExternalLink
+    ExternalLink,
+    CreditCard
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,6 +29,7 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
         { name: "Referrals", href: "/referrals", icon: UserPlus },
         { name: "Register Guest", href: `/p/${partnerCode}`, icon: QrCode },
         { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+        { name: "Earnings & Payouts", href: "/payouts", icon: CreditCard },
     ];
 
     const secondaryLinks = [

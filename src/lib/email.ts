@@ -56,7 +56,7 @@ async function sendMail(options: nodemailer.SendMailOptions): Promise<boolean> {
 export async function sendPartnerOTPEmail(email: string, otp: string): Promise<boolean> {
     const subject = "Your OTP — HOPE Cafe Partner Program";
     const html = `
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="font-family:'Poppins','Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
       <div style="background:linear-gradient(135deg,#1a6b3a,#2d9651);padding:40px 32px;text-align:center">
         <h1 style="color:#fff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px">HOPE Cafe</h1>
         <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Partner Program</p>
@@ -90,7 +90,7 @@ export async function sendPartnerApprovalEmail(
 ): Promise<boolean> {
     const subject = "🎉 Welcome to HOPE Cafe Partner Program — Set Your Password";
     const html = `
-    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+    <div style="font-family:'Poppins','Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
       <div style="background:linear-gradient(135deg,#1a6b3a,#2d9651);padding:40px 32px;text-align:center">
         <h1 style="color:#fff;margin:0;font-size:28px;font-weight:800">HOPE Cafe</h1>
         <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Partner Program</p>
@@ -131,6 +131,43 @@ export async function sendPartnerApprovalEmail(
     });
 }
 
+export async function sendPartnerRejectionEmail(
+    email: string,
+    partnerName: string,
+    reason: string
+): Promise<boolean> {
+    const subject = "Update regarding your HOPE Cafe Partner Application";
+    const html = `
+    <div style="font-family:'Poppins','Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+      <div style="background:#f9fafb;padding:40px 32px;text-align:center;border-bottom:1px solid #f0f0f0">
+        <h1 style="color:#1a1a1a;margin:0;font-size:24px;font-weight:800">HOPE Cafe</h1>
+      </div>
+      <div style="padding:48px 40px">
+        <h2 style="color:#1a1a1a;font-size:20px;font-weight:700;margin:0 0 16px">Hello,</h2>
+        <p style="color:#555;font-size:15px;line-height:1.7;margin:0 0 24px">
+          Thank you for your interest in the HOPE Cafe Partner Program. After reviewing the application for <strong>${partnerName}</strong>, we are unable to approve your account at this time.
+        </p>
+        <div style="background:#fff5f5;border-radius:12px;padding:24px;border-left:4px solid #f87171;margin-bottom:32px">
+          <p style="color:#991b1b;font-weight:700;margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:0.5px">Reason for Rejection:</p>
+          <p style="color:#7f1d1d;font-size:15px;line-height:1.6;margin:0">${reason}</p>
+        </div>
+        <p style="color:#666;font-size:14px;line-height:1.6;margin:0">
+          If you have any questions or would like to provide additional information for a future review, please reply to this email.
+        </p>
+      </div>
+      <div style="background:#f9fafb;padding:24px 40px;text-align:center;border-top:1px solid #f0f0f0">
+        <p style="color:#bbb;font-size:12px;margin:0">© ${new Date().getFullYear()} HOPE Cafe — Achariya Campus, Pondicherry</p>
+      </div>
+    </div>`;
+
+    return sendMail({
+        from: process.env.SMTP_FROM || `"HOPE Cafe Support" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject,
+        html,
+    });
+}
+
 export async function sendAdminNewPartnerAlert(
     partnerName: string,
     contactName: string,
@@ -146,7 +183,7 @@ export async function sendAdminNewPartnerAlert(
         to: adminEmail,
         subject: `[HOPE Cafe] New Partner Application — ${partnerName}`,
         html: `
-        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:32px;background:#f9fafb;border-radius:12px">
+        <div style="font-family:'Poppins',Arial,sans-serif;max-width:500px;margin:0 auto;padding:32px;background:#f9fafb;border-radius:12px">
           <h2 style="color:#1a6b3a;margin:0 0 20px">New Partner Application</h2>
           <table style="width:100%;border-collapse:collapse">
             <tr><td style="padding:8px 0;color:#666;font-size:14px">Business</td><td style="padding:8px 0;font-weight:700;font-size:14px">${partnerName}</td></tr>

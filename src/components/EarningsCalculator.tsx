@@ -8,18 +8,22 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
-export default function EarningsCalculator() {
+export default function EarningsCalculator({ 
+    initialCommission = 7.5 
+}: { 
+    initialCommission?: number 
+}) {
     const [guests, setGuests] = React.useState(20);
     const [avgBill, setAvgBill] = React.useState(1200);
-    const [commission, setCommission] = React.useState(7.5);
+    const [commission, setCommission] = React.useState(initialCommission);
 
     const monthlyComm = (guests * avgBill * (commission / 100));
     const annualComm = monthlyComm * 12;
 
     return (
-        <Card className="border border-hope-green/20 shadow-3xl bg-gradient-to-br from-hope-purple to-hope-green rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-[0_20px_60px_-15px_rgba(45,106,79,0.3)]">
+        <Card className="border border-gray-300 shadow-3xl bg-gradient-to-br from-hope-purple to-hope-green rounded-md overflow-hidden flex flex-col md:flex-row shadow-[0_20px_60px_-15px_rgba(45,106,79,0.3)]">
             {/* Left Side: Light  Estimator */}
-            <div className="bg-white p-8 md:p-12 md:w-[55%] flex flex-col justify-center rounded-r-3xl md:rounded-r-[2.5rem] relative z-10 shadow-2xl shadow-purple-950/10">
+            <div className="bg-white p-8 md:p-12 md:w-[55%] flex flex-col justify-center rounded-r-md md:rounded-r-md relative z-10 shadow-2xl shadow-purple-950/10 border-r border-gray-300">
                 <div className="mb-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-hope-green/10 border border-hope-green/20 mb-6">
                         <Calculator className="w-3.5 h-3.5 text-hope-green" />
@@ -42,7 +46,7 @@ export default function EarningsCalculator() {
                             step="5"
                             value={guests}
                             onChange={(e) => setGuests(parseInt(e.target.value))}
-                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-hope-green"
+                            className="w-full h-1.5 bg-gray-100 rounded-md appearance-none cursor-pointer accent-hope-green"
                         />
                     </div>
 
@@ -58,7 +62,7 @@ export default function EarningsCalculator() {
                             step="100"
                             value={avgBill}
                             onChange={(e) => setAvgBill(parseInt(e.target.value))}
-                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-hope-green"
+                            className="w-full h-1.5 bg-gray-100 rounded-md appearance-none cursor-pointer accent-hope-green"
                         />
                     </div>
 
@@ -74,7 +78,7 @@ export default function EarningsCalculator() {
                             step="0.5"
                             value={commission}
                             onChange={(e) => setCommission(parseFloat(e.target.value))}
-                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-hope-green"
+                            className="w-full h-1.5 bg-gray-100 rounded-md appearance-none cursor-pointer accent-hope-green"
                         />
                     </div>
                 </div>
@@ -102,7 +106,7 @@ export default function EarningsCalculator() {
 
                     <div className="pt-6">
                         <Link href="/register" className="w-full block">
-                            <Button className="w-full h-14 bg-hope-gold text-gray-900 hover:bg-white rounded-2xl font-black text-sm lg:text-base transition-all shadow-xl shadow-black/10 hover:scale-[1.02] group px-4 border-none" aria-label="Start earning now with HOPE Cafe">
+                             <Button className="w-full h-14 bg-hope-gold text-gray-900 hover:bg-white rounded-md border border-gray-300 font-black text-sm lg:text-base transition-all shadow-xl shadow-black/10 hover:scale-[1.02] group px-4" aria-label="Start earning now with HOPE Cafe">
                                 <span className="flex items-center justify-center whitespace-nowrap gap-2">
                                     Start Earning Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </span>

@@ -148,7 +148,7 @@ export default function CashierScanPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Column 1: Live Expected Arrivals Feed */}
-                <div className="lg:col-span-1 bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col h-[600px]">
+                <div className="lg:col-span-1 bg-white p-6 rounded-md shadow-sm border border-gray-300 flex flex-col h-[600px]">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-2">
                             <Clock className="w-5 h-5 text-hope-green" />
@@ -165,7 +165,7 @@ export default function CashierScanPage() {
                             </div>
                         ) : (
                             incomingReferrals.map((guest) => (
-                                <div key={guest.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <div key={guest.id} className="p-4 rounded-md border border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors">
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className="font-bold text-gray-900">{guest.name}</h4>
                                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{guest.timeAgo}</span>
@@ -179,7 +179,7 @@ export default function CashierScanPage() {
                 </div>
 
                 {/* Column 2: The Scanner */}
-                <div className="lg:col-span-1 bg-white p-8 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center justify-center min-h-[600px]">
+                <div className="lg:col-span-1 bg-white p-8 rounded-md shadow-xl shadow-gray-200/50 border border-gray-300 flex flex-col items-center justify-center min-h-[600px]">
                     <AnimatePresence mode="wait">
                         {scanStatus === "idle" && (
                             <motion.div
@@ -210,7 +210,7 @@ export default function CashierScanPage() {
                                 exit={{ opacity: 0 }}
                                 className="text-center w-full relative"
                             >
-                                <div className="w-full max-w-sm aspect-square bg-gray-900 rounded-[2rem] mx-auto overflow-hidden relative shadow-2xl flex items-center justify-center">
+                                <div className="w-full max-w-sm aspect-square bg-gray-900 rounded-md mx-auto overflow-hidden relative shadow-2xl flex items-center justify-center">
 
                                     <div className="absolute inset-0 z-0">
                                         <Scanner
@@ -226,11 +226,11 @@ export default function CashierScanPage() {
                                     </div>
 
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                                        <div className="w-48 h-48 border-2 border-white/20 rounded-xl relative">
-                                            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-hope-green rounded-tl-xl" />
-                                            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-hope-green rounded-tr-xl" />
-                                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-hope-green rounded-bl-xl" />
-                                            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-hope-green rounded-br-xl" />
+                                        <div className="w-48 h-48 border-2 border-white/20 rounded-md relative">
+                                            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-hope-green rounded-tl-md" />
+                                            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-hope-green rounded-tr-md" />
+                                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-hope-green rounded-bl-md" />
+                                            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-hope-green rounded-br-md" />
                                         </div>
                                     </div>
 
@@ -284,7 +284,7 @@ export default function CashierScanPage() {
                 </div>
 
                 {/* Column 3: Verification Panel */}
-                <div className="lg:col-span-1 bg-gray-50 p-8 rounded-[2rem] border border-gray-100 flex flex-col h-[600px]">
+                <div className="lg:col-span-1 bg-gray-50 p-8 rounded-md border border-gray-300 flex flex-col h-[600px]">
                     <div className="mb-8">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">Security Verification</h3>
                         <p className="text-sm text-gray-500">Ask the guest for their full 10-digit mobile number to verify identity and finalize the discount.</p>
@@ -306,7 +306,7 @@ export default function CashierScanPage() {
                                 className="space-y-6"
                             >
                                 {scanStatus === "error" && (
-                                    <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-start gap-3 border border-red-100">
+                                    <div className="p-4 bg-red-50 text-red-600 rounded-md border border-gray-300 flex items-start gap-3">
                                         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                                         <p className="text-sm font-bold">Number mismatch. Ask the guest to verify the number they registered with.</p>
                                     </div>
@@ -319,7 +319,7 @@ export default function CashierScanPage() {
                                         maxLength={10}
                                         value={mobileVerify}
                                         onChange={(e) => setMobileVerify(e.target.value.replace(/\D/g, ''))}
-                                        className="block w-full px-4 py-4 bg-white border border-gray-200 rounded-2xl text-xl font-black tracking-widest text-gray-900 focus:ring-2 focus:ring-hope-purple focus:border-hope-purple transition-all placeholder:text-gray-300 placeholder:font-normal text-center shadow-sm"
+                                        className="block w-full px-4 py-4 bg-white border border-gray-300 rounded-md text-xl font-black tracking-widest text-gray-900 focus:ring-2 focus:ring-hope-purple focus:border-hope-purple transition-all placeholder:text-gray-300 placeholder:font-normal text-center shadow-sm"
                                         placeholder="• • • • • • • • • •"
                                         required
                                     />
@@ -340,7 +340,7 @@ export default function CashierScanPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="space-y-6"
                             >
-                                <div className="p-6 bg-green-50 border border-green-100 rounded-2xl">
+                                <div className="p-6 bg-green-50 border border-gray-300 rounded-md">
                                     <div className="flex items-center gap-3 mb-2">
                                         <CheckCircle2 className="w-6 h-6 text-green-600" />
                                         <h4 className="font-bold text-green-900">Identity Verified</h4>
@@ -349,7 +349,7 @@ export default function CashierScanPage() {
                                 </div>
 
                                 {scanStatus === "success" && (
-                                    <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm space-y-4">
+                                    <div className="p-6 bg-white border border-gray-300 rounded-md shadow-sm space-y-4">
                                         <h4 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Finalize Billing</h4>
                                         <div>
                                             <label className="block text-xs font-bold text-gray-400 mb-2">Total Bill Amount</label>
@@ -359,7 +359,7 @@ export default function CashierScanPage() {
                                                     type="number"
                                                     value={billAmount}
                                                     onChange={(e) => setBillAmount(e.target.value)}
-                                                    className="block w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-purple"
+                                                    className="block w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-purple"
                                                     placeholder="0.00"
                                                 />
                                             </div>
@@ -389,7 +389,7 @@ export default function CashierScanPage() {
                                 )}
 
                                 {scanStatus === "settled" && (
-                                    <div className="p-6 border-2 border-green-500/20 bg-green-500/5 rounded-2xl text-center space-y-2">
+                                    <div className="p-6 border border-gray-300 bg-green-500/5 rounded-md text-center space-y-2">
                                         <h4 className="text-green-700 font-bold text-lg">Transaction Settled</h4>
                                         <p className="text-gray-600 text-sm font-medium">Discount applied and referral attributed to partner.</p>
                                     </div>

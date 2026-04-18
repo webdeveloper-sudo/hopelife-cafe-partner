@@ -177,6 +177,20 @@ export default function RegisterPage() {
         }
     };
 
+    const [config, setConfig] = useState<any>(null);
+
+    useEffect(() => {
+        fetch("/api/config")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) setConfig(data);
+            })
+            .catch(() => console.error("Failed to load global config"));
+    }, []);
+
+    const displayComm = config?.baseCommission ?? 7.5;
+    const displayBonus = config?.welcomeBonus ?? 500;
+
     const field = (
         label: string,
         key: keyof FormData,
@@ -206,21 +220,21 @@ export default function RegisterPage() {
                     {/* ── STEP 1: FORM ── */}
                     {step === "form" && (
                         <motion.div key="form" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={{ duration: 0.4 }}>
-                            <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/60 overflow-hidden grid grid-cols-1 md:grid-cols-5">
+                            <div className="bg-white rounded-md border border-gray-300 shadow-2xl shadow-gray-200/60 overflow-hidden grid grid-cols-1 md:grid-cols-5">
                                 {/* Left panel */}
                                 <div className="md:col-span-2 bg-gradient-to-br from-[#1a6b3a] to-[#2aab5a] p-10 text-white flex flex-col justify-between relative overflow-hidden">
                                     <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/5 rounded-full" />
                                     <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-white/5 rounded-full" />
                                     <div className="relative z-10">
-                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-xl overflow-hidden">
+                                        <div className="w-16 h-16 bg-white rounded-md border border-gray-300 flex items-center justify-center mb-8 shadow-xl overflow-hidden">
                                             <img src="/logo.png" alt="HOPE Cafe" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                         </div>
                                         <h2 className="text-3xl font-black mb-3 leading-tight">Join the <br />Elite Network</h2>
                                         <p className="text-white/70 text-sm mb-8">Become a partner and earn commissions on every guest you refer.</p>
                                         <div className="space-y-4">
                                             {[
-                                                "Earn 7.5% on every referred guest bill",
-                                                "₹500 instant welcome bonus on approval",
+                                                `Earn ${displayComm}% on every referred guest bill`,
+                                                `₹${displayBonus} instant welcome bonus on approval`,
                                                 "Direct weekly payouts to your bank",
                                                 "Dedicated partner support team",
                                             ].map((benefit, i) => (
@@ -233,7 +247,7 @@ export default function RegisterPage() {
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="relative z-10 mt-10 p-5 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                    <div className="relative z-10 mt-10 p-5 bg-white/10 rounded-md border border-gray-300 backdrop-blur-sm">
                                         <p className="text-xs text-white/80 italic leading-relaxed">"Registering was seamless, and the weekly payouts never miss. Highly recommend!"</p>
                                         <p className="text-xs font-bold mt-2 text-white/60">— Local Tour Operator, Puducherry</p>
                                     </div>
@@ -259,7 +273,7 @@ export default function RegisterPage() {
                                             <select
                                                 value={formData.businessType}
                                                 onChange={e => { setFormData(f => ({ ...f, businessType: e.target.value })); setErrors(er => ({ ...er, businessType: undefined })); }}
-                                                className={`flex h-12 w-full rounded-2xl border-2 bg-white px-4 text-sm transition-all outline-none ${errors.businessType ? "border-red-400" : "border-gray-100 focus:border-[#1a6b3a]"}`}
+                                                className={`flex h-12 w-full rounded-md border-2 bg-white px-4 text-sm transition-all outline-none ${errors.businessType ? "border-red-400" : "border-gray-300 focus:border-[#1a6b3a]"}`}
                                             >
                                                 <option value="">Select business category</option>
                                                 {BUSINESS_TYPES.map(bt => <option key={bt.value} value={bt.value}>{bt.label}</option>)}
@@ -284,9 +298,9 @@ export default function RegisterPage() {
                     {/* ── STEP 2: OTP ── */}
                     {step === "otp" && (
                         <motion.div key="otp" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={{ duration: 0.4 }}>
-                            <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/60 max-w-lg mx-auto overflow-hidden">
+                            <div className="bg-white rounded-md border border-gray-300 shadow-2xl shadow-gray-200/60 max-w-lg mx-auto overflow-hidden">
                                 <div className="bg-gradient-to-br from-[#1a6b3a] to-[#2aab5a] p-10 text-center">
-                                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <div className="w-20 h-20 bg-white/20 rounded-md border border-white/20 flex items-center justify-center mx-auto mb-4">
                                         <Mail className="w-10 h-10 text-white" />
                                     </div>
                                     <h2 className="text-2xl font-black text-white">Check your email</h2>
@@ -308,10 +322,10 @@ export default function RegisterPage() {
                                                 value={digit}
                                                 onChange={e => handleOtpChange(i, e.target.value)}
                                                 onKeyDown={e => handleOtpKeyDown(i, e)}
-                                                className={`w-12 h-14 text-center text-2xl font-black rounded-xl border-2 outline-none transition-all ${
+                                                className={`w-12 h-14 text-center text-2xl font-black rounded-md border-2 border-gray-300 outline-none transition-all ${
                                                     otpError ? "border-red-400 bg-red-50" :
                                                     digit ? "border-[#1a6b3a] bg-green-50 text-[#1a6b3a]" :
-                                                    "border-gray-200 focus:border-[#1a6b3a]"
+                                                    "focus:border-[#1a6b3a]"
                                                 }`}
                                             />
                                         ))}
@@ -360,7 +374,7 @@ export default function RegisterPage() {
                     {/* ── STEP 3: HOLD PAGE ── */}
                     {step === "hold" && (
                         <motion.div key="hold" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-                            <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/60 max-w-lg mx-auto overflow-hidden">
+                            <div className="bg-white rounded-md border border-gray-300 shadow-2xl shadow-gray-200/60 max-w-lg mx-auto overflow-hidden">
                                 <div className="bg-gradient-to-br from-[#1a6b3a] to-[#2aab5a] p-12 text-center relative overflow-hidden">
                                     <div className="absolute inset-0 opacity-10">
                                         {[...Array(6)].map((_, i) => (
@@ -375,7 +389,7 @@ export default function RegisterPage() {
                                     <motion.div
                                         initial={{ scale: 0 }} animate={{ scale: 1 }}
                                         transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-                                        className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl relative z-10"
+                                        className="w-24 h-24 bg-white rounded-md border border-gray-300 flex items-center justify-center mx-auto mb-6 shadow-2xl relative z-10"
                                     >
                                         <CheckCircle2 className="w-14 h-14 text-[#1a6b3a]" />
                                     </motion.div>
@@ -384,7 +398,7 @@ export default function RegisterPage() {
                                 </div>
                                 <div className="p-10 text-center">
                                     <div className="flex items-center justify-center gap-3 mb-6">
-                                        <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                                        <div className="w-10 h-10 bg-amber-50 rounded-md border border-gray-300 flex items-center justify-center">
                                             <ClockIcon className="w-5 h-5 text-amber-500" />
                                         </div>
                                         <div className="text-left">
@@ -398,7 +412,7 @@ export default function RegisterPage() {
                                         <strong className="text-gray-800">{formData.email}</strong> with a link to set your password and access your partner dashboard.
                                     </p>
 
-                                    <div className="space-y-3 text-left bg-gray-50 rounded-2xl p-5">
+                                    <div className="space-y-3 text-left bg-gray-50 rounded-md border border-gray-300 p-5">
                                         <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">What happens next?</p>
                                         {[
                                             "Our team reviews your application",

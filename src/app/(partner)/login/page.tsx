@@ -53,9 +53,9 @@ export default function PartnerLoginPage() {
                 transition={{ duration: 0.4 }}
                 className="w-full max-w-md"
             >
-                <Card className="border-none shadow-2xl overflow-hidden">
+                <Card className="border border-gray-300 rounded-md shadow-2xl overflow-hidden">
                     <CardHeader className="text-center pt-10">
-                        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white overflow-hidden">
+                        <div className="w-20 h-20 bg-white rounded-md flex items-center justify-center mx-auto mb-6 shadow-xl border border-gray-300 overflow-hidden">
                             <img 
                                 src="/logo.png" 
                                 alt="HOPE Cafe Logo" 

@@ -35,13 +35,13 @@ export default function MarketingLoginPage() {
                 transition={{ duration: 0.5, type: "spring" }}
                 className="w-full max-w-md"
             >
-                <Card className="bg-white border-none shadow-[0_32px_128px_-16px_rgba(0,0,0,0.1)] overflow-hidden rounded-[2.5rem]">
+                <Card className="bg-white border border-gray-300 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.1)] overflow-hidden rounded-md">
                     {/* Brand Purple Plate */}
                     <div className="h-32 bg-hope-purple" />
 
                     <CardHeader className="text-center pt-0 -mt-16">
-                        <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 border-8 border-white shadow-2xl relative z-10 transition-transform hover:scale-105 duration-500">
-                            <div className="w-full h-full bg-hope-purple/5 rounded-[1.8rem] flex items-center justify-center text-hope-purple">
+                        <div className="w-32 h-32 bg-white rounded-md flex items-center justify-center mx-auto mb-6 border border-gray-300 shadow-2xl relative z-10 transition-transform hover:scale-105 duration-500 overflow-hidden">
+                            <div className="w-full h-full bg-hope-purple/5 rounded-md border border-gray-300 flex items-center justify-center text-hope-purple">
                                 <Briefcase className="w-16 h-16" />
                             </div>
                         </div>
@@ -55,7 +55,7 @@ export default function MarketingLoginPage() {
                                 <div className="relative">
                                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
                                     <Input
-                                        className="h-14 pl-14 bg-gray-50 border-gray-100 text-gray-900 placeholder-gray-400 focus:ring-hope-purple/20 text-lg rounded-2xl transition-all focus:bg-white"
+                                        className="h-14 pl-14 bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-hope-purple/20 text-lg rounded-md transition-all focus:bg-white"
                                         placeholder="name@hopecafe.network"
                                         required
                                         type="email"
@@ -70,7 +70,7 @@ export default function MarketingLoginPage() {
                                 <div className="relative">
                                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
                                     <Input
-                                        className="h-14 pl-14 bg-gray-50 border-gray-100 text-gray-900 placeholder-gray-400 focus:ring-hope-purple/20 text-lg rounded-2xl transition-all focus:bg-white"
+                                        className="h-14 pl-14 bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-hope-purple/20 text-lg rounded-md transition-all focus:bg-white"
                                         placeholder="••••••••"
                                         required
                                         type="password"
@@ -84,14 +84,14 @@ export default function MarketingLoginPage() {
                                 variant="primary"
                                 type="submit"
                                 size="lg"
-                                className="w-full h-16 text-xl mt-6 shadow-hope-purple/40 bg-hope-purple hover:bg-hope-purple/90 transition-all active:scale-[0.98] text-white"
+                                className="w-full h-16 text-xl mt-6 shadow-hope-purple/40 bg-hope-purple hover:bg-hope-purple/90 rounded-md border border-gray-300 transition-all active:scale-[0.98] text-white"
                                 isLoading={loading}
                             >
                                 Authorize <ArrowRight className="w-6 h-6 ml-3" />
                             </Button>
 
                             <div className="pt-8 text-center space-y-4">
-                                <div className="p-5 bg-hope-purple/5 border border-hope-purple/10 rounded-2xl">
+                                <div className="p-5 bg-hope-purple/5 border border-gray-300 rounded-md">
                                     <p className="text-[11px] font-black text-hope-purple uppercase tracking-widest mb-1">Demo Credentials</p>
                                     <p className="text-sm text-gray-500 font-bold">Key: <span className="text-gray-900 font-black">hope2026</span></p>
                                 </div>
