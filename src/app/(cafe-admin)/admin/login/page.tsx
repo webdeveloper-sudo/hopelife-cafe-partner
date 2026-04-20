@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export default function CafeAdminLoginPage() {
+    const router = useRouter();
     const [loading, setLoading] = React.useState(false);
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");

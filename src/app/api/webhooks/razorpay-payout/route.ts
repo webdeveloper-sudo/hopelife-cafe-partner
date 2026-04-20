@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
     const isSimulation = process.env.WEBHOOK_SIMULATION === "true" && signature === "SIMULATED_SIGNATURE";
 
-    if (!isSimulation && !validateWebhookSignature(rawBody, signature)) {
+    if (!isSimulation && (!signature || !validateWebhookSignature(rawBody, signature))) {
         console.warn("[PAYOUT WEBHOOK] Invalid signature detected.");
         if (process.env.NODE_ENV === "production") {
             return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         if (eventName === "payout.processed") {
             // Success: Deduct wallet and mark as completed
             if (internalPayout.status !== "COMPLETED") {
-                await prisma.$transaction(async (tx) => {
+                await prisma.$transaction(async (tx: any) => {
                     const partner = await tx.partner.findUnique({ where: { id: internalPayout.partnerId } });
                     if (!partner) return;
 
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
         else if (eventName === "payout.reversed") {
             // Reversal: Re-credit wallet if it was previously deducted
             if (internalPayout.status === "COMPLETED") {
-                await prisma.$transaction(async (tx) => {
+                await prisma.$transaction(async (tx: any) => {
                     await tx.payout.update({
                         where: { id: internalPayout.id },
                         data: {

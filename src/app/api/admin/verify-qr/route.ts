@@ -129,6 +129,10 @@ export async function POST(req: Request) {
                         earnedCommission: { increment: partnerCommissionAmount },
                         walletTotal: { increment: partnerCommissionAmount }
                     }
+                }),
+                prisma.guest.update({
+                    where: { id: guest.id },
+                    data: { isRedeemed: true }
                 })
             ]);
 

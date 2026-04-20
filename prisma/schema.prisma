@@ -81,6 +81,7 @@ model Guest {
   name         String
   mobileNumber String     @unique
   partnerId    String
+  isRedeemed   Boolean    @default(false)
   createdAt    DateTime   @default(now())
   dynamicQr    DynamicQR?
   partner      Partner    @relation(fields: [partnerId], references: [id])

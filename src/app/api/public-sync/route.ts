@@ -41,14 +41,14 @@ export async function POST() {
 
         for (const partner of partners) {
             // A. Calculate Earned Commission (from ScanLogs)
-            const allScans = partner.guests.flatMap(g => g.scanLogs);
-            const verifiedCommission = allScans.reduce((sum, log) => sum + (log.partnerCommissionAmount || 0), 0);
+            const allScans = partner.guests.flatMap((g: any) => g.scanLogs);
+            const verifiedCommission = allScans.reduce((sum: number, log: any) => sum + (log.partnerCommissionAmount || 0), 0);
 
             // B. Calculate Bonus Amount (from IncomeLogs)
-            const verifiedBonus = partner.incomeLogs.reduce((sum, log) => sum + (log.amount || 0), 0);
+            const verifiedBonus = partner.incomeLogs.reduce((sum: number, log: any) => sum + (log.amount || 0), 0);
 
             // C. Calculate Total Withdrawn (from Payouts)
-            const verifiedWithdrawn = partner.payouts.reduce((sum, p) => sum + (p.amount || 0), 0);
+            const verifiedWithdrawn = partner.payouts.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
             // D. Calculated True Balance
             const verifiedTotal = (verifiedCommission + verifiedBonus) - verifiedWithdrawn;
@@ -63,6 +63,17 @@ export async function POST() {
                     walletBalance: verifiedTotal // Match legacy field for safety
                 }
             });
+
+            // F. Sync Guest isRedeemed status (Repair Logic)
+            for (const guest of partner.guests) {
+                const hasScan = guest.scanLogs.length > 0;
+                if (guest.isRedeemed !== hasScan) {
+                    await prisma.guest.update({
+                        where: { id: guest.id },
+                        data: { isRedeemed: hasScan }
+                    });
+                }
+            }
 
             syncResults.push({
                 partnerCode: partner.partnerCode,

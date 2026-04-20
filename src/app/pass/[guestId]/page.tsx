@@ -242,4 +242,3 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
         </div>
     );
 }
-}
