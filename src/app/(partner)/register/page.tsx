@@ -39,6 +39,7 @@ interface FormData {
     address: string;
     city: string;
     pincode: string;
+    upiId: string;
 }
 
 export default function RegisterPage() {
@@ -46,7 +47,7 @@ export default function RegisterPage() {
     const [step, setStep] = useState<Step>("form");
     const [formData, setFormData] = useState<FormData>({
         partnerName: "", contactName: "", email: "", mobile: "",
-        businessType: "", address: "", city: "Pondicherry", pincode: ""
+        businessType: "", address: "", city: "Pondicherry", pincode: "", upiId: ""
     });
     const [errors, setErrors] = useState<Partial<FormData>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,6 +75,7 @@ export default function RegisterPage() {
         if (!formData.address.trim()) e.address = "Address is required";
         if (!formData.city.trim()) e.city = "City is required";
         if (!formData.pincode || !/^\d{6}$/.test(formData.pincode)) e.pincode = "Valid 6-digit pincode required";
+        if (!formData.upiId || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(formData.upiId)) e.upiId = "Valid UPI ID is required for settlements";
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -285,6 +287,13 @@ export default function RegisterPage() {
                                             {field("City", "city", "Pondicherry")}
                                             {field("Pincode", "pincode", "605001")}
                                         </div>
+
+                                        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                            <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/> Critical Information</p>
+                                            {field("UPI ID (For Settlements)", "upiId", "yourname@upi")}
+                                            <p className="text-[10px] text-red-500 mt-2 font-medium leading-relaxed">Ensure this UPI ID is active and accurate. All your referral commissions will be settled exclusively to this account.</p>
+                                        </div>
+
                                         <Button type="submit" className="w-full h-13 text-base font-bold mt-2" isLoading={isSubmitting}>
                                             Send OTP to Email <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
@@ -398,26 +407,26 @@ export default function RegisterPage() {
                                 </div>
                                 <div className="p-10 text-center">
                                     <div className="flex items-center justify-center gap-3 mb-6">
-                                        <div className="w-10 h-10 bg-amber-50 rounded-md border border-gray-300 flex items-center justify-center">
-                                            <ClockIcon className="w-5 h-5 text-amber-500" />
+                                        <div className="w-10 h-10 bg-green-50 rounded-md border border-gray-300 flex items-center justify-center">
+                                            <CheckCircle2 className="w-5 h-5 text-[#1a6b3a]" />
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Review Period</p>
-                                            <p className="text-base font-black text-gray-900">Up to 48 hours</p>
+                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Account Status</p>
+                                            <p className="text-base font-black text-gray-900">Auto-Approved</p>
                                         </div>
                                     </div>
 
                                     <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                                        Your application is being reviewed by our team. Once approved, you will receive an email at{" "}
-                                        <strong className="text-gray-800">{formData.email}</strong> with a link to set your password and access your partner dashboard.
+                                        Your partner account has been automatically approved! We have just sent an email to{" "}
+                                        <strong className="text-gray-800">{formData.email}</strong> with a secure link to set your password and access your partner dashboard.
                                     </p>
 
                                     <div className="space-y-3 text-left bg-gray-50 rounded-md border border-gray-300 p-5">
-                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">What happens next?</p>
+                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Next Steps</p>
                                         {[
-                                            "Our team reviews your application",
-                                            "You get an email with a login link",
-                                            "Set your password and start earning!",
+                                            "Check your email inbox or spam folder",
+                                            "Click the secure password setup link",
+                                            "Log in and start earning commissions!",
                                         ].map((s, i) => (
                                             <div key={i} className="flex items-center gap-3">
                                                 <div className="w-6 h-6 bg-[#1a6b3a] rounded-full flex items-center justify-center shrink-0">

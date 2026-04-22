@@ -21,6 +21,7 @@ import { toast } from "sonner";
 const navLinks = [
     { name: "Overview", href: "/super-admin/dashboard", icon: BarChart3 },
     { name: "Partners", href: "/super-admin/partners", icon: Users },
+    { name: "Marketing Team", href: "/super-admin/marketing-team", icon: Crown },
     { name: "Payouts", href: "/super-admin/payouts", icon: CreditCard },
     { name: "Slabs & Fees", href: "/super-admin/slabs", icon: Settings2 },
     { name: "System Logs", href: "/super-admin/logs", icon: Activity },
@@ -76,7 +77,12 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         checkSession();
     }, [pathname, router]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } catch (e) {
+            console.error("Logout failed", e);
+        }
         sessionStorage.removeItem("hopecafe_superadmin_session");
         toast.info("Super Admin session terminated.");
         router.replace("/super-admin/login");

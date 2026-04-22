@@ -198,3 +198,49 @@ export async function sendAdminNewPartnerAlert(
         </div>`,
     });
 }
+
+export async function sendMarketingInviteEmail(
+    email: string,
+    repName: string,
+    setupLink: string
+): Promise<boolean> {
+    const subject = "You're Invited to Hope Cafe Marketing Team";
+    const html = `
+    <div style="font-family:'Poppins','Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+      <div style="background:linear-gradient(135deg,#7b2cbf,#9d4edd);padding:40px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:28px;font-weight:800">HOPE Cafe</h1>
+        <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Marketing Team</p>
+      </div>
+      <div style="padding:48px 40px">
+        <h2 style="color:#1a1a1a;font-size:24px;font-weight:700;margin:0 0 12px">Welcome aboard, ${repName}! 🚀</h2>
+        <p style="color:#555;font-size:15px;line-height:1.7;margin:0 0 24px">
+          You have been formally invited to join the Hope Cafe Marketing Team. Our team helps connect incredible partners with the Hope Cafe network.
+        </p>
+        <p style="color:#555;font-size:15px;line-height:1.7;margin:0 0 32px">
+          To access your executive dashboard and start onboarding partners, please click the button below to set up your password securely.
+        </p>
+        <div style="text-align:center;margin:0 0 32px">
+          <a href="${setupLink}" style="background:linear-gradient(135deg,#7b2cbf,#9d4edd);color:#fff;text-decoration:none;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;display:inline-block;letter-spacing:0.3px">
+            Set Your Password →
+          </a>
+        </div>
+        <div style="background:#f4ebfa;border-radius:12px;padding:20px 24px;border-left:4px solid #7b2cbf">
+          <p style="color:#5b21b6;font-weight:700;margin:0 0 8px;font-size:14px">Important Note</p>
+          <p style="color:#555;font-size:14px;line-height:1.8;margin:0">
+            This invitation link expires in 7 days. Once you set your password, you can login anytime at <a href="${process.env.NEXT_PUBLIC_APP_URL}/marketing/login" style="color:#7b2cbf;font-weight:bold">${process.env.NEXT_PUBLIC_APP_URL}/marketing/login</a>.
+          </p>
+        </div>
+      </div>
+      <div style="background:#f9fafb;padding:24px 40px;text-align:center;border-top:1px solid #f0f0f0">
+        <p style="color:#bbb;font-size:12px;margin:0">© ${new Date().getFullYear()} HOPE Cafe — Achariya Campus, Pondicherry</p>
+        <p style="color:#ccc;font-size:11px;margin:6px 0 0">If you did not expect this invitation, you can safely ignore this email.</p>
+      </div>
+    </div>`;
+
+    return sendMail({
+        from: process.env.SMTP_FROM || `"HOPE Cafe Marketing" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject,
+        html,
+    });
+}

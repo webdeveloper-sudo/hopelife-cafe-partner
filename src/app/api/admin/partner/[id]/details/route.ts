@@ -22,6 +22,13 @@ export async function GET(
                 },
                 payouts: {
                     orderBy: { createdAt: 'desc' }
+                },
+                registeredByMarketingRep: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
                 }
             }
         });

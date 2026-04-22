@@ -18,31 +18,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             return NextResponse.json({ error: "Partner is already approved" }, { status: 400 });
         }
 
-        // Fetch system config to apply dynamic bonuses respecting maintenance mode
-        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
-        const maintenanceMode = config?.maintenanceMode ?? false;
-        const welcomeBonus = config?.welcomeBonus ?? 500;
-
-        // Apply welcome bonus only if maintenance mode is OFF and partner has no balance yet
-        const walletIncrement = (!maintenanceMode && partner.walletBalance === 0) ? welcomeBonus : 0;
-
-        // Approve the partner and credit bonus to multi-attribute wallet
+        // Approve the partner
         const updated = await prisma.partner.update({
             where: { id },
             data: {
-                status: "ACTIVE",
-                ...(walletIncrement > 0 ? { 
-                    walletBalance: { increment: walletIncrement },
-                    bonusAmount: { increment: walletIncrement },
-                    walletTotal: { increment: walletIncrement },
-                    incomeLogs: {
-                        create: {
-                            amount: walletIncrement,
-                            type: "WELCOME_BONUS",
-                            description: "Seed credit for joining the HOPE Partnership Program"
-                        }
-                    }
-                } : {})
+                status: "ACTIVE"
             }
         });
 
@@ -54,7 +34,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             { expiresIn: "48h" }
         );
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5000";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://hopelife-cafe-partner.vercel.app";
         const setPasswordUrl = `${appUrl}/set-password?token=${token}&email=${encodeURIComponent(partner.email || "")}`;
 
         // Send welcome email
@@ -70,8 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({
             success: true,
             partner: updated,
-            setPasswordUrl,
-            bonusApplied: walletIncrement > 0 ? walletIncrement : null
+            setPasswordUrl
         });
     } catch (err) {
         console.error("Approve partner error:", err);

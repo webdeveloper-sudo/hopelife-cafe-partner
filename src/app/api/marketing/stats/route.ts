@@ -1,54 +1,59 @@
+export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
-export const runtime = 'nodejs';
-
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        const prisma = getPrisma();
+        const session = await getSession();
+        if (!session || session.role !== "MARKETING") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
-        const partners = await prisma.partner.findMany();
-        const scanLogs = await prisma.scanLog.findMany({
-            where: { status: { in: ["SETTLED", "PAID"] } as any }
+        const prisma = getPrisma();
+        
+        const rep = await prisma.marketingRep.findUnique({
+            where: { id: session.id },
+            include: {
+                partners: {
+                    orderBy: { createdAt: 'desc' }
+                }
+            }
         });
 
-        // 1. Total Partners Onboarded (For demo, all partners)
-        const totalPartners = partners.length;
+        if (!rep) {
+            return NextResponse.json({ error: "Rep not found" }, { status: 404 });
+        }
 
-        // 2. Active this week (Joined in last 7 days)
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).getTime();
-        const activeThisWeek = partners.filter((p: any) => new Date(p.createdAt).getTime() >= sevenDaysAgo).length;
+        const totalPartners = rep.partners.length;
+        
+        const startOfWeek = new Date();
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+        const activeThisWeek = rep.partners.filter(p => new Date(p.createdAt) >= startOfWeek).length;
+        
+        const activePartnersCount = rep.partners.filter(p => p.status === "ACTIVE").length;
 
-        // 3. Network Sales Generated
-        const totalSales = scanLogs.reduce((acc: number, log: any) => acc + (log.billAmount || 0), 0);
-
-        // 4. Marketing Commission (Assume 1.5% of total sales for the exec)
-        const marketingCommission = totalSales * 0.015;
-
-        // 5. Managed Partners List
-        const managedPartners = partners
-            .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .slice(0, 5)
-            .map((p: any) => ({
-                id: p.partnerCode,
-                name: p.name,
-                joined: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                status: p.status || "Active",
-                slab: `${p.commissionSlab || 7.5}%`
-            }));
+        const managedPartners = rep.partners.map(p => ({
+            id: p.id,
+            name: p.name,
+            joined: p.createdAt.toLocaleDateString(),
+            status: p.status,
+            slab: `${p.commissionSlab}%`,
+            mobile: p.mobile,
+            contactName: p.contactName
+        }));
 
         return NextResponse.json({
             success: true,
             metrics: {
                 totalPartners,
                 activeThisWeek,
-                totalRevenueGenerated: totalSales,
-                marketingCommission
+                activePartnersCount
             },
             managedPartners
         });
-    } catch (error) {
-        console.error("Marketing Stats Error:", error);
-        return NextResponse.json({ error: "Failed to fetch marketing stats" }, { status: 500 });
+    } catch (err: any) {
+        console.error("Marketing Stats Error:", err);
+        return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
     }
 }

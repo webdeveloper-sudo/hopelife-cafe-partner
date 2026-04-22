@@ -54,6 +54,22 @@ model Partner {
   razorpayFundAccountId  String?
   guests            Guest[]
   payouts           Payout[]
+  
+  registeredByMarketingRepId String?
+  registeredByMarketingRep   MarketingRep? @relation(fields: [registeredByMarketingRepId], references: [id])
+}
+
+model MarketingRep {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  mobile       String    @unique
+  password     String
+  status       String    @default("ACTIVE")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  partners     Partner[]
 }
 
 model IncomeLog {

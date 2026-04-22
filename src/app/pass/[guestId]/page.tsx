@@ -86,7 +86,11 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                 const data = await res.json();
                 if (data.success && data.isRedeemed) {
                     toast.success("Pass Redeemed Successfully!");
-                    router.push("/thank-you");
+                    if (data.billAmount) {
+                        router.push(`/thank-you?billAmount=${data.billAmount}&discount=${data.discount || 0}`);
+                    } else {
+                        router.push("/thank-you");
+                    }
                 }
             } catch (err) {
                 console.error("Polling error:", err);

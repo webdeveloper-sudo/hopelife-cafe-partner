@@ -46,11 +46,33 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid or expired token." }, { status: 401 });
         }
 
-        // Hash and save password
+        // Fetch system config
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+        const maintenanceMode = config?.maintenanceMode ?? false;
+        const welcomeBonus = config?.welcomeBonus ?? 500;
+
+        const isFirstTimeSetup = !partner.password;
+        const walletIncrement = (isFirstTimeSetup && !maintenanceMode && partner.walletBalance === 0) ? welcomeBonus : 0;
+
+        // Hash and save password & apply welcome bonus if applicable
         const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
         await prisma.partner.update({
             where: { id: partner.id },
-            data: { password: hashedPassword }
+            data: { 
+                password: hashedPassword,
+                ...(walletIncrement > 0 ? { 
+                    walletBalance: { increment: walletIncrement },
+                    bonusAmount: { increment: walletIncrement },
+                    walletTotal: { increment: walletIncrement },
+                    incomeLogs: {
+                        create: {
+                            amount: walletIncrement,
+                            type: "WELCOME_BONUS",
+                            description: "Welcome bonus for completing account setup"
+                        }
+                    }
+                } : {})
+            }
         });
 
         return NextResponse.json({ success: true });

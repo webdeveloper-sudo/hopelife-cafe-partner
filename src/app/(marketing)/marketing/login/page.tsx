@@ -20,11 +20,25 @@ export default function MarketingLoginPage() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        await new Promise(r => setTimeout(r, 1000));
-        localStorage.setItem("hopecafe_marketing_session", "active");
-        setLoading(false);
-        toast.success("Marketing Executive Login Successful");
-        router.push("/marketing/dashboard");
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role: "MARKETING", email, password }),
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                toast.success("Marketing Executive Login Successful");
+                router.push(data.redirectUrl || "/marketing/dashboard");
+            } else {
+                toast.error(data.error || "Login failed");
+            }
+        } catch (error) {
+            toast.error("An error occurred during login");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

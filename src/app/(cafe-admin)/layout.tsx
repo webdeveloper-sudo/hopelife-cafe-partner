@@ -72,7 +72,12 @@ export default function CafeAdminLayout({ children }: { children: React.ReactNod
         checkSession();
     }, [pathname, router]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } catch (e) {
+            console.error("Logout failed", e);
+        }
         sessionStorage.removeItem("hopecafe_admin_session");
         toast.info("Cafe Admin session terminated.");
         router.replace("/admin/login");

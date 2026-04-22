@@ -50,6 +50,29 @@ export async function POST(req: Request) {
 
             await login({ role: "PARTNER", id: partner.id, partnerCode: partner.partnerCode });
             return NextResponse.json({ success: true, redirectUrl: "/dashboard", partnerCode: partner.partnerCode });
+            
+        } else if (role === "MARKETING") {
+            if (!email) {
+                return NextResponse.json({ error: "Email is required for marketing login" }, { status: 400 });
+            }
+            
+            const marketingRep = await prisma.marketingRep.findUnique({ where: { email } });
+            
+            if (!marketingRep) {
+                return NextResponse.json({ error: "Marketing account not found" }, { status: 404 });
+            }
+            
+            if (marketingRep.status !== "ACTIVE") {
+                 return NextResponse.json({ error: "Marketing account is inactive" }, { status: 403 });
+            }
+
+            const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
+            if (marketingRep.password !== hashedPassword) {
+                return NextResponse.json({ error: "Invalid marketing credentials" }, { status: 401 });
+            }
+
+            await login({ role: "MARKETING", id: marketingRep.id });
+            return NextResponse.json({ success: true, redirectUrl: "/marketing/dashboard" });
         }
 
         return NextResponse.json({ error: "Invalid role specified" }, { status: 400 });

@@ -93,7 +93,7 @@ export async function POST(req: Request) {
         });
 
         // 3. Trigger WhatsApp Delivery API (Internal Call or Service)
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hopelife-cafe-partner.vercel.app';
         const passLink = `${baseUrl}/pass/${guest.id}`;
 
         // Simulating the WhatsApp Send API call

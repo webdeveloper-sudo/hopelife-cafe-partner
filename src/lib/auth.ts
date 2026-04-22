@@ -29,10 +29,10 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function login(payload: any) {
-    // Super Admin: 24h, others: 365 days (indefinite)
+    // Super Admin: 24h, others (Partner, Cafe Admin): 3650 days (indefinite)
     const isSuperAdmin = payload.role === "SUPER_ADMIN";
-    const expiresIn = isSuperAdmin ? "24h" : "365d";
-    const maxAge = isSuperAdmin ? 24 * 60 * 60 : 365 * 24 * 60 * 60;
+    const expiresIn = isSuperAdmin ? "24h" : "3650d";
+    const maxAge = isSuperAdmin ? 24 * 60 * 60 : 3650 * 24 * 60 * 60;
 
     const session = await encrypt(payload, expiresIn);
 

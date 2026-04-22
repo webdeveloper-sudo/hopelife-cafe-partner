@@ -324,6 +324,17 @@ export default function PartnerDetailsPage() {
                                             <p className="font-bold text-gray-900 mt-1 truncate">{partner.email || "-"}</p>
                                         </div>
                                     </div>
+                                    {partner.registeredByMarketingRep && (
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-purple-50 rounded-md border border-purple-200 flex items-center justify-center text-purple-500">
+                                                <Users className="w-5 h-5" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest leading-none">Registered By (Marketing)</p>
+                                                <p className="font-bold text-gray-900 mt-1 truncate">{partner.registeredByMarketingRep.name}</p>
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="flex items-start gap-4 pt-2">
                                         <div className="w-10 h-10 bg-gray-50 rounded-md border border-gray-300 flex items-center justify-center text-gray-400 shrink-0">
                                             <MapPin className="w-5 h-5" />

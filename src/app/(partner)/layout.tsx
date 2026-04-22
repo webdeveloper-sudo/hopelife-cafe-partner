@@ -79,7 +79,12 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
         checkSession();
     }, [pathname, router]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } catch (e) {
+            console.error("Logout failed", e);
+        }
         sessionStorage.removeItem("hopecafe_partner_session");
         toast.info("Signed out successfully.");
         router.replace("/login");

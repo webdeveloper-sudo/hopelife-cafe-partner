@@ -41,9 +41,6 @@ export async function POST(req: Request) {
         const slug = partnerName.toUpperCase().replace(/[^A-Z0-9\s]/g, "").split(" ").map((w: string) => w.slice(0, 3)).join("").slice(0, 8);
         const partnerCode = `${slug}${Date.now().toString().slice(-4)}`;
 
-        // When maintenance mode is OFF, credit welcomeBonus to walletBalance; else start at 0
-        const initialWallet = maintenanceMode ? 0 : welcomeBonus;
-
         const partner = await prisma.partner.create({
             data: {
                 name: partnerName,
@@ -58,7 +55,7 @@ export async function POST(req: Request) {
                 commissionSlab: effectiveCommission,
                 guestDiscountSlab: effectiveDiscount,
                 status: "ACTIVE",
-                walletBalance: initialWallet,
+                walletBalance: 0,
                 bonusCommission: 0,
                 retentionStreak: 0,
             }
@@ -72,7 +69,7 @@ export async function POST(req: Request) {
             { expiresIn: "48h" }
         );
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5000";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://hopelife-cafe-partner.vercel.app";
         const setPasswordUrl = `${appUrl}/set-password?token=${token}&email=${encodeURIComponent(email)}`;
 
         // Send welcome email immediately
@@ -81,8 +78,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             partnerCode: partner.partnerCode,
-            setPasswordUrl,
-            bonusApplied: maintenanceMode ? null : welcomeBonus
+            setPasswordUrl
         });
     } catch (err) {
         console.error("Admin onboard partner error:", err);

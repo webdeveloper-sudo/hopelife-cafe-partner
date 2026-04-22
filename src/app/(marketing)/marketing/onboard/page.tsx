@@ -4,14 +4,17 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, Building, Phone, Percent, Receipt, ChevronRight, CheckCircle2, UserCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import QRCode from "react-qr-code";
 
 // Marketing Executive Add Partner Flow
 export default function AddPartnerPage() {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [passUrl, setPassUrl] = useState("");
+    
+    // OTP State
+    const [otp, setOtp] = useState("");
+    const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+    const [verificationToken, setVerificationToken] = useState("");
 
     // Form State
     const [formData, setFormData] = useState({
@@ -20,18 +23,67 @@ export default function AddPartnerPage() {
         mobile: "",
         email: "",
         commissionSlab: "7.5",
-        bankAccount: "",
-        ifsc: "",
+        upiId: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const nextStep = () => {
-        if (step === 1 && (!formData.partnerName || !formData.contactName || formData.mobile.length !== 10)) return;
-        if (step === 2 && (!formData.bankAccount || !formData.ifsc)) return;
+    const nextStep = async () => {
+        if (step === 1 && (!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email)) return;
+        
+        if (step === 1) {
+            // Trigger send OTP
+            setIsVerifyingOtp(true);
+            try {
+                const res = await fetch("/api/partner/send-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: formData.email, type: "partner-registration" })
+                });
+                if (!res.ok) {
+                    const data = await res.json();
+                    alert(data.error || "Failed to send OTP.");
+                    setIsVerifyingOtp(false);
+                    return;
+                }
+            } catch {
+                alert("Network error.");
+                setIsVerifyingOtp(false);
+                return;
+            }
+            setIsVerifyingOtp(false);
+        }
+        
+        const isValidUpi = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(formData.upiId);
+        if (step === 3 && (!formData.upiId || !isValidUpi)) {
+            alert("Please enter a strictly valid UPI ID (e.g. number@bank).");
+            return;
+        }
         setStep(step + 1);
+    };
+
+    const handleVerifyOtp = async () => {
+        setIsVerifyingOtp(true);
+        try {
+            const res = await fetch("/api/partner/verify-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: formData.email, otp, purpose: "partner-registration" })
+            });
+            const data = await res.json();
+            if (res.ok && data.success && data.verificationToken) {
+                setVerificationToken(data.verificationToken);
+                setStep(3);
+            } else {
+                alert(data.error || "Invalid OTP code.");
+            }
+        } catch {
+            alert("Network error verifying OTP.");
+        } finally {
+            setIsVerifyingOtp(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -41,14 +93,13 @@ export default function AddPartnerPage() {
             const res = await fetch("/api/partner/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ ...formData, verificationToken }),
             });
             const data = await res.json();
             if (!res.ok) {
                 alert(data.error || "Registration failed.");
                 return;
             }
-            setPassUrl(data.passUrl);
             setIsSuccess(true);
         } catch {
             alert("Network error. Please try again.");
@@ -64,38 +115,32 @@ export default function AddPartnerPage() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    className="w-24 h-24 bg-green-50 rounded-md border border-gray-300 flex items-center justify-center mb-6"
+                    className="w-24 h-24 bg-green-50 rounded-md border border-gray-300 flex items-center justify-center mb-6 shadow-sm"
                 >
                     <CheckCircle2 className="w-12 h-12 text-green-500" />
                 </motion.div>
-                <h2 className="text-3xl font-black text-gray-900 mb-2">Partner Instantly Active!</h2>
-                <p className="text-gray-500 max-w-sm mb-8">
-                    <span className="font-bold text-gray-900">{formData.partnerName}</span> is now live on the network at the {formData.commissionSlab}% slab.
+                <h2 className="text-3xl font-black text-gray-900 mb-2">Invitation Sent Successfully!</h2>
+                <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
+                    We've emailed <span className="font-bold text-gray-900">{formData.email}</span> with a secure link to set their password and login to the automated Partner Portal.
                 </p>
 
-                <div className="bg-hope-purple/5 border border-gray-300 p-6 rounded-md w-full max-w-md mb-8">
-                    <h3 className="text-sm font-bold text-hope-purple uppercase tracking-widest mb-4">Print QR Standee</h3>
-                    <p className="text-xs text-gray-600 mb-5">Scan or hand this QR to the receptionist — guests scan it at the property to get their Live Pass.</p>
-
-                    {/* QR Code */}
-                    <div className="bg-white p-5 rounded-md border border-gray-300 flex justify-center mb-4 shadow-sm">
-                        <QRCode
-                            value={passUrl}
-                            size={180}
-                            style={{ height: "auto", maxWidth: "100%", width: "180px" }}
-                            level="M"
-                        />
-                    </div>
-
-                    {/* URL + Copy */}
-                    <div className="bg-white px-4 py-3 rounded-md border border-gray-300 font-mono text-xs text-gray-700 flex justify-between items-center gap-2">
-                        <span className="truncate">{passUrl}</span>
-                        <Button size="sm" variant="outline" className="h-8 text-xs shrink-0" onClick={() => { navigator.clipboard.writeText(passUrl); }}>Copy</Button>
-                    </div>
+                <div className="bg-amber-50 border border-amber-200 p-6 rounded-md w-full max-w-md mb-8 text-left shadow-sm">
+                    <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest mb-3">Next Steps</h3>
+                    <ul className="text-sm text-amber-700 space-y-3 font-medium">
+                        <li className="flex gap-2">
+                            <span className="font-bold">1.</span> Partner sets their password via the email link.
+                        </li>
+                        <li className="flex gap-2">
+                            <span className="font-bold">2.</span> Partner logs into their Portal instantly.
+                        </li>
+                        <li className="flex gap-2">
+                            <span className="font-bold">3.</span> Partner generates and prints their own dynamic QR code.
+                        </li>
+                    </ul>
                 </div>
 
-                <Button onClick={() => window.location.reload()} size="lg" className="h-14 px-8">
-                    Register Another Partner
+                <Button onClick={() => window.location.reload()} size="lg" className="h-14 px-8 bg-hope-purple hover:bg-purple-700 text-white font-bold tracking-wide">
+                    Onboard Another Partner
                 </Button>
             </div>
         );
@@ -184,12 +229,24 @@ export default function AddPartnerPage() {
                                             />
                                         </div>
                                     </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                            placeholder="partner@example.com"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="pt-6 flex justify-end">
-                                <Button onClick={nextStep} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={!formData.partnerName || !formData.contactName || formData.mobile.length !== 10}>
-                                    Next Step <ChevronRight className="w-4 h-4 ml-1" />
+                                <Button onClick={nextStep} isLoading={isVerifyingOtp} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email}>
+                                    Next Step (OTP) <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
                             </div>
                         </motion.div>
@@ -204,33 +261,23 @@ export default function AddPartnerPage() {
                             className="space-y-6"
                         >
                             <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                <Receipt className="w-5 h-5 text-hope-purple" /> Payout Details
+                                <UserCheck className="w-5 h-5 text-hope-purple" /> Partner Verification
                             </h3>
 
                             <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                    We've sent an OTP to the partner's email address: <span className="font-bold">{formData.email}</span>
+                                </p>
+                                
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Account Number</label>
-                                    <input
-                                        type="password"
-                                        name="bankAccount"
-                                        value={formData.bankAccount}
-                                        onChange={handleChange}
-                                        className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple font-mono tracking-widest"
-                                        placeholder="••••••••••••"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">IFSC Code</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Enter Verification Code</label>
                                     <input
                                         type="text"
-                                        name="ifsc"
-                                        value={formData.ifsc}
-                                        onChange={(e) => setFormData({ ...formData, ifsc: e.target.value.toUpperCase() })}
-                                        className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple font-mono uppercase"
-                                        placeholder="HDFC0001234"
-                                        maxLength={11}
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple tracking-widest text-center text-lg"
+                                        placeholder="000000"
+                                        maxLength={6}
                                         required
                                     />
                                 </div>
@@ -240,8 +287,8 @@ export default function AddPartnerPage() {
                                 <Button onClick={() => setStep(1)} variant="outline" className="h-12 px-8 text-gray-500 hover:text-gray-900 border-gray-200">
                                     Back
                                 </Button>
-                                <Button onClick={nextStep} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={!formData.bankAccount || formData.ifsc.length < 5}>
-                                    Next Step <ChevronRight className="w-4 h-4 ml-1" />
+                                <Button onClick={handleVerifyOtp} isLoading={isVerifyingOtp} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={otp.length < 6 || isVerifyingOtp}>
+                                    Verify Code <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
                             </div>
                         </motion.div>
@@ -250,6 +297,54 @@ export default function AddPartnerPage() {
                     {step === 3 && (
                         <motion.div
                             key="step3"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="space-y-6"
+                        >
+                            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <Receipt className="w-5 h-5 text-hope-purple" /> Settlement Details
+                            </h3>
+
+                            <div className="space-y-4">
+                                <div className="bg-amber-50 border border-amber-200 p-4 rounded-md">
+                                    <h4 className="text-amber-800 font-bold text-sm mb-1 uppercase tracking-widest">⚠️ Critical Information</h4>
+                                    <p className="text-amber-700 text-xs leading-relaxed font-medium">This is the most important step. Your earnings will be settled automatically to this UPI ID ONLY. Please double check and ensure the UPI ID is perfectly active and capable of receiving payments.</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Partner UPI ID</label>
+                                    <input
+                                        type="text"
+                                        name="upiId"
+                                        value={formData.upiId}
+                                        onChange={handleChange}
+                                        className="block w-full px-4 py-4 bg-gray-50 border border-gray-300 rounded-md font-bold focus:ring-2 focus:ring-hope-purple font-mono tracking-widest text-lg"
+                                        placeholder="e.g. mobilenumber@bank"
+                                        required
+                                    />
+                                    {formData.upiId && !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(formData.upiId) && (
+                                        <p className="text-red-500 font-bold text-xs mt-2 ml-1 flex items-center gap-1">
+                                            Invalid UPI format. Must contain '@'.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="pt-6 flex justify-between">
+                                <Button onClick={() => setStep(2)} variant="outline" className="h-12 px-8 text-gray-500 hover:text-gray-900 border-gray-200">
+                                    Back
+                                </Button>
+                                <Button onClick={nextStep} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={!formData.upiId || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(formData.upiId)}>
+                                    Next Step <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {step === 4 && (
+                        <motion.div
+                            key="step4"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
@@ -293,11 +388,11 @@ export default function AddPartnerPage() {
                             </div>
 
                             <div className="pt-6 flex justify-between">
-                                <Button onClick={() => setStep(2)} variant="outline" className="h-14 px-8 text-gray-500 hover:text-gray-900 border-gray-200">
+                                <Button onClick={() => setStep(3)} variant="outline" className="h-14 px-8 text-gray-500 hover:text-gray-900 border-gray-200">
                                     Back
                                 </Button>
                                 <Button onClick={handleSubmit} className="h-14 px-8 bg-black hover:bg-gray-800 text-white" isLoading={isSubmitting}>
-                                    Activate Partner <ArrowRight className="w-5 h-5 ml-2" />
+                                    Send Email Invitation <ArrowRight className="w-5 h-5 ml-2" />
                                 </Button>
                             </div>
                         </motion.div>

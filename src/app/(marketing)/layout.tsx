@@ -22,32 +22,43 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = React.useState(false);
+    const [repInfo, setRepInfo] = React.useState<{ name: string, id: string } | null>(null);
 
     React.useEffect(() => {
-        // Exempt login page from the guard
-        if (pathname === "/marketing/login") {
+        // Exempt auth pages from the guard
+        if (pathname === "/marketing/login" || pathname === "/marketing/set-password") {
             setIsAuthorized(true);
             return;
         }
 
-        const session = localStorage.getItem("hopecafe_marketing_session");
-        if (!session) {
-            toast.error("Security session expired. Please log in.");
-            router.replace("/marketing/login");
-        } else {
-            setIsAuthorized(true);
-        }
+        const checkAuth = async () => {
+            try {
+                const res = await fetch("/api/auth/session");
+                const data = await res.json();
+                if (data.authenticated && data.user.role === "MARKETING") {
+                    setIsAuthorized(true);
+                } else {
+                    router.replace("/marketing/login");
+                }
+            } catch (err) {
+                router.replace("/marketing/login");
+            }
+        };
+
+        checkAuth();
     }, [pathname, router]);
 
-    const handleLogout = () => {
-        localStorage.removeItem("hopecafe_marketing_session");
+    const handleLogout = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+        } catch (e) {}
         toast.info("Logged out successfully.");
         router.replace("/marketing/login");
     };
 
-    const isAuthPage = pathname === "/marketing/login";
+    const isAuthPage = pathname === "/marketing/login" || pathname === "/marketing/set-password";
 
-    if (!isAuthorized) return <div className="min-h-screen bg-gray-50" />;
+    if (!isAuthorized && !isAuthPage) return <div className="min-h-screen bg-surface-light flex items-center justify-center"><div className="w-8 h-8 border-4 border-hope-purple border-t-transparent rounded-full animate-spin" /></div>;
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-900">
@@ -94,8 +105,8 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-black">M</div>
                                 <div>
-                                    <p className="text-xs font-black text-gray-900">Mark Johnson</p>
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Exec ID: M-104</p>
+                                    <p className="text-xs font-black text-gray-900">Marketing Rep</p>
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Active Member</p>
                                 </div>
                             </div>
                         </div>

@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         };
 
         // Forward to the actual webhook handler
-        const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:5000'}/api/webhooks/razorpay-payout`;
+        const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://hopelife-cafe-partner.vercel.app'}/api/webhooks/razorpay-payout`;
         
         console.log(`[SIMULATION] Forwarding ${event} for ${rzpPayoutId} to ${webhookUrl}`);
 
