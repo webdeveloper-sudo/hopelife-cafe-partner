@@ -29,11 +29,11 @@ export async function GET(req: Request) {
         
         const startOfWeek = new Date();
         startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-        const activeThisWeek = rep.partners.filter(p => new Date(p.createdAt) >= startOfWeek).length;
+        const activeThisWeek = rep.partners.filter((p: any) => new Date(p.createdAt) >= startOfWeek).length;
         
-        const activePartnersCount = rep.partners.filter(p => p.status === "ACTIVE").length;
+        const activePartnersCount = rep.partners.filter((p: any) => p.status === "ACTIVE").length;
 
-        const managedPartners = rep.partners.map(p => ({
+        const managedPartners = rep.partners.map((p: any) => ({
             id: p.id,
             name: p.name,
             joined: p.createdAt.toLocaleDateString(),

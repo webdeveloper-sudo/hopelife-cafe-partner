@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
-export default function SetPasswordPage() {
+function SetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
@@ -156,5 +156,17 @@ export default function SetPasswordPage() {
                 </div>
             </motion.div>
         </div>
+    );
+}
+
+export default function SetPasswordPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-hope-purple" />
+            </div>
+        }>
+            <SetPasswordContent />
+        </Suspense>
     );
 }

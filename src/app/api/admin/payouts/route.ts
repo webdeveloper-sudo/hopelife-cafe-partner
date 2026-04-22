@@ -52,7 +52,7 @@ export async function GET() {
             success: true,
             payouts: formattedPayouts
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Fetch Payouts Error:", error);
         return NextResponse.json({ error: "Failed to fetch payouts" }, { status: 500 });
     }
