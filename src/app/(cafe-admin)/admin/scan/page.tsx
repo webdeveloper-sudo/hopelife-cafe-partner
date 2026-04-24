@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ScanLine, CheckCircle2, AlertCircle, IndianRupee, X } from "lucide-react";
+import { ScanLine, CheckCircle2, AlertCircle, IndianRupee, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "sonner";
 
 export default function CashierScanPage() {
+    const router = useRouter();
     const [scanStatus, setScanStatus] = useState<"idle" | "scanning" | "detected" | "verifying" | "success" | "error" | "settled">("idle");
     const [mobileVerify, setMobileVerify] = useState("");
     const [billAmount, setBillAmount] = useState("");
+    const [isSettling, setIsSettling] = useState(false);
+    const [isCalculating, setIsCalculating] = useState(false);
     
     // Data states
     const [scannedGuest, setScannedGuest] = useState<any>(null);
@@ -19,6 +23,17 @@ export default function CashierScanPage() {
     // Error tracking
     const [errorMsg, setErrorMsg] = useState("");
     const [errorType, setErrorType] = useState<"redeemed" | "mismatch" | "invalid" | null>(null);
+
+    // Simulate calculation delay for aesthetics
+    useEffect(() => {
+        if (billAmount && !isNaN(Number(billAmount)) && Number(billAmount) > 0) {
+            setIsCalculating(true);
+            const timer = setTimeout(() => setIsCalculating(false), 600);
+            return () => clearTimeout(timer);
+        } else {
+            setIsCalculating(false);
+        }
+    }, [billAmount]);
 
     const handleStartScan = () => {
         setScanStatus("scanning");
@@ -84,11 +99,7 @@ export default function CashierScanPage() {
     };
 
     const handleCompleteTransaction = async () => {
-        if (!billAmount || isNaN(Number(billAmount))) {
-            toast.error("Please enter a valid bill amount.");
-            return;
-        }
-
+        setIsSettling(true);
         try {
             const response = await fetch("/api/admin/verify-qr", {
                 method: "POST",
@@ -105,11 +116,25 @@ export default function CashierScanPage() {
             if (data.success) {
                 toast.success(`Discount of ₹${data.discountApplied.toFixed(2)} applied successfully!`);
                 setScanStatus("settled");
+
+                // Redirect to thank you page with full receipt details
+                const params = new URLSearchParams({
+                    billAmount: billAmount,
+                    discount: data.discountApplied.toString(),
+                    guestName: scannedGuest.name,
+                    guestMobile: scannedGuest.mobile,
+                    partnerName: scannedGuest.partnerName,
+                    discountPercent: scannedGuest.guestDiscountSlab.toString(),
+                    date: new Date().toISOString()
+                });
+                router.push(`/thank-you?${params.toString()}`);
             } else {
                 toast.error(data.error || "Failed to settle transaction.");
             }
         } catch (error) {
             toast.error("Network error. Please try again.");
+        } finally {
+            setIsSettling(false);
         }
     };
 
@@ -337,27 +362,47 @@ export default function CashierScanPage() {
                                         </div>
 
                                         {billAmount && !isNaN(Number(billAmount)) && Number(billAmount) > 0 && (
-                                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3 text-sm font-bold shadow-sm">
-                                                <div className="flex justify-between text-gray-500">
-                                                    <span>Subtotal</span>
-                                                    <span>₹{Number(billAmount).toFixed(2)}</span>
-                                                </div>
-                                                <div className="flex justify-between text-green-600 border-b border-gray-200 pb-3">
-                                                    <span>Discount ({scannedGuest.commissionSlab}%)</span>
-                                                    <span>-₹{(Number(billAmount) * (scannedGuest.commissionSlab / 100)).toFixed(2)}</span>
-                                                </div>
-                                                <div className="flex justify-between text-gray-900 text-xl font-black pt-1">
-                                                    <span>Payable</span>
-                                                    <span>₹{(Number(billAmount) * (1 - scannedGuest.commissionSlab / 100)).toFixed(2)}</span>
-                                                </div>
+                                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3 text-sm font-bold shadow-sm relative min-h-[140px] flex flex-col justify-center">
+                                                {isCalculating ? (
+                                                    <div className="flex flex-col items-center justify-center py-4 space-y-2">
+                                                        <Loader2 className="w-6 h-6 text-hope-green animate-spin" />
+                                                        <span className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Computing breakdown...</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex justify-between text-gray-500">
+                                                            <span>Subtotal</span>
+                                                            <span>₹{Number(billAmount).toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-green-600 border-b border-gray-200 pb-3">
+                                                            <span>Discount ({scannedGuest.commissionSlab}%)</span>
+                                                            <span>-₹{(Number(billAmount) * (scannedGuest.commissionSlab / 100)).toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-gray-900 text-xl font-black pt-1">
+                                                            <span>Payable</span>
+                                                            <span>₹{(Number(billAmount) * (1 - scannedGuest.commissionSlab / 100)).toFixed(2)}</span>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         )}
 
                                         <div className="pt-2">
-                                            <Button onClick={handleCompleteTransaction} className="w-full py-6 rounded-xl text-lg font-bold bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20" disabled={!billAmount || isNaN(Number(billAmount)) || Number(billAmount) <= 0}>
-                                                Apply Discount & Settle
+                                            <Button 
+                                                onClick={handleCompleteTransaction} 
+                                                className="w-full py-6 rounded-xl text-lg font-bold bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20 gap-3" 
+                                                disabled={!billAmount || isNaN(Number(billAmount)) || Number(billAmount) <= 0 || isSettling}
+                                            >
+                                                {isSettling ? (
+                                                    <>
+                                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                                        Processing Settlement...
+                                                    </>
+                                                ) : (
+                                                    "Apply Discount & Settle"
+                                                )}
                                             </Button>
-                                            <Button type="button" onClick={handleReset} variant="ghost" className="w-full mt-2 text-gray-500 hover:text-gray-900 font-medium">
+                                            <Button type="button" onClick={handleReset} variant="ghost" className="w-full mt-2 text-gray-500 hover:text-gray-900 font-medium" disabled={isSettling}>
                                                 Cancel Protocol
                                             </Button>
                                         </div>

@@ -68,8 +68,11 @@ export async function POST(req: Request) {
         let finalStatus = "ACTIVE"; // Auto-approve all partners now
 
         if (registeredByMarketingRepId) {
-            const repExists = await prisma.marketingRep.findUnique({ where: { id: registeredByMarketingRepId } });
-            if (repExists) {
+            const rep = await prisma.marketingRep.findUnique({ where: { id: registeredByMarketingRepId } });
+            if (rep) {
+                if (rep.status !== "ACTIVE") {
+                    return NextResponse.json({ error: "Your marketing account is deactivated. Cannot register partners." }, { status: 401 });
+                }
                 validRepId = registeredByMarketingRepId;
             }
         }

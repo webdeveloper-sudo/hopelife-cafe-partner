@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { Plus, CheckCircle, XCircle, Search, Mail, Phone, Users, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -193,7 +194,14 @@ export default function MarketingTeamAdminPage() {
                                 </tr>
                             ) : filteredReps.map((rep) => (
                                 <tr key={rep.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 font-semibold text-gray-900">{rep.name}</td>
+                                    <td className="px-6 py-4">
+                                        <Link 
+                                            href={`/super-admin/marketing-team/${rep.id}`}
+                                            className="font-semibold text-gray-900 hover:text-amber-600 transition-colors"
+                                        >
+                                            {rep.name}
+                                        </Link>
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1 text-gray-600">
                                             <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />{rep.email}</div>

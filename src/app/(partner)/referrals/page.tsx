@@ -14,7 +14,9 @@ import {
     Smartphone,
     User,
     ArrowRight,
-    Loader2
+    Loader2,
+    Copy,
+    ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,6 +48,7 @@ export default function ReferralsPage() {
     const [newName, setNewName] = useState("");
     const [newMobile, setNewMobile] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [successData, setSuccessData] = useState<{ guestId: string } | null>(null);
 
     const fetchReferrals = async () => {
         try {
@@ -82,10 +85,8 @@ export default function ReferralsPage() {
             });
             const data = await res.json();
             if (data.success) {
-                toast.success(`Guest referral generated! Pass sent to ${newMobile}`);
-                setIsAdding(false);
-                setNewName("");
-                setNewMobile("");
+                setSuccessData({ guestId: data.guestId });
+                toast.success(`Guest referral generated!`);
                 fetchReferrals();
             } else {
                 toast.error(data.error || "Failed to add guest.");
@@ -261,72 +262,111 @@ export default function ReferralsPage() {
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             className="relative w-full max-w-lg bg-white rounded-md border border-gray-300 shadow-2xl overflow-hidden"
                         >
-                            <div className="p-10">
-                                <div className="flex justify-between items-start mb-8">
-                                    <div>
-                                        <h2 className="text-3xl font-black text-gray-900 tracking-tight">Direct Referral</h2>
-                                        <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Onboard a guest immediately</p>
-                                    </div>
-                                    <Button variant="ghost" size="icon" onClick={() => setIsAdding(false)} className="rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200">
-                                        <XCircle className="w-6 h-6 text-gray-400" />
-                                    </Button>
-                                </div>
-
-                                <form onSubmit={handleAddGuest} className="space-y-6">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Guest Full Name</label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                                <User className="h-5 w-5 text-gray-300" />
-                                            </div>
-                                            <Input
-                                                type="text"
-                                                value={newName}
-                                                onChange={(e) => setNewName(e.target.value)}
-                                                className="block w-full pl-14 h-16 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green shadow-inner"
-                                                placeholder="e.g. Johnathan Doe"
-                                                required
-                                            />
+                                <div className="p-10">
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div>
+                                            <h2 className="text-3xl font-black text-gray-900 tracking-tight">Direct Referral</h2>
+                                            <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-[10px]">Onboard a guest immediately</p>
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">WhatsApp Mobile Number</label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                                <Smartphone className="h-5 w-5 text-gray-300" />
-                                            </div>
-                                            <Input
-                                                type="tel"
-                                                maxLength={10}
-                                                value={newMobile}
-                                                onChange={(e) => setNewMobile(e.target.value.replace(/\D/g, ''))}
-                                                className="block w-full pl-14 h-16 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 tracking-[0.1em] focus:ring-2 focus:ring-hope-green shadow-inner"
-                                                placeholder="99999 99999"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-4">
-                                        <Button
-                                            type="submit"
-                                            disabled={newMobile.length !== 10 || !newName.trim() || submitting}
-                                            className="w-full h-16 text-lg bg-hope-green hover:bg-hope-green/90 shadow-xl shadow-hope-green/20 border border-gray-300 rounded-md font-black uppercase tracking-widest gap-3"
-                                        >
-                                            {submitting ? (
-                                                <Loader2 className="w-6 h-6 animate-spin" />
-                                            ) : (
-                                                <>Generate Live Pass <ArrowRight className="w-5 h-5" /></>
-                                            )}
+                                        <Button variant="ghost" size="icon" onClick={() => { setIsAdding(false); setSuccessData(null); }} className="rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200">
+                                            <XCircle className="w-6 h-6 text-gray-400" />
                                         </Button>
                                     </div>
-                                    
-                                    <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                        Valid for 24 hours • One-time use discount
-                                    </p>
-                                </form>
-                            </div>
+
+                                    {!successData ? (
+                                        <form onSubmit={handleAddGuest} className="space-y-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Guest Full Name</label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                                        <User className="h-5 w-5 text-gray-300" />
+                                                    </div>
+                                                    <Input
+                                                        type="text"
+                                                        value={newName}
+                                                        onChange={(e) => setNewName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                                                        className="block w-full pl-14 h-16 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green shadow-inner"
+                                                        placeholder="e.g. Johnathan Doe"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Mobile Number</label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                                        <Smartphone className="h-5 w-5 text-gray-300" />
+                                                    </div>
+                                                    <Input
+                                                        type="tel"
+                                                        maxLength={10}
+                                                        value={newMobile}
+                                                        onChange={(e) => setNewMobile(e.target.value.replace(/\D/g, ''))}
+                                                        className="block w-full pl-14 h-16 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 tracking-[0.1em] focus:ring-2 focus:ring-hope-green shadow-inner"
+                                                        placeholder="99999 99999"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-4">
+                                                <Button
+                                                    type="submit"
+                                                    disabled={newMobile.length !== 10 || !newName.trim() || submitting}
+                                                    className="w-full h-16 text-lg bg-hope-green hover:bg-hope-green/90 shadow-xl shadow-hope-green/20 border border-gray-300 rounded-md font-black uppercase tracking-widest gap-3"
+                                                >
+                                                    {submitting ? (
+                                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                                    ) : (
+                                                        <>Generate Live Pass <ArrowRight className="w-5 h-5" /></>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                            
+                                            <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                Valid for 24 hours • One-time use discount
+                                            </p>
+                                        </form>
+                                    ) : (
+                                        <div className="space-y-6 text-center py-4">
+                                            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                <CheckCircle2 className="w-10 h-10 text-green-500" />
+                                            </div>
+                                            <h3 className="text-2xl font-black text-gray-900 tracking-tight">Referral Generated!</h3>
+                                            <p className="text-sm text-gray-500 font-medium px-4">
+                                                Pass for <span className="text-gray-900 font-bold">{newName}</span> is ready. Share the link or view the pass below.
+                                            </p>
+
+                                            <div className="grid grid-cols-1 gap-3 pt-4">
+                                                <Button 
+                                                    onClick={() => {
+                                                        const url = `${window.location.origin}/pass/${successData.guestId}`;
+                                                        navigator.clipboard.writeText(url);
+                                                        toast.success("Pass link copied to clipboard!");
+                                                    }}
+                                                    className="h-14 bg-gray-900 hover:bg-black text-white font-black uppercase tracking-widest gap-2"
+                                                >
+                                                    <Copy className="w-4 h-4" /> Copy Pass Link
+                                                </Button>
+                                                <Button 
+                                                    onClick={() => window.open(`/pass/${successData.guestId}`, '_blank')}
+                                                    variant="outline"
+                                                    className="h-14 border-gray-300 font-black uppercase tracking-widest gap-2"
+                                                >
+                                                    <ExternalLink className="w-4 h-4" /> View Pass
+                                                </Button>
+                                            </div>
+
+                                            <button 
+                                                onClick={() => { setSuccessData(null); setNewName(""); setNewMobile(""); }}
+                                                className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900 transition-colors mt-4"
+                                            >
+                                                Refer another guest
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                         </motion.div>
                     </div>
                 )}

@@ -159,7 +159,7 @@ export default function PartnerPayoutsPage() {
                             <thead className="bg-gray-50/50">
                                 <tr>
                                     <th className="px-8 py-5 font-black text-[10px] text-gray-500 uppercase tracking-widest">Date</th>
-                                    <th className="px-8 py-5 font-black text-[10px] text-gray-500 uppercase tracking-widest">Reference ID</th>
+                                    <th className="px-8 py-5 font-black text-[10px] text-gray-500 uppercase tracking-widest">Transaction ID</th>
                                     <th className="px-8 py-5 font-black text-[10px] text-gray-500 uppercase tracking-widest">Method</th>
                                     <th className="px-8 py-5 font-black text-[10px] text-gray-500 uppercase tracking-widest">Status</th>
                                     <th className="px-8 py-5 font-black text-[10px] text-gray-500 uppercase tracking-widest text-right">Amount</th>
@@ -177,7 +177,7 @@ export default function PartnerPayoutsPage() {
                                         </td>
                                         <td className="px-8 py-6">
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest font-mono truncate max-w-[120px]">
-                                                {p.razorpayPayoutId || p.id}
+                                                {p.id.slice(0, 8).toUpperCase()}
                                             </p>
                                         </td>
                                         <td className="px-8 py-6">
@@ -190,7 +190,7 @@ export default function PartnerPayoutsPage() {
                                             <div className="flex flex-col gap-1 items-start">
                                                 <StatusBadge status={p.status} className={cn(
                                                     p.status === "COMPLETED" ? "bg-green-50 text-green-600 border-green-100" :
-                                                    p.status === "PROCESSING" ? "bg-blue-50 text-blue-600 border-blue-100 animate-pulse" :
+                                                    p.status === "PENDING" ? "bg-blue-50 text-blue-600 border-blue-100" :
                                                     "bg-red-50 text-red-600 border-red-100"
                                                 )} />
                                                 {p.failureReason && <span className="text-[8px] text-red-500 font-black uppercase max-w-[120px] truncate">{p.failureReason}</span>}

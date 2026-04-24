@@ -16,8 +16,7 @@ export async function PATCH(req: Request) {
 
         // Allowed fields for partner editing
         const allowedFields = [
-            "name", "contactName", "address", "city", "pincode", 
-            "bankName", "accountHolderName", "bankAccount", "ifsc", "upiId", "mobile"
+            "name", "contactName", "address", "city", "pincode", "upiId", "mobile"
         ];
 
         const updateData: any = {};
@@ -40,10 +39,6 @@ export async function PATCH(req: Request) {
                 contactName: updatedPartner.contactName,
                 email: updatedPartner.email,
                 mobile: updatedPartner.mobile,
-                bankAccount: updatedPartner.bankAccount,
-                ifsc: updatedPartner.ifsc,
-                bankName: updatedPartner.bankName,
-                accountHolderName: updatedPartner.accountHolderName,
                 upiId: updatedPartner.upiId,
                 address: updatedPartner.address,
                 city: updatedPartner.city,

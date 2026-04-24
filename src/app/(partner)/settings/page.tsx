@@ -38,10 +38,6 @@ export default function PartnerSettingsPage() {
         address: "",
         city: "",
         pincode: "",
-        bankName: "",
-        accountHolderName: "",
-        bankAccount: "",
-        ifsc: "",
         upiId: ""
     });
 
@@ -60,10 +56,6 @@ export default function PartnerSettingsPage() {
                         address: p.address || "",
                         city: p.city || "",
                         pincode: p.pincode || "",
-                        bankName: p.bankName || "",
-                        accountHolderName: p.accountHolderName || "",
-                        bankAccount: p.bankAccount || "",
-                        ifsc: p.ifsc || "",
                         upiId: p.upiId || ""
                     });
                 }
@@ -190,38 +182,14 @@ export default function PartnerSettingsPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-8 space-y-6">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Bank Transfer Details</p>
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Holder Name</label>
-                                    <Input name="accountHolderName" value={formData.accountHolderName} onChange={handleChange} className="h-12 border-gray-300" placeholder="e.g. Grand Hope Cafe Ltd" />
-                                </div>
-                                <div className="grid grid-cols-1 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Bank Name</label>
-                                        <Input name="bankName" value={formData.bankName} onChange={handleChange} className="h-12 border-gray-300" placeholder="e.g. HDFC Bank" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Number</label>
-                                            <Input name="bankAccount" value={formData.bankAccount} onChange={handleChange} className="h-12 border-gray-300" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">IFSC Code</label>
-                                            <Input name="ifsc" value={formData.ifsc} onChange={handleChange} className="h-12 border-gray-300" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 pt-4">Direct UPI Transfer</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Direct UPI Transfer</p>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">UPI ID (VPA)</label>
                                 <div className="relative">
                                     <Input name="upiId" value={formData.upiId} onChange={handleChange} className="h-12 border-gray-300 pl-10" placeholder="e.g. example@okaxis" />
                                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                                 </div>
-                                <p className="text-[10px] text-gray-400 font-medium">Payouts will prioritize UPI if available for faster settlement.</p>
+                                <p className="text-[10px] text-gray-400 font-medium">Payouts will be settled instantly to this UPI ID.</p>
                             </div>
 
                             <div className="mt-8 p-6 bg-blue-50/50 rounded-md border border-blue-100 space-y-3">
@@ -230,7 +198,7 @@ export default function PartnerSettingsPage() {
                                     <div>
                                         <p className="text-xs font-black text-blue-900 uppercase tracking-tight">Financial Accuracy Notice</p>
                                         <p className="text-[10px] text-blue-700 font-medium leading-relaxed mt-1">
-                                            Please ensure these details are verified. Incorrect banking information may lead to payment reversals or delays in your settlement cycle.
+                                            Please ensure this UPI ID is verified. Incorrect information may lead to payment reversals or delays in your settlement cycle.
                                         </p>
                                     </div>
                                 </div>

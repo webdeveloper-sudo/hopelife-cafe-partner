@@ -28,33 +28,21 @@ export async function POST(req: Request) {
                 id: true,
                 name: true,
                 walletBalance: true,
-                bankAccount: true,
-                upiId: true,
-                razorpayFundAccountId: true
+                upiId: true
             }
         });
 
-        const processingPayouts = await prisma.payout.findMany({
-            where: {
-                partnerId: { in: partnerIds },
-                status: "PROCESSING"
-            },
-            select: { partnerId: true }
-        });
-        const processingIds = new Set(processingPayouts.map((p: any) => p.partnerId));
-
         const previewData = partners.map((p: any) => {
-            const hasPayoutDetails = !!(p.bankAccount || p.upiId);
-            const isProcessing = processingIds.has(p.id);
+            const hasPayoutDetails = !!p.upiId;
             const balance = p.walletBalance || 0;
             
             return {
                 id: p.id,
                 name: p.name,
                 amount: balance,
-                method: p.bankAccount ? "BANK_TRANSFER" : (p.upiId ? "UPI" : "MISSING"),
-                status: isProcessing ? "LOCKED" : (balance <= 0 ? "ZERO_BALANCE" : (hasPayoutDetails ? "READY" : "MISSING_DETAILS")),
-                canSettle: balance > 0 && hasPayoutDetails && !isProcessing
+                method: p.upiId ? "UPI" : "MISSING",
+                status: balance <= 0 ? "ZERO_BALANCE" : (hasPayoutDetails ? "READY" : "MISSING_DETAILS"),
+                canSettle: balance > 0 && hasPayoutDetails
             };
         });
 

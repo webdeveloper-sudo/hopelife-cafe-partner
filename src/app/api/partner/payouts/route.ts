@@ -22,7 +22,6 @@ export async function GET() {
                 amount: true,
                 status: true,
                 method: true,
-                razorpayPayoutId: true,
                 failureReason: true,
                 settledAt: true,
                 createdAt: true

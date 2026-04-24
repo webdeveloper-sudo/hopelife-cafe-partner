@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import EarningsCalculator from "@/components/EarningsCalculator";
 import FAQ from "@/components/FAQ";
+import Header from "@/components/Header";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -44,6 +45,7 @@ const stagger = {
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+      <Header />
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
         {/* Dynamic Background Gradients */}

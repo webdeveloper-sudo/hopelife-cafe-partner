@@ -17,6 +17,18 @@ export async function GET() {
                 select: { partnerCode: true }
             });
             extraData = { partnerCode: partner?.partnerCode };
+        } else if (session.role === "MARKETING") {
+            const prisma = getPrisma();
+            const rep = await prisma.marketingRep.findUnique({
+                where: { id: session.id },
+                select: { status: true }
+            });
+            if (!rep || rep.status !== "ACTIVE") {
+                const { cookies } = await import("next/headers");
+                const cookieStore = await cookies();
+                cookieStore.delete("session");
+                return NextResponse.json({ authenticated: false, error: "Account deactivated" }, { status: 401 });
+            }
         }
 
         return NextResponse.json({

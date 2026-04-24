@@ -431,47 +431,36 @@ export default function PartnerDetailsPage() {
                         </Card>
                     </motion.div>
 
-                    {/* Banking Details */}
+                    {/* Payout Configuration */}
                     <motion.div variants={item}>
                         <Card className="border border-gray-300 bg-white shadow-xl shadow-gray-200/30 rounded-md">
                             <CardHeader className="p-8 border-b border-gray-300">
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
                                         <CreditCard className="w-5 h-5 text-gray-400" />
-                                        Payment Account
+                                        Payout Account
                                     </CardTitle>
                                     <StatusBadge status={partner.status === "ACTIVE" ? "ACTIVE" : partner.status} className="h-5" />
                                 </div>
                             </CardHeader>
                             <CardContent className="p-8 space-y-6">
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Bank Name</p>
-                                            <p className="font-bold text-gray-900">{partner.bankName || "-"}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">IFSC Code</p>
-                                            <p className="font-bold text-gray-900 text-xs truncate">{partner.ifsc || "-"}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Account Holder</p>
-                                        <p className="font-bold text-gray-900 uppercase truncate">{partner.accountHolderName || "-"}</p>
-                                    </div>
                                     <div className="p-4 bg-gray-50 rounded-md border border-gray-300">
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Account / UPI ID</p>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Direct UPI ID</p>
                                         <div className="flex items-center justify-between">
-                                            <p className="font-black text-gray-900 text-lg tracking-tight truncate">{partner.upiId || partner.bankAccount || "-"}</p>
+                                            <p className="font-black text-gray-900 text-lg tracking-tight truncate">{partner.upiId || "-"}</p>
                                             <button 
-                                                disabled={!partner.upiId && !partner.bankAccount}
-                                                onClick={() => copyToClipboard(partner.upiId || partner.bankAccount, "Account ID")} 
+                                                disabled={!partner.upiId}
+                                                onClick={() => copyToClipboard(partner.upiId, "UPI ID")} 
                                                 className="text-gray-300 hover:text-gray-900"
                                             >
                                                 <Copy className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                                        Settlements are processed exclusively via UPI to the ID above.
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>

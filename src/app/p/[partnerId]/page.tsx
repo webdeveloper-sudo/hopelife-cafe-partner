@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Smartphone, User, ArrowRight, CheckCircle2, MessageCircle } from "lucide-react";
+import { ShieldCheck, Smartphone, User, ArrowRight, CheckCircle2, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -55,16 +55,6 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
             if (data.success) {
                 setSuccessData({ guestId: data.guestId });
                 toast.success("Live pass generated successfully!");
-
-                // Also trigger our Mock WhatsApp Delivery API
-                await fetch("/api/whatsapp/send", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        mobile,
-                        targetUrl: `${window.location.origin}/pass/${data.guestId}`
-                    })
-                });
             } else {
                 toast.error(data.error || "Failed to register.");
             }
@@ -101,7 +91,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                     <ShieldCheck className="w-6 h-6" />
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900 mb-2">Claim Your {discountSlab}% Discount</h2>
-                                <p className="text-sm text-gray-500">Register to receive your Live Pass directly on WhatsApp.</p>
+                                <p className="text-sm text-gray-500">Register to generate your unique Live Discount Pass.</p>
                             </div>
 
                             <form onSubmit={handleGenerate} className="space-y-6">
@@ -114,7 +104,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                         <input
                                             type="text"
                                             value={name}
-                                            onChange={(e) => setName(e.target.value)}
+                                            onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                                             className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
                                             placeholder="John Doe"
                                             required
@@ -122,7 +112,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">WhatsApp Mobile Number</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Mobile Number</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <Smartphone className="h-5 w-5 text-gray-400" />
@@ -143,10 +133,10 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                 <Button
                                     type="submit"
                                     disabled={mobile.length !== 10 || !name.trim() || isGenerating}
-                                    className="w-full h-14 text-lg bg-green-600 hover:bg-green-700 shadow-green-600/20"
+                                    className="w-full h-14 text-lg bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20"
                                     isLoading={isGenerating}
                                 >
-                                    Get Pass via WhatsApp <MessageCircle className="w-5 h-5 ml-2" />
+                                    Generate Live Pass <ArrowRight className="w-5 h-5 ml-2" />
                                 </Button>
                             </form>
 
@@ -165,22 +155,28 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <CheckCircle2 className="w-10 h-10 text-green-500" />
                             </div>
-                            <h2 className="text-2xl font-black text-gray-900 mb-2">Check Your WhatsApp!</h2>
-                            <p className="text-gray-500 mb-8">
-                                We just sent your Live Discount Pass to <br />
-                                <strong className="text-gray-900">+91 {mobile.slice(0, 5)} {mobile.slice(5)}</strong>
-                            </p>
+                             <h2 className="text-2xl font-black text-gray-900 mb-2">Registration Successful!</h2>
+                             <p className="text-gray-500 mb-8 font-medium">
+                                 Your Special Guest Pass is ready. Use the buttons below to copy the link or view your pass.
+                             </p>
 
-                            <div className="bg-gray-50 rounded-md p-4 border border-gray-300 mb-8">
-                                <p className="text-sm text-gray-600">Please open the WhatsApp message from HOPE Cafe and click the link to claim your benefits at the cashier.</p>
-                            </div>
-
-                            {/* Developer Link for Testing Purposes */}
-                            <Link href={`/pass/${successData.guestId}`}>
-                                <Button variant="outline" className="w-full text-gray-500 border-gray-200">
-                                    [DEV] Open Live Pass Directly
+                             <div className="space-y-4">
+                                <Button 
+                                    onClick={() => {
+                                        const url = `${window.location.origin}/pass/${successData.guestId}`;
+                                        navigator.clipboard.writeText(url);
+                                        toast.success("Pass link copied!");
+                                    }}
+                                    className="w-full h-14 bg-gray-900 text-white font-black uppercase tracking-widest gap-2"
+                                >
+                                    <Copy className="w-5 h-5" /> Copy Pass Link
                                 </Button>
-                            </Link>
+                                <Link href={`/pass/${successData.guestId}`} className="block">
+                                    <Button variant="outline" className="w-full h-14 border-gray-300 font-black uppercase tracking-widest gap-2">
+                                        <ExternalLink className="w-5 h-5" /> View Live Pass
+                                    </Button>
+                                </Link>
+                             </div>
 
                         </motion.div>
                     )}

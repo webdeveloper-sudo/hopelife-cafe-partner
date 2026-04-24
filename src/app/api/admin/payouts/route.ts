@@ -19,8 +19,6 @@ export async function GET() {
                     select: {
                         name: true,
                         partnerCode: true,
-                        accountHolderName: true,
-                        bankName: true,
                         upiId: true
                     }
                 }
@@ -35,17 +33,12 @@ export async function GET() {
             id: p.id.slice(0, 8).toUpperCase(), 
             partner: p.partner.name,
             partnerCode: p.partner.partnerCode,
-            amount: `₹${p.amount.toLocaleString()}`,
-            rawAmount: p.amount,
+            amount: p.amount,
             date: new Date(p.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
             method: p.method,
             status: p.status,
-            razorpayPayoutId: p.razorpayPayoutId,
-            idempotencyKey: p.idempotencyKey ? `${p.idempotencyKey.slice(-8)}` : null,
-            failureReason: p.failureReason,
             settledAt: p.settledAt,
-            retryCount: p.retryCount,
-            bankDetails: p.partner.bankName ? `${p.partner.bankName} (${p.partner.accountHolderName})` : p.partner.upiId || "N/A"
+            upiId: p.partner.upiId || "N/A"
         }));
 
         return NextResponse.json({

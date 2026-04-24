@@ -5,6 +5,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, Building, Phone, Percent, Receipt, ChevronRight, CheckCircle2, UserCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
+const BUSINESS_TYPES = [
+    { value: "homestay", label: "Homestays & Guest Houses" },
+    { value: "resort", label: "Resorts & Boutique Stays" },
+    { value: "hostel", label: "Hostels & Backpacker Lodges" },
+    { value: "taxi", label: "Taxi & Car Rentals" },
+    { value: "bike", label: "Bike & Scooter Rentals" },
+    { value: "travel_agency", label: "Tour & Travel Agencies" },
+    { value: "guide", label: "Local Travel Guides" },
+    { value: "wellness", label: "Yoga & Wellness Centers" },
+    { value: "adventure", label: "Adventure Activity Centers" },
+    { value: "water_sports", label: "Water Sports Centers" },
+    { value: "events", label: "Event Organizers" },
+    { value: "freelance", label: "Freelance Guide" },
+    { value: "others", label: "Others" },
+];
+
 // Marketing Executive Add Partner Flow
 export default function AddPartnerPage() {
     const [step, setStep] = useState(1);
@@ -22,6 +38,10 @@ export default function AddPartnerPage() {
         contactName: "",
         mobile: "",
         email: "",
+        businessType: "",
+        address: "",
+        city: "Pondicherry",
+        pincode: "",
         commissionSlab: "7.5",
         upiId: "",
     });
@@ -31,9 +51,11 @@ export default function AddPartnerPage() {
     };
 
     const nextStep = async () => {
-        if (step === 1 && (!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email)) return;
-        
         if (step === 1) {
+            if (!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email || !formData.businessType || !formData.address || !formData.city || !formData.pincode) {
+                alert("Please fill all business and contact details.");
+                return;
+            }
             // Trigger send OTP
             setIsVerifyingOtp(true);
             try {
@@ -198,57 +220,107 @@ export default function AddPartnerPage() {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Contact Person</label>
-                                        <input
-                                            type="text"
-                                            name="contactName"
-                                            value={formData.contactName}
-                                            onChange={handleChange}
-                                            className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
-                                            placeholder="Jane Doe"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Mobile Number</label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Phone className="h-4 w-4 text-gray-400" />
-                                                <span className="ml-2 text-gray-900 font-bold text-sm">+91</span>
-                                            </div>
-                                            <input
-                                                type="tel"
-                                                maxLength={10}
-                                                name="mobile"
-                                                value={formData.mobile}
-                                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
-                                                className="block w-full pl-20 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
-                                                placeholder="99999 99999"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
-                                            placeholder="partner@example.com"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 flex justify-end">
-                                <Button onClick={nextStep} isLoading={isVerifyingOtp} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email}>
-                                    Next Step (OTP) <ChevronRight className="w-4 h-4 ml-1" />
-                                </Button>
-                            </div>
+                                     <div>
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Contact Person</label>
+                                         <input
+                                             type="text"
+                                             name="contactName"
+                                             value={formData.contactName}
+                                             onChange={handleChange}
+                                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             placeholder="Jane Doe"
+                                             required
+                                         />
+                                     </div>
+                                     <div>
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Mobile Number</label>
+                                         <div className="relative">
+                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                 <Phone className="h-4 w-4 text-gray-400" />
+                                                 <span className="ml-2 text-gray-900 font-bold text-sm">+91</span>
+                                             </div>
+                                             <input
+                                                 type="tel"
+                                                 maxLength={10}
+                                                 name="mobile"
+                                                 value={formData.mobile}
+                                                 onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
+                                                 className="block w-full pl-20 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                                 placeholder="99999 99999"
+                                                 required
+                                             />
+                                         </div>
+                                     </div>
+                                     <div>
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                                         <input
+                                             type="email"
+                                             name="email"
+                                             value={formData.email}
+                                             onChange={handleChange}
+                                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             placeholder="partner@example.com"
+                                             required
+                                         />
+                                     </div>
+                                     <div>
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Business Category</label>
+                                         <select
+                                             name="businessType"
+                                             value={formData.businessType}
+                                             onChange={handleChange}
+                                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             required
+                                         >
+                                             <option value="">Select category</option>
+                                             {BUSINESS_TYPES.map(bt => <option key={bt.value} value={bt.value}>{bt.label}</option>)}
+                                         </select>
+                                     </div>
+                                     <div className="md:col-span-2">
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Full Business Address</label>
+                                         <input
+                                             type="text"
+                                             name="address"
+                                             value={formData.address}
+                                             onChange={handleChange}
+                                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             placeholder="Street name, Area, Building"
+                                             required
+                                         />
+                                     </div>
+                                     <div>
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">City</label>
+                                         <input
+                                             type="text"
+                                             name="city"
+                                             value={formData.city}
+                                             onChange={handleChange}
+                                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             placeholder="Pondicherry"
+                                             required
+                                         />
+                                     </div>
+                                     <div>
+                                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Pincode</label>
+                                         <input
+                                             type="text"
+                                             name="pincode"
+                                             maxLength={6}
+                                             value={formData.pincode}
+                                             onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '') })}
+                                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             placeholder="605001"
+                                             required
+                                         />
+                                     </div>
+                                 </div>
+                             </div>
+ 
+                             <div className="pt-6 flex justify-end">
+                                 <Button onClick={nextStep} isLoading={isVerifyingOtp} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email || !formData.businessType || !formData.address || !formData.pincode}>
+                                     Next Step (OTP) <ChevronRight className="w-4 h-4 ml-1" />
+                                 </Button>
+                             </div>
                         </motion.div>
                     )}
 

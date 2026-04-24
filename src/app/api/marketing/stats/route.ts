@@ -21,8 +21,8 @@ export async function GET(req: Request) {
             }
         });
 
-        if (!rep) {
-            return NextResponse.json({ error: "Rep not found" }, { status: 404 });
+        if (!rep || rep.status !== "ACTIVE") {
+            return NextResponse.json({ error: "Unauthorized: Account deactivated" }, { status: 401 });
         }
 
         const totalPartners = rep.partners.length;

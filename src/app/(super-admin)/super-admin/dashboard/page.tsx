@@ -83,21 +83,6 @@ export default function SuperAdminDashboard() {
     if (showLogs) fetchLogs();
   }, [showLogs]);
 
-  const runPayouts = async () => {
-    toast.promise(
-      fetch("/api/admin/payouts/run", { method: "POST" }).then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Payout failed");
-        fetchStats();
-        return data;
-      }),
-      {
-        loading: "Processing batch settlement...",
-        success: (data) => data.message || "Batch Settlement Complete",
-        error: (err) => err.message || "Error processing settlement",
-      },
-    );
-  };
 
   if (loading) {
     return (
@@ -198,22 +183,11 @@ export default function SuperAdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <Button
-              className="flex items-center justify-center gap-2.5 shadow-purple-200/40 h-11 px-8 rounded-md bg-gray-900 text-white hover:bg-black border border-gray-300"
-              onClick={() => {
-                if (confirm("Proceed with batch settlement for all eligible partners?")) {
-                  runPayouts();
-                }
-              }}
-            >
-              <Zap className="w-4 h-4 shrink-0" />
-              <span className="translate-y-[0.5px]">Run Payouts</span>
-            </Button>
-            <Button
               variant="ghost"
               className="text-gray-600 border border-gray-300 hover:bg-gray-50 h-11 px-6 rounded-md"
               onClick={() => setShowLogs(true)}
             >
-              <Bell className="w-4 h-4" />
+              <Bell className="w-4 h-4" /> Activity Logs
             </Button>
           </div>
         </div>

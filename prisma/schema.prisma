@@ -26,8 +26,6 @@ model Partner {
   password          String?
   commissionSlab    Float    @default(7.5)
   guestDiscountSlab Float    @default(7.5)
-  bankAccount       String?
-  ifsc              String?
   status            String   @default("PENDING")
   referralGoal      Int      @default(10)
   currentTier       String   @default("BRONZE")
@@ -47,11 +45,7 @@ model Partner {
   createdAt               DateTime   @default(now())
   updatedAt               DateTime   @default(now()) @updatedAt
   incomeLogs              IncomeLog[]
-  accountHolderName       String?
-  bankName               String?
   upiId                  String?
-  razorpayContactId      String?
-  razorpayFundAccountId  String?
   guests            Guest[]
   payouts           Payout[]
   

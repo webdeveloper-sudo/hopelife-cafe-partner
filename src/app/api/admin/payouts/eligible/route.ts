@@ -19,42 +19,19 @@ export async function GET() {
                 status: "ACTIVE",
                 walletBalance: { gt: 0 }
             },
-            include: {
-                payouts: {
-                    orderBy: { createdAt: "desc" },
-                    take: 1
-                }
+            orderBy: {
+                walletBalance: "desc"
             }
         });
-
-        // For each partner, check for any ongoing (PROCESSING) payout
-        const processingPayouts = await prisma.payout.findMany({
-            where: {
-                status: "PROCESSING"
-            },
-            select: {
-                partnerId: true
-            }
-        });
-
-        const processingPartnerIds = new Set(processingPayouts.map((p: any) => p.partnerId) as string[]);
 
         const eligiblePartners = partners.map((p: any) => {
-            const hasBank = p.bankAccount && p.ifsc;
-            const hasUpi = !!p.upiId;
-            
             return {
                 id: p.id,
                 name: p.name,
                 partnerCode: p.partnerCode,
                 walletBalance: p.walletBalance,
-                lastPayoutDate: p.payouts[0]?.createdAt || null,
-                isProcessing: processingPartnerIds.has(p.id),
-                payoutMethod: hasBank ? "BANK_TRANSFER" : hasUpi ? "UPI" : "NONE",
-                hasPayoutDetails: hasBank || hasUpi,
-                bankName: p.bankName,
-                accountHolderName: p.accountHolderName,
-                upiId: p.upiId
+                upiId: p.upiId,
+                hasPayoutDetails: !!p.upiId,
             };
         });
 
