@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Building, Phone, Percent, Receipt, ChevronRight, CheckCircle2, UserCheck, ArrowRight } from "lucide-react";
+import { UserPlus, Building, Phone, Percent, Receipt, ChevronRight, CheckCircle2, UserCheck, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { toast } from "sonner";
 
 const BUSINESS_TYPES = [
     { value: "homestay", label: "Homestays & Guest Houses" },
@@ -28,9 +29,11 @@ export default function AddPartnerPage() {
     const [isSuccess, setIsSuccess] = useState(false);
     
     // OTP State
-    const [otp, setOtp] = useState("");
+    const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
+    const [otpError, setOtpError] = useState("");
     const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
     const [verificationToken, setVerificationToken] = useState("");
+    const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -53,7 +56,7 @@ export default function AddPartnerPage() {
     const nextStep = async () => {
         if (step === 1) {
             if (!formData.partnerName || !formData.contactName || formData.mobile.length !== 10 || !formData.email || !formData.businessType || !formData.address || !formData.city || !formData.pincode) {
-                alert("Please fill all business and contact details.");
+                toast.error("Please fill all business and contact details.");
                 return;
             }
             // Trigger send OTP
@@ -66,12 +69,13 @@ export default function AddPartnerPage() {
                 });
                 if (!res.ok) {
                     const data = await res.json();
-                    alert(data.error || "Failed to send OTP.");
+                    toast.error(data.error || "Failed to send OTP.");
                     setIsVerifyingOtp(false);
                     return;
                 }
+                toast.success("OTP sent to " + formData.email);
             } catch {
-                alert("Network error.");
+                toast.error("Network error.");
                 setIsVerifyingOtp(false);
                 return;
             }
@@ -80,13 +84,40 @@ export default function AddPartnerPage() {
         
         const isValidUpi = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(formData.upiId);
         if (step === 3 && (!formData.upiId || !isValidUpi)) {
-            alert("Please enter a strictly valid UPI ID (e.g. number@bank).");
+            toast.error("Please enter a strictly valid UPI ID (e.g. number@bank).");
             return;
         }
         setStep(step + 1);
     };
 
+    const handleOtpChange = (index: number, value: string) => {
+        if (!/^\d?$/.test(value)) return;
+        const digits = [...otpDigits];
+        digits[index] = value;
+        setOtpDigits(digits);
+        setOtpError("");
+        if (value && index < 5) otpRefs.current[index + 1]?.focus();
+    };
+
+    const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+        if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+            otpRefs.current[index - 1]?.focus();
+        }
+    };
+
+    const handleOtpPaste = (e: React.ClipboardEvent) => {
+        const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+        if (text.length === 6) {
+            setOtpDigits(text.split(""));
+        }
+    };
+
     const handleVerifyOtp = async () => {
+        const otp = otpDigits.join("");
+        if (otp.length < 6) { 
+            setOtpError("Verify all 6 digits");
+            return; 
+        }
         setIsVerifyingOtp(true);
         try {
             const res = await fetch("/api/partner/verify-otp", {
@@ -98,11 +129,12 @@ export default function AddPartnerPage() {
             if (res.ok && data.success && data.verificationToken) {
                 setVerificationToken(data.verificationToken);
                 setStep(3);
+                toast.success("OTP verified!");
             } else {
-                alert(data.error || "Invalid OTP code.");
+                setOtpError(data.error || "Invalid OTP code.");
             }
         } catch {
-            alert("Network error verifying OTP.");
+            toast.error("Network error verifying OTP.");
         } finally {
             setIsVerifyingOtp(false);
         }
@@ -119,12 +151,12 @@ export default function AddPartnerPage() {
             });
             const data = await res.json();
             if (!res.ok) {
-                alert(data.error || "Registration failed.");
+                toast.error(data.error || "Registration failed.");
                 return;
             }
             setIsSuccess(true);
         } catch {
-            alert("Network error. Please try again.");
+            toast.error("Network error. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -137,7 +169,7 @@ export default function AddPartnerPage() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    className="w-24 h-24 bg-green-50 rounded-md border border-gray-300 flex items-center justify-center mb-6 shadow-sm"
+                    className="w-24 h-24 bg-green-50 rounded-full border border-gray-300 flex items-center justify-center mb-6 shadow-sm"
                 >
                     <CheckCircle2 className="w-12 h-12 text-green-500" />
                 </motion.div>
@@ -161,7 +193,7 @@ export default function AddPartnerPage() {
                     </ul>
                 </div>
 
-                <Button onClick={() => window.location.reload()} size="lg" className="h-14 px-8 bg-hope-purple hover:bg-purple-700 text-white font-bold tracking-wide">
+                <Button onClick={() => window.location.reload()} size="lg" className="h-14 px-8" variant="primary">
                     Onboard Another Partner
                 </Button>
             </div>
@@ -181,12 +213,12 @@ export default function AddPartnerPage() {
 
             {/* Progress Track */}
             <div className="flex items-center gap-2 mb-8">
-                {[1, 2, 3].map((num) => (
+                {[1, 2, 3, 4].map((num) => (
                     <React.Fragment key={num}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${step >= num ? 'bg-hope-purple text-white shadow-md' : 'bg-gray-100 text-gray-400'}`}>
                             {num}
                         </div>
-                        {num < 3 && <div className={`h-1 flex-1 rounded-md transition-colors ${step > num ? 'bg-hope-purple' : 'bg-gray-100'}`} />}
+                        {num < 4 && <div className={`h-1 flex-1 rounded-md transition-colors ${step > num ? 'bg-hope-purple' : 'bg-gray-100'}`} />}
                     </React.Fragment>
                 ))}
             </div>
@@ -336,30 +368,56 @@ export default function AddPartnerPage() {
                                 <UserCheck className="w-5 h-5 text-hope-purple" /> Partner Verification
                             </h3>
 
-                            <div className="space-y-4">
-                                <p className="text-sm text-gray-600">
-                                    We've sent an OTP to the partner's email address: <span className="font-bold">{formData.email}</span>
+                            <div className="space-y-6 text-center">
+                                <p className="text-sm text-gray-600 max-w-sm mx-auto">
+                                    We've sent a 6-digit confirmation code to <br /><span className="font-bold text-gray-900">{formData.email}</span>
                                 </p>
                                 
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Enter Verification Code</label>
-                                    <input
-                                        type="text"
-                                        value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
-                                        className="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple tracking-widest text-center text-lg"
-                                        placeholder="000000"
-                                        maxLength={6}
-                                        required
-                                    />
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Enter Security Code</label>
+                                    
+                                    <div className="flex gap-3 justify-center" onPaste={handleOtpPaste}>
+                                        {otpDigits.map((digit, i) => (
+                                            <input
+                                                key={i}
+                                                ref={el => { otpRefs.current[i] = el; }}
+                                                type="text"
+                                                inputMode="numeric"
+                                                maxLength={1}
+                                                value={digit}
+                                                onChange={e => handleOtpChange(i, e.target.value)}
+                                                onKeyDown={e => handleOtpKeyDown(i, e)}
+                                                className={`w-12 h-14 text-center text-2xl font-black rounded-md border-2 border-gray-300 outline-none transition-all ${
+                                                    otpError ? "border-red-400 bg-red-50 text-red-600 shadow-[0_0_0_1px_rgba(239,68,68,0.1)]" :
+                                                    digit ? "border-hope-purple bg-purple-50 text-hope-purple" :
+                                                    "focus:border-hope-purple focus:shadow-lg focus:shadow-purple-500/10"
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                    
+                                    {otpError && (
+                                        <motion.p 
+                                            initial={{ opacity: 0, y: -10 }} 
+                                            animate={{ opacity: 1, y: 0 }} 
+                                            className="text-xs font-bold text-red-500 mt-4 bg-red-50 py-2 px-4 rounded-md inline-block"
+                                        >
+                                            {otpError}
+                                        </motion.p>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="pt-6 flex justify-between">
+                            <div className="pt-8 flex justify-between border-t border-gray-100">
                                 <Button onClick={() => setStep(1)} variant="outline" className="h-12 px-8 text-gray-500 hover:text-gray-900 border-gray-200">
                                     Back
                                 </Button>
-                                <Button onClick={handleVerifyOtp} isLoading={isVerifyingOtp} className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" disabled={otp.length < 6 || isVerifyingOtp}>
+                                <Button 
+                                    onClick={handleVerifyOtp} 
+                                    isLoading={isVerifyingOtp} 
+                                    className="h-12 px-8 bg-hope-purple hover:bg-purple-700 text-white" 
+                                    disabled={otpDigits.some(d => !d) || isVerifyingOtp}
+                                >
                                     Verify Code <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
                             </div>

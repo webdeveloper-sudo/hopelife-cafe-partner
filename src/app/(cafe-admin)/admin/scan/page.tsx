@@ -151,7 +151,7 @@ export default function CashierScanPage() {
     return (
         <div className="px-4 py-8 md:py-12 max-w-md mx-auto min-h-[calc(100vh-4rem)] flex flex-col items-center">
             <div className="text-center mb-8 w-full">
-                <h1 className="text-2xl font-black text-gray-900 tracking-tight">Scan Guest Pass</h1>
+                <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Scan Guest Pass</h1>
                 <p className="text-sm text-gray-500 font-medium mt-1">Scan pass and apply discount securely.</p>
             </div>
 
@@ -240,7 +240,7 @@ export default function CashierScanPage() {
                             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <X className="w-10 h-10 text-red-500" />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">Pass Invalid</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Pass Invalid</h3>
                             <p className="text-sm text-red-600 font-bold mb-8 px-4 leading-relaxed">{errorMsg}</p>
                             <Button onClick={handleReset} variant="outline" className="w-full py-6 rounded-xl text-lg font-bold border-red-200 text-red-600 hover:bg-red-50">
                                 Try Another Pass
@@ -263,7 +263,7 @@ export default function CashierScanPage() {
                                     <CheckCircle2 className="w-7 h-7 text-green-500" />
                                 </div>
                                 <div className="overflow-hidden">
-                                    <h3 className="text-lg font-black text-gray-900 truncate">{scannedGuest?.name}</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 truncate">{scannedGuest?.name}</h3>
                                     <p className="text-xs text-hope-green font-bold uppercase tracking-wider truncate mt-0.5">{scannedGuest?.partnerName}</p>
                                 </div>
                             </div>
@@ -287,11 +287,11 @@ export default function CashierScanPage() {
                                         maxLength={10}
                                         value={mobileVerify}
                                         onChange={(e) => setMobileVerify(e.target.value.replace(/\D/g, ''))}
-                                        className="block w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-xl font-black tracking-[0.2em] text-gray-900 focus:ring-2 focus:ring-hope-purple focus:border-hope-purple transition-all placeholder:text-gray-300 placeholder:font-normal text-center shadow-inner"
+                                        className="block w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-xl font-bold tracking-[0.2em] text-gray-900 focus:ring-2 focus:ring-hope-purple focus:border-hope-purple transition-all placeholder:text-gray-300 placeholder:font-normal text-center shadow-inner"
                                         placeholder="••••••••••"
                                         required
                                     />
-                                    <p className="text-[10px] text-center text-gray-400 mt-2 font-bold uppercase tracking-widest">
+                                    <p className="text-[10px] text-center text-gray-400 mt-2 font-semibold uppercase tracking-widest">
                                         Matches: +91 *******{scannedGuest?.mobile?.slice(-3)}
                                     </p>
                                 </div>
@@ -322,7 +322,7 @@ export default function CashierScanPage() {
                                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100">
                                         <CheckCircle2 className="w-10 h-10 text-green-500" />
                                     </motion.div>
-                                    <h3 className="text-xl font-black text-gray-900 mb-2">Transaction Settled</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Transaction Settled</h3>
                                     <p className="text-sm text-gray-500 mb-8">Discount applied successfully.</p>
                                     <Button onClick={handleReset} className="w-full py-6 rounded-xl text-lg font-bold shadow-lg shadow-green-500/20 bg-green-600 hover:bg-green-700 text-white">
                                         Scan Next Guest
@@ -334,13 +334,13 @@ export default function CashierScanPage() {
                                     {/* Verified Guest Info */}
                                     <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100">
                                         <div className="overflow-hidden pr-2">
-                                            <h3 className="text-lg font-black text-gray-900 truncate">{scannedGuest?.name}</h3>
+                                            <h3 className="text-lg font-bold text-gray-900 truncate">{scannedGuest?.name}</h3>
                                             <p className="text-xs text-green-600 font-bold mt-1 flex items-center gap-1">
                                                 <CheckCircle2 className="w-3.5 h-3.5" /> Identity Verified
                                             </p>
                                         </div>
                                         <div className="shrink-0 text-right">
-                                            <span className="inline-block px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-black tracking-wider border border-green-200">
+                                            <span className="inline-block px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-bold tracking-wider border border-green-200">
                                                 {scannedGuest?.commissionSlab}% OFF
                                             </span>
                                         </div>
@@ -366,7 +366,7 @@ export default function CashierScanPage() {
                                                 {isCalculating ? (
                                                     <div className="flex flex-col items-center justify-center py-4 space-y-2">
                                                         <Loader2 className="w-6 h-6 text-hope-green animate-spin" />
-                                                        <span className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Computing breakdown...</span>
+                                                        <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Computing breakdown...</span>
                                                     </div>
                                                 ) : (
                                                     <>

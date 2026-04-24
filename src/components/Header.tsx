@@ -26,7 +26,7 @@ export default function Header() {
             className={cn(
                 "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
                 scrolled
-                    ? "bg-white/95 backdrop-blur-2xl py-4 border-b border-gray-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+                    ? "bg-white/95 backdrop-blur-2xl py-4 border-b border-hope-purple/10 shadow-[0_8px_30px_rgba(93,46,140,0.06)]"
                     : "bg-transparent py-6 border-b border-transparent"
             )}
         >
@@ -55,29 +55,17 @@ export default function Header() {
 
                     {/* Navigation */}
                     {!isAuthPage && (
-                        <nav className="flex items-center gap-2 sm:gap-4 relative z-10">
+                        <nav className="flex items-center gap-4 relative z-10">
                             <Link
                                 href="/login"
-                                className="hidden md:flex text-sm font-bold text-gray-600 hover:text-hope-gold transition-all items-center gap-2 px-4 py-2 rounded-md hover:bg-hope-gold/5 border border-gray-300 hover:border-hope-gold/10"
+                                className="text-sm font-bold text-[#1A1A1A] hover:text-hope-purple transition-all px-4 py-2 rounded-md hover:bg-hope-purple/5"
                             >
-                                <LogIn className="w-4 h-4" />
-                                <span>Partner Login</span>
+                                Partner Login
                             </Link>
 
-                            <div className="hidden md:block w-px h-5 bg-gray-200 mx-1" />
-
-                            <Link
-                                href="/admin/login"
-                                className="hidden md:flex text-sm font-bold text-gray-400 hover:text-gray-900 transition-all items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-50 border border-gray-300 hover:border-gray-200"
-                            >
-                                <Shield className="w-4 h-4" />
-                                <span>Admin</span>
-                            </Link>
-
-                            <Link href="/scan" className="ml-2">
-                                <Button size="sm" className="flex gap-2 rounded-md shadow-md shadow-hope-gold/20 hover:shadow-lg hover:shadow-hope-gold/40 transition-all hover:-translate-y-0.5 bg-gradient-to-r from-hope-gold to-hope-pink hover:from-hope-pink hover:to-hope-gold border border-gray-300 h-10 px-5 ring-2 ring-transparent hover:ring-hope-gold/20" aria-label="Find your guest pass">
-                                    <QrCode className="w-4 h-4" />
-                                    <span className="font-bold text-gray-900">Guest Pass</span>
+                            <Link href="/register">
+                                <Button className="rounded-md bg-hope-purple text-white hover:bg-[#4A2470] font-bold text-sm px-6 h-10 shadow-lg shadow-hope-purple/10">
+                                    Join Network
                                 </Button>
                             </Link>
                         </nav>

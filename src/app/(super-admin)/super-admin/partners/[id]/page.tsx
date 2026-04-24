@@ -246,9 +246,9 @@ export default function PartnerDetailsPage() {
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="h-12 border-gray-100 font-bold px-6">
+{/* <Button variant="outline" className="h-12 border-gray-100 font-bold px-6">
                         Export Report
-                    </Button>
+                    </Button> */}
                     <Button 
                         disabled={partner.status === "PENDING"}
                         onClick={() => setShowSlabsModal(true)}

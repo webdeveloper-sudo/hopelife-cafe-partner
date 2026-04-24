@@ -55,4 +55,25 @@ body {
   .glass-card {
     @apply bg-white/40 backdrop-blur-xl border border-gray-300 rounded-md shadow-xl shadow-gray-200/50 hover:bg-white/60 transition-all duration-500 hover:shadow-2xl hover:shadow-gray-300/60;
   }
+
+  @keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient-flow {
+    background-size: 200% 200%;
+    animation: gradient-flow 8s ease infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
 }

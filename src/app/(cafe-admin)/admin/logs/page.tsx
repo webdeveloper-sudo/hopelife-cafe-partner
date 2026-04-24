@@ -111,10 +111,10 @@ export default function CafeLogsPage() {
                         <RefreshCw className={cn("w-4 h-4 text-gray-400", loading && "animate-spin")} />
                         Refresh
                     </Button>
-                    <Button className="h-11 px-6 bg-gray-900 text-white flex items-center gap-2">
+{/* <Button className="h-11 px-6 bg-gray-900 text-white flex items-center gap-2">
                         <Download className="w-4 h-4" />
                         Export
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 

@@ -1,11 +1,16 @@
 "use client";
 
-import React from "react";
+import Header from "./Header";
 import { usePathname } from "next/navigation";
+
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isLandingPage = pathname === "/";
+
     return (
         <>
-            <main>
+            {isLandingPage && <Header />}
+            <main className={isLandingPage ? "pt-16" : ""}>
                 {children}
             </main>
         </>

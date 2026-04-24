@@ -96,9 +96,9 @@ export default function PartnerPayoutsPage() {
                     <Button variant="outline" className="gap-2 h-11 border-gray-100 bg-white" onClick={() => fetchData()}>
                         <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Refresh
                     </Button>
-                    <Button className="gap-2 h-11 bg-hope-purple hover:bg-hope-purple/90 text-white px-6 font-black uppercase tracking-widest text-xs">
+{/* <Button className="gap-2 h-11 bg-hope-purple hover:bg-hope-purple/90 text-white px-6 font-black uppercase tracking-widest text-xs">
                         <Download className="w-4 h-4" /> Statement
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 

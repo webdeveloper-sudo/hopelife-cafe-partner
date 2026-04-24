@@ -8,6 +8,7 @@ import QRCode from "react-qr-code";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { AuthLayout } from "@/components/AuthLayout";
 
 export default function PassDisplayPage({ params }: { params: Promise<{ guestId: string }> }) {
     const unwrappedParams = React.use(params);
@@ -106,143 +107,158 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
 
     if (error || !guestData || guestData.isExpired) {
         return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-gray-900 text-center">
-                <div className="w-24 h-24 bg-red-100 rounded-md border border-gray-300 flex items-center justify-center mb-8">
-                    <AlertCircle className="w-12 h-12 text-red-500" />
+            <AuthLayout>
+                <div className="flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-md border border-white/20 flex items-center justify-center mb-8 shadow-2xl shadow-black/40">
+                        <AlertCircle className="w-12 h-12 text-white/50" />
+                    </div>
+                    <h1 className="text-3xl font-black mb-4 tracking-tight text-white">Pass Expired or Invalid</h1>
+                    <p className="text-white/60 max-w-sm mb-10 leading-relaxed font-medium">
+                        Referral passes are valid for 24 hours only. Please contact your partner/referrer to request a fresh invitation link.
+                    </p>
+                    <Button 
+                        variant="outline" 
+                        className="bg-white/10 hover:bg-white/20 border-white/20 text-white px-8 h-14 rounded-md font-black uppercase tracking-widest text-xs" 
+                        onClick={() => window.location.reload()}
+                    >
+                        Refresh Page
+                    </Button>
                 </div>
-                <h1 className="text-3xl font-black mb-4 tracking-tight">Pass Expired or Invalid</h1>
-                <p className="text-gray-500 max-w-sm mb-10 leading-relaxed font-medium">
-                    Referral passes are valid for 24 hours only. Please contact your partner/referrer to request a fresh invitation link.
-                </p>
-                <Button variant="outline" className="border-gray-300 px-8 h-12 rounded-md font-bold" onClick={() => window.location.reload()}>
-                    Refresh Page
-                </Button>
-            </div>
+            </AuthLayout>
         );
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-[#fafafa]">
-            {/* Background Elements */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                style={{
-                    backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')",
-                }}
-            />
-            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-hope-green/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-            <div className="w-full max-w-md relative z-10">
+        <AuthLayout>
+            <div className="w-full max-w-4xl mx-auto px-4 py-8">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key="pass"
-                        initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ type: "spring", damping: 20, stiffness: 100 }}
-                        className="py-10 relative flex flex-col items-center"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center"
                     >
-                        {/* Header Section */}
-                        <div className="text-center mb-10 w-full">
-                            <div className="flex justify-center mb-6">
+                        {/* Status Header */}
+                        <div className="text-center mb-10">
+                            <div className="inline-flex items-center gap-2 px-6 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-[10px] font-black tracking-[0.2em] uppercase mb-6 shadow-xl shadow-black/20">
                                 {guestData.isRedeemed ? (
-                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-100 border border-gray-300 text-gray-500 rounded-md text-[10px] font-black tracking-[0.2em] uppercase">
-                                        <AlertCircle className="w-3.5 h-3.5" /> Pass Already Redeemed
-                                    </div>
+                                    <><AlertCircle className="w-4 h-4 text-white/50" /> Pass Redeemed</>
                                 ) : (
-                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 border border-gray-300 text-green-700 rounded-md text-[10px] font-black tracking-[0.2em] uppercase">
-                                        <CheckCircle2 className="w-3.5 h-3.5" /> High Priority Pass
-                                    </div>
+                                    <><Sparkles className="w-4 h-4 text-amber-400" /> High Priority Pass</>
                                 )}
                             </div>
-                            <h2 className="text-4xl font-black text-gray-900 mb-3 tracking-tight leading-tight">Your Live Pass</h2>
-                            <p className="text-gray-500 text-sm font-medium px-4">
+                            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">Your Digital Pass</h2>
+                            <p className="text-white/60 text-sm font-medium mt-2 max-w-md mx-auto">
                                 {guestData.isRedeemed 
-                                    ? "This pass has been settled at the counter and is now deactivated." 
-                                    : "Present this secure code to the cashier during checkout to claim your benefits."}
+                                    ? "This pass has been settled and is now inactive." 
+                                    : "Validate this code at the outlet counter during checkout."}
                             </p>
                         </div>
 
-                        {/* QR Code Card */}
+                        {/* Main Interaction Card (Ticket Style) */}
                         <div className={cn(
-                            "group p-8 rounded-md shadow-2xl relative z-10 mx-auto w-full max-w-[320px] mb-10 transition-all duration-700 bg-white border border-gray-300",
-                            guestData.isRedeemed && "grayscale opacity-40 shadow-none border-dashed"
+                            "w-full bg-white rounded-md shadow-2xl shadow-black/40 border border-gray-300 overflow-hidden flex flex-col md:flex-row min-h-[400px]",
+                            guestData.isRedeemed && "opacity-50 grayscale"
                         )}>
-                            <div className="relative aspect-square flex items-center justify-center" ref={qrRef}>
-                                {!guestData.isRedeemed && (
-                                    <motion.div
-                                        animate={{ y: [0, 256, 0] }}
-                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                        className="absolute top-0 left-[-10%] right-[-10%] h-[2px] bg-gradient-to-r from-transparent via-hope-green to-transparent z-20 pointer-events-none blur-[1px]"
-                                    />
-                                )}
-                                <div className="p-2 bg-white rounded-md border border-gray-300">
+                            {/* Left Section: QR Code */}
+                            <div className="w-full md:w-[40%] bg-gray-50 p-10 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-200">
+                                <div className="relative p-2 bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden mb-6 group">
+                                    {!guestData.isRedeemed && (
+                                        <motion.div
+                                            animate={{ y: [0, 200, 0] }}
+                                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                            className="absolute top-0 left-[-20%] right-[-20%] h-[2px] bg-gradient-to-r from-transparent via-hope-green to-transparent z-10 blur-[1px]"
+                                        />
+                                    )}
                                     <QRCode
                                         value={guestData.isRedeemed ? "REDEEMED-PASS" : qrData}
-                                        size={256}
+                                        size={200}
                                         style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                                         viewBox={`0 0 256 256`}
                                         level="H"
+                                        className="relative z-0"
                                     />
                                 </div>
+                                
+                                {!guestData.isRedeemed && (
+                                    <div className="w-full max-w-[200px]">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-1.5 text-hope-green">
+                                                <Timer className="w-3 h-3 animate-pulse" />
+                                                <span className="text-[10px] font-black tracking-widest uppercase">Securing Refresh</span>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-400">{timeLeft}s</span>
+                                        </div>
+                                        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                                            <motion.div
+                                                className="h-full bg-hope-green"
+                                                initial={{ width: "100%" }}
+                                                animate={{ width: `${(timeLeft / 60) * 100}%` }}
+                                                transition={{ duration: 1, ease: "linear" }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {!guestData.isRedeemed && (
-                                <div className="mt-8 flex flex-col items-center">
-                                    <div className="flex items-center justify-center gap-2 text-hope-green mb-3">
-                                        <Timer className="w-4 h-4 animate-pulse" />
-                                        <span className="font-black text-[11px] tracking-widest uppercase">Securing Refresh: {timeLeft}s</span>
-                                    </div>
-                                    <div className="w-full h-1 bg-gray-100 rounded-md overflow-hidden">
-                                        <motion.div
-                                            className="h-full bg-hope-green rounded-md"
-                                            initial={{ width: "100%" }}
-                                            animate={{ width: `${(timeLeft / 60) * 100}%` }}
-                                            transition={{ duration: 1, ease: "linear" }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Guest ID Card Bottom */}
-                        <div className="w-full px-4 space-y-6">
-                            <div className="bg-white rounded-md p-8 shadow-xl shadow-gray-200/40 border border-gray-300 relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110" />
-                                
-                                <div className="relative z-10 space-y-6">
-                                    <div>
-                                        <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black mb-2">Authenticated Guest</p>
-                                        <h3 className="text-3xl font-black text-gray-900 leading-tight">{guestData.name}</h3>
-                                        <div className="flex items-center gap-2 mt-2 text-gray-500">
-                                            <Smartphone className="w-4 h-4 text-hope-green" />
-                                            <span className="font-bold text-sm tracking-[0.1em]">+91 {guestData.mobile.slice(0, 5)} {guestData.mobile.slice(5)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4 pt-6 border-t border-gray-100/80">
+                            {/* Right Section: Details */}
+                            <div className="flex-1 p-10 flex flex-col justify-between">
+                                <div className="space-y-8">
+                                    <div className="flex justify-between items-start">
                                         <div>
-                                            <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-black mb-1">Referrer</p>
-                                            <p className="text-xs font-black text-hope-green truncate">{guestData.partnerName}</p>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Validated Guest</p>
+                                            <h3 className="text-4xl font-black text-gray-900 tracking-tight leading-none mb-4">{guestData.name}</h3>
+                                            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md w-fit">
+                                                <Smartphone className="w-4 h-4 text-hope-green" />
+                                                <span className="text-sm font-bold text-gray-700 tracking-wider">+91 {guestData.mobile}</span>
+                                            </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-black mb-1">Visit Rank</p>
-                                            <div className="flex items-center justify-end gap-1.5">
-                                                <Sparkles className="w-3 h-3 text-amber-500" />
-                                                <p className="text-xs font-black text-gray-900">Level {guestData.frequency}</p>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Visit Rank</p>
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-md">
+                                                <Sparkles className="w-4 h-4" />
+                                                <span className="text-xs font-black uppercase">Level {guestData.frequency}</span>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div className="grid grid-cols-2 gap-8 pt-8 border-t border-gray-100">
+                                        <div>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Claimable Discount</p>
+                                            <p className="text-2xl font-black text-hope-green">{guestData.discount}% Off</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Referrer Details</p>
+                                            <p className="text-sm font-bold text-gray-900">{guestData.partnerName}</p>
+                                            <p className="text-[10px] font-medium text-gray-400 mt-0.5">{guestData.partnerCode}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-12 flex flex-col gap-4">
+                                    <div className="flex items-center gap-2 text-gray-400">
+                                        <Clock className="w-4 h-4" />
+                                        <p className="text-[9px] font-bold uppercase tracking-[0.2em]">Expires in 24 hours from generation</p>
+                                    </div>
+                                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-md">
+                                        <p className="text-[10px] text-amber-700 font-bold leading-relaxed">
+                                            ⚠️ IMPORTANT: This pass is unique to your mobile number and non-transferable. Screenshot misuse may lead to blacklisting.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
-                                Valid for 24 hours only. <br />
-                                Please do not share this pass with others.
-                            </p>
+                        {/* Footer Logo */}
+                        <div className="mt-12 opacity-50 flex flex-col items-center">
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-2 shadow-xl border border-gray-300 overflow-hidden p-1.5">
+                                <img src="/logo.png" alt="Logo" className="w-full h-full object-fit" />
+                            </div>
+                            <p className="text-white text-[10px] font-black uppercase tracking-[0.3em]">Hope Life Cafe</p>
                         </div>
                     </motion.div>
                 </AnimatePresence>
             </div>
-        </div>
+        </AuthLayout>
     );
 }

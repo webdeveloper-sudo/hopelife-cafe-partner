@@ -79,9 +79,9 @@ export default function PartnerTransactionsPage() {
                     <p className="text-gray-500 mt-1 font-medium">Full audit logs of all wallet credit events and milestone bonuses.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="secondary" className="gap-2 h-11 px-6 rounded-md border border-gray-300 shadow-sm" onClick={() => toast.success("Earning statement compiled successfully.")}>
+{/* <Button variant="secondary" className="gap-2 h-11 px-6 rounded-md border border-gray-300 shadow-sm" onClick={() => toast.success("Earning statement compiled successfully.")}>
                         <Download className="w-4 h-4" /> Download Statement
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 

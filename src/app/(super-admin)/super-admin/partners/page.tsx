@@ -200,9 +200,9 @@ export default function SuperAdminPartnersPage() {
                     <p className="text-gray-500 mt-1">Approve applications and manage the partner directory.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2 h-11 border border-gray-300 rounded-md" onClick={exportCSV}>
+{/* <Button variant="outline" className="gap-2 h-11 border border-gray-300 rounded-md" onClick={exportCSV}>
                         <Download className="w-4 h-4" /> Export CSV
-                    </Button>
+                    </Button> */}
                     <Button className="gap-2 h-11 bg-gray-900 hover:bg-black text-white px-6 rounded-md border border-gray-300" onClick={() => setShowOnboard(true)}>
                         <Plus className="w-4 h-4" /> New Partner
                     </Button>

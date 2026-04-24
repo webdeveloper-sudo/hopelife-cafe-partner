@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { AuthLayout } from "@/components/AuthLayout";
 
 const BUSINESS_TYPES = [
     { value: "homestay", label: "Homestays & Guest Houses" },
@@ -201,7 +202,7 @@ export default function RegisterPage() {
         className = ""
     ) => (
         <div className={`space-y-1.5 ${className}`}>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</label>
+            <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{label}</label>
             <Input
                 type={type}
                 value={formData[key]}
@@ -215,7 +216,7 @@ export default function RegisterPage() {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <AuthLayout>
             <div className="w-full max-w-5xl">
                 <AnimatePresence mode="wait">
 
@@ -228,11 +229,11 @@ export default function RegisterPage() {
                                     <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/5 rounded-full" />
                                     <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-white/5 rounded-full" />
                                     <div className="relative z-10">
-                                        <div className="w-16 h-16 bg-white rounded-md border border-gray-300 flex items-center justify-center mb-8 shadow-xl overflow-hidden">
+                                        <div className="w-24 h-24 bg-white rounded-full border border-gray-300 flex items-center justify-center mb-8 shadow-xl overflow-hidden">
                                             <img src="/logo.png" alt="HOPE Cafe" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                         </div>
-                                        <h2 className="text-3xl font-black mb-3 leading-tight">Join the <br />Elite Network</h2>
-                                        <p className="text-white/70 text-sm mb-8">Become a partner and earn commissions on every guest you refer.</p>
+                                        <h2 className="text-3xl font-bold mb-3 leading-tight tracking-tight">Join the <br />Partner Network</h2>
+                                        <p className="text-white/70 text-sm mb-8">Access the collaborative ecosystem of Hope Cafe Puducherry.</p>
                                         <div className="space-y-4">
                                             {[
                                                 `Earn ${displayComm}% on every referred guest bill`,
@@ -258,8 +259,8 @@ export default function RegisterPage() {
                                 {/* Right form */}
                                 <div className="md:col-span-3 p-10">
                                     <div className="mb-8">
-                                        <h1 className="text-3xl font-black text-gray-900">Partner Registration</h1>
-                                        <p className="text-gray-400 text-sm mt-1">Fill in your details. We'll send an OTP to verify your email.</p>
+                                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Partner Registration</h1>
+                                        <p className="text-gray-400 text-sm mt-1">Join the community of Puducherry hospitality partners.</p>
                                     </div>
                                     <form onSubmit={handleFormSubmit} className="space-y-5">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -289,9 +290,9 @@ export default function RegisterPage() {
                                         </div>
 
                                         <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                                            <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/> Critical Information</p>
+                                            <p className="text-[10px] font-semibold text-red-600 uppercase tracking-widest mb-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/> Settlement Account</p>
                                             {field("UPI ID (For Settlements)", "upiId", "yourname@upi")}
-                                            <p className="text-[10px] text-red-500 mt-2 font-medium leading-relaxed">Ensure this UPI ID is active and accurate. All your referral commissions will be settled exclusively to this account.</p>
+                                            <p className="text-[10px] text-red-500 mt-2 font-medium leading-relaxed">Ensure this UPI ID is active and accurate for your weekly commissions.</p>
                                         </div>
 
                                         <Button type="submit" className="w-full h-13 text-base font-bold mt-2" isLoading={isSubmitting}>
@@ -332,16 +333,20 @@ export default function RegisterPage() {
                                                 onChange={e => handleOtpChange(i, e.target.value)}
                                                 onKeyDown={e => handleOtpKeyDown(i, e)}
                                                 className={`w-12 h-14 text-center text-2xl font-black rounded-md border-2 border-gray-300 outline-none transition-all ${
-                                                    otpError ? "border-red-400 bg-red-50" :
+                                                    otpError ? "border-red-400 bg-red-50 text-red-600 shadow-[0_0_0_1px_rgba(239,68,68,0.1)]" :
                                                     digit ? "border-[#1a6b3a] bg-green-50 text-[#1a6b3a]" :
-                                                    "focus:border-[#1a6b3a]"
+                                                    "focus:border-[#1a6b3a] focus:shadow-lg focus:shadow-green-500/10"
                                                 }`}
                                             />
                                         ))}
                                     </div>
 
                                     {otpError && (
-                                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-sm text-red-500 font-medium mb-4">
+                                        <motion.p 
+                                            initial={{ opacity: 0, y: -10 }} 
+                                            animate={{ opacity: 1, y: 0 }} 
+                                            className="text-center text-xs font-bold text-red-500 mb-6 bg-red-50 py-2 rounded-md"
+                                        >
                                             {otpError}
                                         </motion.p>
                                     )}
@@ -411,8 +416,8 @@ export default function RegisterPage() {
                                             <CheckCircle2 className="w-5 h-5 text-[#1a6b3a]" />
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Account Status</p>
-                                            <p className="text-base font-black text-gray-900">Auto-Approved</p>
+                                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Account Status</p>
+                                            <p className="text-base font-bold text-gray-900">Auto-Approved</p>
                                         </div>
                                     </div>
 
@@ -447,6 +452,6 @@ export default function RegisterPage() {
 
                 </AnimatePresence>
             </div>
-        </div>
+        </AuthLayout>
     );
 }

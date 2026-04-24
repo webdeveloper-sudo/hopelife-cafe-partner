@@ -128,9 +128,9 @@ export default function ReferralsPage() {
                     >
                         <UserPlus className="w-4 h-4" /> Refer Guest
                     </Button>
-                    <Button variant="secondary" className="gap-2 h-11" onClick={() => toast.success("Exporting report...")}>
+{/* <Button variant="secondary" className="gap-2 h-11" onClick={() => toast.success("Exporting report...")}>
                         <Download className="w-4 h-4" /> Export Report
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 

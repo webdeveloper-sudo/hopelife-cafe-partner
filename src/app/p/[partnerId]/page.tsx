@@ -6,6 +6,7 @@ import { ShieldCheck, Smartphone, User, ArrowRight, CheckCircle2, Copy, External
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { toast } from "sonner";
+import { AuthLayout } from "@/components/AuthLayout";
 
 export default function GuestRegistrationPage({ params }: { params: Promise<{ partnerId: string }> }) {
     const unwrappedParams = React.use(params);
@@ -66,15 +67,15 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-md">
+        <AuthLayout>
+            <div className="mx-auto w-full max-w-md">
                 {/* Header Branding */}
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-white rounded-md flex items-center justify-center mx-auto mb-4 shadow-xl border border-gray-300 overflow-hidden p-1 transition-transform hover:scale-105 duration-500">
-                        <img src="/logo.png" alt="HOPE Cafe Logo" className="w-full h-full object-cover" />
+                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl border border-gray-300 overflow-hidden p-2 transition-transform hover:scale-105 duration-500">
+                        <img src="/logo.png" alt="HOPE Cafe Logo" className="w-full h-full object-fit" />
                     </div>
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tighter">HOPE Cafe</h1>
-                    <p className="text-gray-500 font-medium text-sm mt-1">Special Guest Pass via {partnerName}</p>
+                    <h1 className="text-2xl font-black text-white tracking-tighter">HOPE Cafe</h1>
+                    <p className="text-white/70 font-medium text-sm mt-1">Special Guest Pass via {partnerName}</p>
                 </div>
 
                 <AnimatePresence mode="wait">
@@ -84,7 +85,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200/50 border border-gray-300"
+                            className="bg-white p-8 rounded-md shadow-2xl shadow-black/20 border border-gray-300"
                         >
                             <div className="mb-8 text-center">
                                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 text-green-600 mb-4">
@@ -150,7 +151,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                             key="success"
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200/50 border border-gray-300 text-center"
+                            className="bg-white p-8 rounded-md shadow-2xl shadow-black/20 border border-gray-300 text-center"
                         >
                             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <CheckCircle2 className="w-10 h-10 text-green-500" />
@@ -182,6 +183,6 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </AuthLayout>
     );
 }

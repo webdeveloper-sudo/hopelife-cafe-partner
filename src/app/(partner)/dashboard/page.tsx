@@ -151,9 +151,9 @@ export default function PartnerDashboard() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="secondary" className="gap-2.5 h-11 shadow-sm border border-gray-300" onClick={() => toast.success("Exporting data...")}>
+{/* <Button variant="secondary" className="gap-2.5 h-11 shadow-sm border border-gray-300" onClick={() => toast.success("Exporting data...")}>
                         <Download className="w-4 h-4" /> Export Data
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 
