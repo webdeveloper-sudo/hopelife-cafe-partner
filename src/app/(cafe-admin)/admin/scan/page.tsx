@@ -111,26 +111,15 @@ export default function CashierScanPage() {
                 })
             });
 
-            // const data = await response.json();
+            const data = await response.json();
 
-            // if (data.success) {
-            //     toast.success(`Discount of ₹${data.discountApplied.toFixed(2)} applied successfully!`);
-            //     setScanStatus("settled");
-
-            //     // Redirect to thank you page with full receipt details
-            //     const params = new URLSearchParams({
-            //         billAmount: billAmount,
-            //         discount: data.discountApplied.toString(),
-            //         guestName: scannedGuest.name,
-            //         guestMobile: scannedGuest.mobile,
-            //         partnerName: scannedGuest.partnerName,
-            //         discountPercent: scannedGuest.guestDiscountSlab.toString(),
-            //         date: new Date().toISOString()
-            //     });
-            //     router.push(`/thank-you?${params.toString()}`);
-            // } else {
-            //     toast.error(data.error || "Failed to settle transaction.");
-            // }
+            if (data.success) {
+                toast.success(`Discount of ₹${data.discountApplied.toFixed(2)} applied successfully!`);
+                // Transition to settled state: Admin stays here to see success message and "Scan Next" button
+                setScanStatus("settled");
+            } else {
+                toast.error(data.error || "Failed to settle transaction.");
+             }
         } catch (error) {
             toast.error("Network error. Please try again.");
         } finally {

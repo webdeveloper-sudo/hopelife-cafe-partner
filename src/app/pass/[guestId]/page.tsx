@@ -88,7 +88,16 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                 if (data.success && data.isRedeemed) {
                     toast.success("Pass Redeemed Successfully!");
                     if (data.billAmount) {
-                        router.push(`/thank-you?billAmount=${data.billAmount}&discount=${data.discount || 0}`);
+                        const params = new URLSearchParams({
+                            billAmount: data.billAmount.toString(),
+                            discount: data.discount.toString(),
+                            guestName: guestData.name,
+                            guestMobile: guestData.mobile,
+                            partnerName: guestData.partnerName,
+                            discountPercent: guestData.discount.toString(),
+                            date: new Date().toISOString()
+                        });
+                        router.push(`/thank-you?${params.toString()}`);
                     } else {
                         router.push("/thank-you");
                     }
