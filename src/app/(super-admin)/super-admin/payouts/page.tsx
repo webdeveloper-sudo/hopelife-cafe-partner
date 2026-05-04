@@ -47,7 +47,10 @@ export default function AdminPayoutsPage() {
         try {
             const res = await fetch("/api/admin/payouts/eligible");
             const data = await res.json();
-            if (data.success) setEligiblePartners(data.partners);
+            if (data.success) {
+                setEligiblePartners(data.partners);
+                setConfig((prev: any) => ({ ...prev, minPayoutAmount: data.minPayoutAmount }));
+            }
         } catch { toast.error("Failed to load payout queue"); }
     }, []);
 
@@ -141,6 +144,9 @@ export default function AdminPayoutsPage() {
                                 </div>
                                 <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest leading-none">{s.label}</p>
                                 <p className="text-3xl font-black text-gray-900 mt-2">{s.value}</p>
+                                <p className="text-[8px] font-black text-amber-600 uppercase tracking-[0.2em] mt-3">
+                                    Payout Threshold: ₹{config?.minPayoutAmount || 100}
+                                </p>
                             </CardContent>
                         </Card>
                     </motion.div>
@@ -186,6 +192,9 @@ export default function AdminPayoutsPage() {
                     </div>
                 </div>
             </div>
+            <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest px-2">
+                Note: Partners with balance below ₹{config?.minPayoutAmount || 100} are excluded from automatic settlement queue.
+            </p>
 
             {/* Content Section */}
             <Card className="border border-gray-100 bg-white shadow-2xl shadow-gray-200/50 overflow-hidden rounded-md">
@@ -196,7 +205,7 @@ export default function AdminPayoutsPage() {
                                 <thead className="bg-gray-50/50">
                                     <tr>
                                         <th className="px-8 py-5 font-semibold text-[10px] text-gray-400 uppercase tracking-widest">Partner</th>
-                                        <th className="px-8 py-5 font-semibold text-[10px] text-gray-400 uppercase tracking-widest">Wallet Balance</th>
+                                        <th className="px-8 py-5 font-semibold text-[10px] text-gray-400 uppercase tracking-widest">Available Balance</th>
                                         <th className="px-8 py-5 font-semibold text-[10px] text-gray-400 uppercase tracking-widest">Payout Details</th>
                                         <th className="px-8 py-5 font-semibold text-[10px] text-gray-400 uppercase tracking-widest text-right">Actions</th>
                                     </tr>

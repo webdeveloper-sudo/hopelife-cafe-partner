@@ -38,7 +38,10 @@ function PayoutProcessContent() {
                 const res = await fetch(`/api/admin/partners/${partnerId}`);
                 const data = await res.json();
                 if (data.success) {
-                    setPartner(data.partner);
+                    setPartner({
+                        ...data.partner,
+                        minPayoutAmount: data.minPayoutAmount
+                    });
                 } else {
                     toast.error("Partner not found");
                     router.push("/super-admin/payouts");
@@ -130,6 +133,9 @@ function PayoutProcessContent() {
                             <div className="pt-4">
                                 <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1">Total Payable</p>
                                 <p className="text-5xl font-black text-hope-green tracking-tighter">₹{amount.toLocaleString()}</p>
+                                <p className="text-[8px] font-black text-amber-600 uppercase tracking-[0.2em] mt-3">
+                                    Payout Threshold: ₹{partner.minPayoutAmount || 100}
+                                </p>
                             </div>
                         </div>
 
@@ -194,7 +200,7 @@ function PayoutProcessContent() {
                         <Info className="w-5 h-5 shrink-0 mt-0.5" />
                         <p className="text-[10px] font-medium uppercase leading-loose tracking-wide"> 
                             Confirm only after the payment is successful in your bank records. 
-                            This will atomically reset the partner's wallet balance.
+                            This will automatically reset the partner's available balance.
                         </p>
                     </div>
 

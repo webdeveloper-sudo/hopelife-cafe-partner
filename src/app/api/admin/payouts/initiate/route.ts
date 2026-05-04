@@ -48,11 +48,14 @@ export async function POST(req: Request) {
         // 3. Process Manual Settlement
         if (manual) {
             const result = await prisma.$transaction(async (tx: any) => {
-                // Decrement partner's wallet balance
+                // Decrement partner's wallet balance and total
                 const updatedPartner = await tx.partner.update({
                     where: { id: partner.id },
                     data: {
                         walletBalance: {
+                            decrement: payoutAmount
+                        },
+                        walletTotal: {
                             decrement: payoutAmount
                         }
                     }

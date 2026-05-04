@@ -56,7 +56,8 @@ export default function MilestoneTracker({
                     });
                     setConfig({
                         tiers: tierRecord,
-                        baseCommission: data.baseCommission
+                        baseCommission: data.baseCommission,
+                        baseGuestDiscount: data.baseGuestDiscount
                     });
                 }
             } catch (err) {

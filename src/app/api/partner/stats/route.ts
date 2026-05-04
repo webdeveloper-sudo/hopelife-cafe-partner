@@ -25,10 +25,7 @@ export async function GET(req: Request) {
 
         // Auto-seed for demo purposes if it doesn't exist yet
         if (!partner && partnerId === 'demo') {
-            // Fetch base config for default slab
-            const p = prisma as any;
-            const configModel = p.systemConfig || p.SystemConfig;
-            const config = configModel ? await configModel.findUnique({ where: { id: "GLOBAL" } }) : null;
+            const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
             const baseCommission = config?.baseCommission ?? 7.5;
             partner = await prisma.partner.create({
                 data: {
@@ -129,7 +126,7 @@ export async function GET(req: Request) {
         });
 
         // Ledger Source of Truth (sync-wallets script ensures these are accurate)
-        const walletTotal = partner.walletTotal ?? 0;
+        const walletBalance = partner.walletBalance ?? 0;
 
         return NextResponse.json({
             success: true,
@@ -142,7 +139,8 @@ export async function GET(req: Request) {
                 welcomeBonus: partner.bonusAmount ?? 0,
                 tierBonuses: totalTierBonus,
                 totalWithdrawn,
-                availableBalance: walletTotal
+                availableBalance: walletBalance,
+                minPayoutAmount: config?.minPayoutAmount ?? 100
             },
             recentReferrals,
             receivingHistory: [
@@ -183,8 +181,8 @@ export async function GET(req: Request) {
                 businessType: partner.businessType || "N/A",
                 referralGoal: partner.referralGoal || 10,
                 totalLeads,
-                walletTotal: walletTotal ?? 0,
-                walletBalance: walletTotal ?? 0, 
+                walletTotal: walletBalance ?? 0,
+                walletBalance: walletBalance ?? 0, 
                 bonusAmount: partner.bonusAmount ?? 0,
                 earnedCommission: partner.earnedCommission ?? 0,
                 claimedTierBonuses: claimed

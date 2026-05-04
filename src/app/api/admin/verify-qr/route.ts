@@ -103,9 +103,13 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Pass ALREADY REDEEMED. This is a one-time discount only." }, { status: 400 });
             }
 
+            const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+            const baseComm = config?.baseCommission ?? 7.5;
+            const baseDisc = config?.baseGuestDiscount ?? 7.5;
+
             // Calculate effective commission (base slab + any earned bonus commission %)
-            const partnerCommissionSlab = (guest.partner.commissionSlab || 7.5) + (guest.partner.bonusCommission || 0);
-            const guestDiscountSlab = guest.partner.guestDiscountSlab || guest.partner.commissionSlab || 7.5;
+            const partnerCommissionSlab = (guest.partner.commissionSlab || baseComm) + (guest.partner.bonusCommission || 0);
+            const guestDiscountSlab = guest.partner.guestDiscountSlab || guest.partner.commissionSlab || baseDisc;
 
             const guestDiscountAmount = billAmount * (guestDiscountSlab / 100);
             const partnerCommissionAmount = billAmount * (partnerCommissionSlab / 100);
@@ -178,7 +182,7 @@ export async function POST(req: Request) {
                 mobile: guest.mobileNumber,
                 partnerName: guest.partner.name,
                 commissionSlab: guest.partner.commissionSlab,
-                guestDiscountSlab: guest.partner.guestDiscountSlab || guest.partner.commissionSlab,
+                guestDiscountSlab: guest.partner.guestDiscountSlab || guest.partner.commissionSlab || (await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } }))?.baseGuestDiscount || 7.5,
                 referralCount: referralCount + 1, // Current visit number
                 isRedeemed: !!redemptionCheck
             }

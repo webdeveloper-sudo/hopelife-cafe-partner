@@ -114,10 +114,11 @@ export async function GET(
                 lastReferalDate,
                 lastActiveDate,
                 totalPayoutAmount: totalPayoutAmount.toFixed(2),
-                currentSettlementBalance: (partner.walletTotal ?? 0).toFixed(2), // Unified Hero Metric
+                currentSettlementBalance: (partner.walletBalance ?? 0).toFixed(2), // Unified Hero Metric
                 bonusAmount: partner.bonusAmount ?? 0,
                 earnedCommission: partner.earnedCommission ?? 0,
-                walletTotal: partner.walletTotal ?? 0
+                walletTotal: partner.walletBalance ?? 0,
+                minPayoutAmount: (await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } }))?.minPayoutAmount ?? 100
             },
             weeklyPerformance,
             guestActivity,

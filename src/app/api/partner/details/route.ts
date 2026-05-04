@@ -25,10 +25,12 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Partner not found" }, { status: 404 });
         }
 
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+
         return NextResponse.json({
             success: true,
             name: partner.name,
-            discount: partner.guestDiscountSlab
+            discount: partner.guestDiscountSlab || config?.baseGuestDiscount || 7.5
         });
     } catch (error) {
         console.error("Partner Details API Error:", error);

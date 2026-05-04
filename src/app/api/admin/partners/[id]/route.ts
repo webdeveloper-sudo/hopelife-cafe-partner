@@ -35,9 +35,13 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Partner not found" }, { status: 404 });
     }
 
+    // Fetch config
+    const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+
     return NextResponse.json({
         success: true,
-        partner
+        partner,
+        minPayoutAmount: config?.minPayoutAmount ?? 100
     });
   } catch (err) {
     console.error("Single partner fetch error:", err);

@@ -38,10 +38,8 @@ export async function GET() {
             ? partners.reduce((acc: number, p: any) => acc + (p.commissionSlab || 0), 0) / partners.length
             : 0;
 
-        // 6. Total Owed (Sum of commissions earned by partners that are NOT PAID yet)
-        const totalOwedAmount = scanLogs
-            .filter((log: any) => log.status === "SETTLED")
-            .reduce((acc: number, log: any) => acc + (log.partnerCommissionAmount || log.discountAmount || 0), 0);
+        // 6. Total Owed (Sum of all partner wallet balances)
+        const totalOwedAmount = partners.reduce((acc: number, p: any) => acc + (p.walletBalance || 0), 0);
 
         // 7. Recent Approvals (Partners requiring ACTION - PENDING ones)
         const recentApprovals = partners

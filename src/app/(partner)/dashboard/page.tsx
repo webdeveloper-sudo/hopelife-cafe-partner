@@ -136,7 +136,7 @@ export default function PartnerDashboard() {
         { label: "Total Cafe Sales",         value: `₹${stats.metrics.totalSales.toFixed(2)}`,       icon: BarChart2,   change: "All Time",                         color: "text-green-500",      bg: "bg-green-50" },
         { label: "Net Earned Commission",    value: `₹${stats.metrics.totalCommission.toFixed(2)}`,  icon: Wallet,      change: `${stats.partnerDetails.effectiveSlab}% Effective Slab`,color: "text-hope-green",     bg: "bg-hope-green/5" },
         { label: "Total Paid",               value: `₹${stats.metrics.totalPaid.toFixed(2)}`,        icon: CheckCircle2,change: "Settled",                          color: "text-green-600",      bg: "bg-green-100" },
-        { label: "Available Balance",        value: `₹${(stats.partnerDetails.walletTotal ?? 0).toLocaleString()}`, icon: Wallet,      change: "Ready to Payout",                  color: "text-hope-purple",    bg: "bg-hope-purple/5" },
+        { label: "Available Balance",        value: `₹${(stats.partnerDetails.walletBalance ?? 0).toLocaleString()}`, icon: Wallet,      change: "Ready to Payout",                  color: "text-hope-purple",    bg: "bg-hope-purple/5", legend: `Threshold: ₹${stats.metrics.minPayoutAmount}` },
     ];
 
     return (
@@ -188,6 +188,7 @@ export default function PartnerDashboard() {
                                 <div className="mt-auto">
                                     <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{m.label}</h3>
                                     <p className="text-4xl font-extrabold text-gray-900 mt-2">{m.value}</p>
+                                    {m.legend && <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mt-1 opacity-80">{m.legend}</p>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -229,7 +230,7 @@ export default function PartnerDashboard() {
                             </div>
                             <div className="p-8 bg-hope-purple/5">
                                 <p className="text-[10px] font-black text-hope-purple uppercase tracking-widest mb-1">Net Available Funds</p>
-                                <p className="text-4xl font-black text-gray-900">₹{(stats.partnerDetails.walletTotal ?? 0).toLocaleString()}</p>
+                                <p className="text-4xl font-black text-gray-900">₹{(stats.partnerDetails.walletBalance ?? 0).toLocaleString()}</p>
                                 <p className="text-[10px] text-gray-500 font-bold mt-1">Live Statement Balance</p>
                             </div>
                         </div>

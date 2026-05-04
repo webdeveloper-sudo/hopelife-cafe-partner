@@ -15,29 +15,39 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
     const [isGenerating, setIsGenerating] = useState(false);
     const [successData, setSuccessData] = useState<{ guestId: string } | null>(null);
     const [partnerData, setPartnerData] = useState<{ name: string, discount: number } | null>(null);
+    const [partnerError, setPartnerError] = useState<string | null>(null);
+    const [partnerLoading, setPartnerLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     React.useEffect(() => {
         const fetchPartner = async () => {
+            setPartnerLoading(true);
             try {
                 const res = await fetch(`/api/partner/details?code=${unwrappedParams.partnerId}`);
                 const data = await res.json();
                 if (data.success) {
                     setPartnerData({ name: data.name, discount: data.discount });
+                } else {
+                    setPartnerError(data.error || "Partner not found");
                 }
             } catch (e) {
                 console.error("Failed to fetch partner info");
+                setPartnerError("Unable to load partner information");
+            } finally {
+                setPartnerLoading(false);
             }
         };
         fetchPartner();
     }, [unwrappedParams.partnerId]);
 
     const partnerName = partnerData?.name || (unwrappedParams.partnerId === "demo" ? "Grand Hope Cafe" : `Partner #${unwrappedParams.partnerId}`);
-    const discountSlab = partnerData?.discount || 7.5;
+    const discountSlab = partnerData?.discount || 0;
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (mobile.length !== 10 || !name.trim()) return;
 
+        setError(null);
         setIsGenerating(true);
 
         try {
@@ -57,9 +67,11 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                 setSuccessData({ guestId: data.guestId });
                 toast.success("Live pass generated successfully!");
             } else {
+                setError(data.error || "Failed to register.");
                 toast.error(data.error || "Failed to register.");
             }
         } catch (error) {
+            setError("Network connection failed. Please check your internet.");
             toast.error("Network error. Please try again.");
         } finally {
             setIsGenerating(false);
@@ -75,11 +87,24 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                         <img src="/logo.png" alt="HOPE Cafe Logo" className="w-full h-full object-fit" />
                     </div>
                     <h1 className="text-2xl font-black text-white tracking-tighter">HOPE Cafe</h1>
-                    <p className="text-white/70 font-medium text-sm mt-1">Special Guest Pass via {partnerName}</p>
+                    <p className="text-white/70 font-medium text-sm mt-1">
+                        {partnerLoading ? "Validating Referrer..." : partnerError ? "Invalid Referral Link" : `Special Guest Pass via ${partnerName}`}
+                    </p>
                 </div>
 
+                {partnerError && !successData && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-8 rounded-md shadow-2xl border border-red-100 text-center mb-8">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ShieldCheck className="w-8 h-8 text-red-400" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">Invalid Link</h2>
+                        <p className="text-sm text-gray-500 mb-6">{partnerError}</p>
+                        <Button onClick={() => window.location.reload()} variant="outline" className="w-full">Retry Connection</Button>
+                    </motion.div>
+                )}
+
                 <AnimatePresence mode="wait">
-                    {!successData ? (
+                    {!successData && !partnerError ? (
                         <motion.div
                             key="form"
                             initial={{ opacity: 0, y: 20 }}
@@ -112,6 +137,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                         />
                                     </div>
                                 </div>
+
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Mobile Number</label>
                                     <div className="relative">
@@ -130,6 +156,13 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                         />
                                     </div>
                                 </div>
+                                
+                                {error && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-md">
+                                        <ShieldCheck className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                        <p className="text-sm font-bold text-red-700">{error}</p>
+                                    </motion.div>
+                                )}
 
                                 <Button
                                     type="submit"
@@ -164,7 +197,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                              <div className="space-y-4">
                                 <Button 
                                     onClick={() => {
-                                        const url = `${window.location.origin}/pass/${successData.guestId}`;
+                                        const url = `${window.location.origin}/pass/${successData?.guestId}`;
                                         navigator.clipboard.writeText(url);
                                         toast.success("Pass link copied!");
                                     }}
@@ -172,7 +205,7 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                                 >
                                     <Copy className="w-5 h-5" /> Copy Pass Link
                                 </Button>
-                                <Link href={`/pass/${successData.guestId}`} className="block">
+                                <Link href={`/pass/${successData?.guestId}`} className="block">
                                     <Button variant="outline" className="w-full h-14 border-gray-300 font-black uppercase tracking-widest gap-2">
                                         <ExternalLink className="w-5 h-5" /> View Live Pass
                                     </Button>

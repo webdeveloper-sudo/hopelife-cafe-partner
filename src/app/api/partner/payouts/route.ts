@@ -34,9 +34,13 @@ export async function GET() {
             select: { walletBalance: true }
         });
 
+        // Fetch config for threshold
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+
         return NextResponse.json({
             success: true,
             walletBalance: partner?.walletBalance || 0,
+            minPayoutAmount: config?.minPayoutAmount || 100,
             payouts
         });
 

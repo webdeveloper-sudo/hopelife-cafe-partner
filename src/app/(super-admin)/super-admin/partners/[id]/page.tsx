@@ -59,7 +59,7 @@ export default function PartnerDetailsPage() {
     const [rejectReason, setRejectReason] = React.useState("");
 
     const [showSlabsModal, setShowSlabsModal] = React.useState(false);
-    const [slabValues, setSlabValues] = React.useState({ commission: 7.5, discount: 7.5 });
+    const [slabValues, setSlabValues] = React.useState({ commission: 0, discount: 0 });
 
     const fetchPartnerDetails = React.useCallback(async () => {
         try {
@@ -79,6 +79,17 @@ export default function PartnerDetailsPage() {
 
     React.useEffect(() => {
         fetchPartnerDetails();
+        // Fetch global defaults for fallback
+        fetch('/api/admin/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setSlabValues(v => ({
+                        commission: v.commission || data.config.baseCommission,
+                        discount: v.discount || data.config.baseGuestDiscount
+                    }));
+                }
+            });
     }, [fetchPartnerDetails]);
 
     const handleApprove = async () => {
@@ -384,6 +395,9 @@ export default function PartnerDetailsPage() {
                                     <h3 className={cn("text-6xl font-black tracking-tighter", partner.status === "ACTIVE" ? "text-white" : "text-gray-300")}>
                                         ₹{metrics.walletTotal?.toLocaleString() || "0.00"}
                                     </h3>
+                                    <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] mt-3 opacity-80">
+                                        Payout Threshold is ₹{metrics.minPayoutAmount || 100} to become eligible for settlement
+                                    </p>
                                     <div className="flex items-center gap-4 mt-6 text-[11px] font-bold uppercase tracking-widest">
                                         <div className="flex items-center gap-1.5 bg-white/5 px-4 py-2 rounded-md border border-white/5">
                                             <span className="text-gray-500">Bonus Carry:</span>

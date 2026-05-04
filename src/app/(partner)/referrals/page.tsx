@@ -89,10 +89,10 @@ export default function ReferralsPage() {
                 toast.success(`Guest referral generated!`);
                 fetchReferrals();
             } else {
-                toast.error(data.error || "Failed to add guest.");
+                toast.error(data.error || "Failed to generate security pass. Please verify the guest details.");
             }
-        } catch (err) {
-            toast.error("Network error. Please try again.");
+        } catch (err: any) {
+            toast.error("Generation Link Failure: Unable to connect to the pass engine. Please check your network.");
         } finally {
             setSubmitting(false);
         }

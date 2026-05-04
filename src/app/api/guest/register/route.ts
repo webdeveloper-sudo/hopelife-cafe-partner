@@ -31,12 +31,13 @@ export async function POST(req: Request) {
         if (partnerId === "demo") {
             let demoPartner = await prisma.partner.findUnique({ where: { partnerCode: "demo" } });
             if (!demoPartner) {
+                const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
                 demoPartner = await prisma.partner.create({
                     data: {
                         partnerCode: "demo",
                         name: "Grand Hope Cafe (Demo)",
                         mobile: "0000000000",
-                        commissionSlab: 7.5
+                        commissionSlab: config?.baseCommission || 7.5
                     }
                 });
             }

@@ -25,7 +25,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
         isExpired: boolean
     } | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [qrData, setQrData] = useState<string>("");
     
     // For QR Download
@@ -45,11 +45,11 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                     isRedeemed: data.isRedeemed
                 });
             } else {
-                setError(true);
+                setError(data.error || "Failed to generate security payload");
             }
-        } catch (err) {
-            setError(true);
-            toast.error("Invalid or expired Live Pass");
+        } catch (err: any) {
+            setError(err.message || "Unable to connect to security server");
+            toast.error("Security verification failed");
         } finally {
             setLoading(false);
         }
@@ -115,22 +115,28 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
     }
 
     if (error || !guestData || guestData.isExpired) {
+        const isSystemError = error && !error.toLowerCase().includes('expire') && !error.toLowerCase().includes('invalid');
+        
         return (
             <AuthLayout>
                 <div className="flex flex-col items-center justify-center p-6 text-center">
                     <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-md border border-white/20 flex items-center justify-center mb-8 shadow-2xl shadow-black/40">
-                        <AlertCircle className="w-12 h-12 text-white/50" />
+                        <AlertCircle className={cn("w-12 h-12", isSystemError ? "text-red-400" : "text-white/50")} />
                     </div>
-                    <h1 className="text-3xl font-black mb-4 tracking-tight text-white">Pass Expired or Invalid</h1>
+                    <h1 className="text-3xl font-black mb-4 tracking-tight text-white">
+                        {isSystemError ? "System Generation Error" : "Pass Expired or Invalid"}
+                    </h1>
                     <p className="text-white/60 max-w-sm mb-10 leading-relaxed font-medium">
-                        Referral passes are valid for 24 hours only. Please contact your partner/referrer to request a fresh invitation link.
+                        {isSystemError 
+                            ? `The system failed to generate your unique security pass: ${error}. Please try refreshing or contact support.`
+                            : "Referral passes are valid for 24 hours only. Please contact your partner/referrer to request a fresh invitation link."}
                     </p>
                     <Button 
                         variant="outline" 
                         className="bg-white/10 hover:bg-white/20 border-white/20 text-white px-8 h-14 rounded-md font-black uppercase tracking-widest text-xs" 
                         onClick={() => window.location.reload()}
                     >
-                        Refresh Page
+                        {isSystemError ? "Retry Generation" : "Refresh Page"}
                     </Button>
                 </div>
             </AuthLayout>
@@ -167,7 +173,7 @@ export default function PassDisplayPage({ params }: { params: Promise<{ guestId:
                         {/* Main Interaction Card (Ticket Style) */}
                         <div className={cn(
                             "w-full bg-white rounded-md shadow-2xl shadow-black/40 border border-gray-300 overflow-hidden flex flex-col md:flex-row min-h-[400px]",
-                            guestData.isRedeemed && "opacity-50 grayscale"
+                            guestData.isRedeemed && ""
                         )}>
                             {/* Left Section: QR Code */}
                             <div className="w-full md:w-[40%] bg-gray-50 p-10 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-200">

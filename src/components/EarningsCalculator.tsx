@@ -17,6 +17,16 @@ export default function EarningsCalculator({
     const [avgBill, setAvgBill] = React.useState(1200);
     const [commission, setCommission] = React.useState(initialCommission);
 
+    React.useEffect(() => {
+        if (initialCommission === 7.5) {
+            fetch('/api/config')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) setCommission(data.baseCommission);
+                });
+        }
+    }, [initialCommission]);
+
     const monthlyComm = (guests * avgBill * (commission / 100));
     const annualComm = monthlyComm * 12;
 

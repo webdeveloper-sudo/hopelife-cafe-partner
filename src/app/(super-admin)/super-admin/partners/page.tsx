@@ -80,6 +80,7 @@ export default function SuperAdminPartnersPage() {
     const [showOnboard, setShowOnboard] = useState(false);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [config, setConfig] = useState<any>(null);
 
     const [newPartner, setNewPartner] = useState({
         partnerName: "", contactName: "", email: "", mobile: "",
@@ -91,12 +92,32 @@ export default function SuperAdminPartnersPage() {
         try {
             const res = await fetch("/api/admin/partners");
             const data = await res.json();
-            if (res.ok) setPartners(data.map((p: any) => ({ ...p, guestDiscountSlab: p.guestDiscountSlab || p.commissionSlab || 7.5 })));
+            if (res.ok) {
+                // Fetch config for fallbacks
+                const configRes = await fetch('/api/admin/config');
+                const configData = await configRes.json();
+                const baseComm = configData.config?.baseCommission || 7.5;
+                
+                setPartners(data.map((p: any) => ({ 
+                    ...p, 
+                    guestDiscountSlab: p.guestDiscountSlab || p.commissionSlab || baseComm 
+                })));
+            }
         } catch { toast.error("Failed to load partners"); }
         finally { setLoading(false); }
     }, []);
 
-    useEffect(() => { fetchPartners(); }, [fetchPartners]);
+    useEffect(() => { 
+        fetchPartners(); 
+        fetch('/api/admin/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setConfig(data.config);
+                    setNewPartner(p => ({ ...p, commissionSlab: data.config.baseCommission }));
+                }
+            });
+    }, [fetchPartners]);
 
     const filtered = partners.filter(p => {
         const matchesFilter = filter === "all" ? true : filter === "approved" ? p.status === "ACTIVE" : p.status === "PENDING";
@@ -168,7 +189,7 @@ export default function SuperAdminPartnersPage() {
             if (!res.ok) throw new Error(data.error);
             toast.success("Partner onboarded! Welcome email sent. ✅");
             setShowOnboard(false);
-            setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "", pincode: "", commissionSlab: 7.5 });
+            setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "", pincode: "", commissionSlab: config?.baseCommission || 7.5 });
             fetchPartners();
         } catch (err: any) { toast.error(err.message); }
         finally { setIsOnboarding(false); }
@@ -398,7 +419,7 @@ export default function SuperAdminPartnersPage() {
                                             value={newPartner.commissionSlab}
                                             onChange={e => setNewPartner(f => ({ ...f, commissionSlab: parseFloat(e.target.value) }))}
                                             className="h-12 rounded-md border border-gray-300 text-center font-bold w-28" />
-                                        <p className="text-xs text-gray-400">Standard rate is 7.5%</p>
+                                        <p className="text-xs text-gray-400">Standard rate is {config?.baseCommission || 7.5}%</p>
                                     </div>
                                 </div>
 

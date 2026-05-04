@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
     CheckCircle2, ArrowRight, Mail, ShieldCheck,
-    Building2, Phone, MapPin, User, ChevronRight,
-    Timer, RefreshCw, Loader2, Lock, ClockIcon
+     ChevronRight,
+    Timer, RefreshCw 
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -206,7 +206,14 @@ export default function RegisterPage() {
             <Input
                 type={type}
                 value={formData[key]}
-                onChange={e => { setFormData(f => ({ ...f, [key]: e.target.value })); setErrors(er => ({ ...er, [key]: undefined })); }}
+                onChange={e => {
+                    let value = e.target.value;
+                    if (key === "mobile") {
+                        value = value.replace(/\D/g, "").slice(0, 10);
+                    }
+                    setFormData(f => ({ ...f, [key]: value }));
+                    setErrors(er => ({ ...er, [key]: undefined }));
+                }}
                 placeholder={placeholder}
                 error={!!errors[key]}
                 className="h-12"

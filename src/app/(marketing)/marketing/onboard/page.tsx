@@ -27,6 +27,7 @@ export default function AddPartnerPage() {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [config, setConfig] = useState<any>(null);
     
     // OTP State
     const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
@@ -48,6 +49,17 @@ export default function AddPartnerPage() {
         commissionSlab: "7.5",
         upiId: "",
     });
+
+    useEffect(() => {
+        fetch("/api/admin/config")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setConfig(data.config);
+                    setFormData(prev => ({ ...prev, commissionSlab: data.config.baseCommission.toString() }));
+                }
+            });
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -486,14 +498,14 @@ export default function AddPartnerPage() {
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div
-                                    onClick={() => setFormData({ ...formData, commissionSlab: "7.5" })}
-                                    className={`p-4 rounded-md border-2 cursor-pointer transition-all ${formData.commissionSlab === "7.5" ? 'border-hope-purple bg-purple-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
+                                    onClick={() => setFormData({ ...formData, commissionSlab: (config?.baseCommission || 7.5).toString() })}
+                                    className={`p-4 rounded-md border-2 cursor-pointer transition-all ${formData.commissionSlab === (config?.baseCommission || 7.5).toString() ? 'border-hope-purple bg-purple-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
                                 >
                                     <div className="flex justify-between items-start mb-2">
                                         <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Standard</span>
-                                        {formData.commissionSlab === "7.5" && <CheckCircle2 className="w-4 h-4 text-hope-purple" />}
+                                        {formData.commissionSlab === (config?.baseCommission || 7.5).toString() && <CheckCircle2 className="w-4 h-4 text-hope-purple" />}
                                     </div>
-                                    <span className="text-3xl font-black text-gray-900">7.5%</span>
+                                    <span className="text-3xl font-black text-gray-900">{config?.baseCommission || 7.5}%</span>
                                 </div>
 
                                 <div

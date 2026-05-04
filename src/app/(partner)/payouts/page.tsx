@@ -42,10 +42,12 @@ export default function PartnerPayoutsPage() {
         walletBalance: number;
         lastPayout: number | null;
         totalWithdrawn: number;
+        minPayoutAmount: number;
     }>({
         walletBalance: 0,
         lastPayout: null,
-        totalWithdrawn: 0
+        totalWithdrawn: 0,
+        minPayoutAmount: 100
     });
     const [payouts, setPayouts] = useState<any[]>([]);
     const [search, setSearch] = useState("");
@@ -65,7 +67,8 @@ export default function PartnerPayoutsPage() {
                 setStats({
                     walletBalance: data.walletBalance,
                     lastPayout: last ? last.amount : null,
-                    totalWithdrawn: total
+                    totalWithdrawn: total,
+                    minPayoutAmount: data.minPayoutAmount || 100
                 });
             }
         } catch (error) {
@@ -120,6 +123,9 @@ export default function PartnerPayoutsPage() {
                                 </div>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">{s.label}</p>
                                 <p className="text-3xl font-black text-gray-900 mt-2">{s.value}</p>
+                                {s.label === "Available Balance" && (
+                                    <p className="text-[8px] font-black text-amber-600 uppercase tracking-[0.2em] mt-2">Payout Threshold: ₹{stats.minPayoutAmount}</p>
+                                )}
                             </CardContent>
                         </Card>
                     </motion.div>

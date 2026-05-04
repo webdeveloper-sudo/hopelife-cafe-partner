@@ -35,9 +35,13 @@ export async function GET() {
             };
         });
 
+        // Fetch config
+        const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+
         return NextResponse.json({
             success: true,
-            partners: eligiblePartners
+            partners: eligiblePartners,
+            minPayoutAmount: config?.minPayoutAmount ?? 100
         });
 
     } catch (error: any) {

@@ -258,6 +258,18 @@ const GradientTopBorder = () => (
 );
 
 export default function Home() {
+  const [config, setConfig] = React.useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setConfig(data);
+      });
+  }, []);
+
+  const displayComm = config?.baseCommission ?? 7.5;
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-[#1A1A1A] selection:bg-hope-purple/20">
       <Header />
@@ -413,7 +425,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
-                  { icon: TrendingUp, title: "7.5% Revenue Share", desc: "Transparent earnings on every referral bill.", border: "border-hope-gold/30" },
+                  { icon: TrendingUp, title: `${displayComm}% Revenue Share`, desc: "Transparent earnings on every referral bill.", border: "border-hope-gold/30" },
                   { icon: Award, title: "Curated Priority", desc: "Your guests receive priority seating & care.", border: "border-hope-pink/30" },
                   { icon: ShieldCheck, title: "UPI Settlements", desc: "Manual secure withdrawals every week.", border: "border-hope-green/30" },
                   { icon: Zap, title: "Zero Entry Fee", desc: "Built by local cafe owners for local partners.", border: "border-white/20" },
