@@ -42,6 +42,13 @@ export async function GET(req: Request) {
 
         if (!partner) return NextResponse.json({ error: "Partner not found" }, { status: 404 });
 
+        if (partner.status === "RESTRICTED") {
+            return NextResponse.json({ 
+                error: "RESTRICTED", 
+                message: "Your account has been restricted, please contact our team to activate your account." 
+            }, { status: 403 });
+        }
+
         // Trigger retention streak evaluation for the current month (non-blocking)
         // This is a background evaluation — errors here should not fail the stats request
         try {

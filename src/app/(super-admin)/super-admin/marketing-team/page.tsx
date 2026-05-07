@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, CheckCircle, XCircle, Search, Mail, Phone, Users, UserPlus } from "lucide-react";
+import { Plus, CheckCircle, XCircle, Search, Mail, Phone, Users, UserPlus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +90,23 @@ export default function MarketingTeamAdminPage() {
                 fetchReps();
             } else {
                 toast.error("Failed to update status");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        }
+    };
+
+    const handleDeleteRep = async (id: string, name: string) => {
+        if (!confirm(`Are you sure you want to completely remove marketing member "${name}"? Partners registered by them will remain active.`)) return;
+        
+        try {
+            const res = await fetch(`/api/admin/marketing-rep/${id}`, { method: "DELETE" });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success("Marketing member removed successfully.");
+                setReps(prev => prev.filter(r => r.id !== id));
+            } else {
+                toast.error(data.error || "Failed to remove member");
             }
         } catch (error) {
             toast.error("An error occurred");
@@ -220,17 +237,26 @@ export default function MarketingTeamAdminPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => toggleStatus(rep.id, rep.status)}
-                                            className={cn(
-                                                "text-xs font-semibold px-3 py-1.5 rounded border transition-colors",
-                                                rep.status === "ACTIVE" 
-                                                    ? "text-red-700 border-red-200 hover:bg-red-50" 
-                                                    : "text-green-700 border-green-200 hover:bg-green-50"
-                                            )}
-                                        >
-                                            {rep.status === "ACTIVE" ? "Deactivate" : "Activate"}
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => toggleStatus(rep.id, rep.status)}
+                                                className={cn(
+                                                    "text-xs font-semibold px-3 py-1.5 rounded border transition-colors",
+                                                    rep.status === "ACTIVE" 
+                                                        ? "text-red-700 border-red-200 hover:bg-red-50" 
+                                                        : "text-green-700 border-green-200 hover:bg-green-50"
+                                                )}
+                                            >
+                                                {rep.status === "ACTIVE" ? "Deactivate" : "Activate"}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteRep(rep.id, rep.name)}
+                                                className="p-1.5 rounded border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                                                title="Delete Member"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -14,8 +14,20 @@ export async function GET() {
             const prisma = getPrisma();
             const partner = await prisma.partner.findUnique({
                 where: { id: session.id },
-                select: { partnerCode: true }
+                select: { partnerCode: true, status: true }
             });
+
+            if (!partner || partner.status === "RESTRICTED") {
+                const { cookies } = await import("next/headers");
+                const cookieStore = await cookies();
+                cookieStore.delete("session");
+                return NextResponse.json({ 
+                    authenticated: false, 
+                    error: "RESTRICTED", 
+                    message: "Your account has been restricted, please contact our team to activate your account." 
+                }, { status: 403 });
+            }
+
             extraData = { partnerCode: partner?.partnerCode };
         } else if (session.role === "MARKETING") {
             const prisma = getPrisma();

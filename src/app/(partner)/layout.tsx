@@ -44,35 +44,35 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
         const isPublicPage = pathname === "/login" || pathname === "/register" || pathname === "/scan";
 
         const checkSession = async () => {
-            const sessionRaw = sessionStorage.getItem("hopecafe_partner_session");
-            
-            if (sessionRaw) {
-                const session = JSON.parse(sessionRaw);
-                if (session.partnerCode) setPartnerCode(session.partnerCode);
-                setIsAuthorized(true);
-            } else {
-                // Try to restore from cookie via API
-                try {
-                    const res = await fetch("/api/auth/session");
-                    const data = await res.json();
-                    if (data.authenticated && data.user.role === "PARTNER") {
-                        sessionStorage.setItem("hopecafe_partner_session", JSON.stringify({ 
-                            role: "PARTNER", 
-                            partnerCode: data.user.partnerCode, 
-                            ts: Date.now() 
-                        }));
-                        if (data.user.partnerCode) setPartnerCode(data.user.partnerCode);
-                        setIsAuthorized(true);
-                    } else if (!isPublicPage) {
-                        toast.error("Session expired. Please sign in to continue.");
-                        router.replace("/login");
-                    } else {
-                        setIsAuthorized(true);
-                    }
-                } catch (error) {
-                    if (!isPublicPage) router.replace("/login");
-                    else setIsAuthorized(true);
+            // Even if we have local session, verify status with server to handle deactivations
+            try {
+                const res = await fetch("/api/auth/session");
+                const data = await res.json();
+
+                if (res.status === 403 && data.error === "RESTRICTED") {
+                    toast.error(data.message || "Your account has been restricted.");
+                    sessionStorage.removeItem("hopecafe_partner_session");
+                    router.replace("/login");
+                    return;
                 }
+
+                if (data.authenticated && data.user.role === "PARTNER") {
+                    sessionStorage.setItem("hopecafe_partner_session", JSON.stringify({ 
+                        role: "PARTNER", 
+                        partnerCode: data.user.partnerCode, 
+                        ts: Date.now() 
+                    }));
+                    if (data.user.partnerCode) setPartnerCode(data.user.partnerCode);
+                    setIsAuthorized(true);
+                } else if (!isPublicPage) {
+                    sessionStorage.removeItem("hopecafe_partner_session");
+                    router.replace("/login");
+                } else {
+                    setIsAuthorized(true);
+                }
+            } catch (error) {
+                if (!isPublicPage) router.replace("/login");
+                else setIsAuthorized(true);
             }
         };
 

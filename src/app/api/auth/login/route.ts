@@ -38,6 +38,10 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Partner account not found" }, { status: 404 });
             }
 
+            if (partner.status === "RESTRICTED") {
+                return NextResponse.json({ error: "Your account has been restricted, please contact our team to activate your account." }, { status: 403 });
+            }
+
             // Secure Hashed Password Verification
             if (partner.password) {
                 const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");

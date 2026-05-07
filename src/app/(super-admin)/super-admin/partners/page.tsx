@@ -6,7 +6,7 @@ import {
     Users, Search, Download, Plus, X, CheckCircle, XCircle,
     Building2, Phone, Mail, MapPin, Calendar, Clock,
     ShieldCheck, Percent, MinusCircle, PlusCircle,
-    User, ChevronDown, Loader2
+    User, ChevronDown, Loader2, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
@@ -56,11 +56,13 @@ const StatusBadge = ({ status }: { status: string }) => {
         ACTIVE: "bg-green-100 text-green-700 border-green-200",
         PENDING: "bg-amber-100 text-amber-700 border-amber-200",
         REJECTED: "bg-red-100 text-red-700 border-red-200",
+        RESTRICTED: "bg-gray-100 text-gray-500 border-gray-200",
     };
     const dots: Record<string, string> = {
         ACTIVE: "bg-green-500",
         PENDING: "bg-amber-500",
         REJECTED: "bg-red-500",
+        RESTRICTED: "bg-gray-400",
     };
     return (
         <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-gray-300", styles[status] || "bg-gray-100 text-gray-600")}>
@@ -156,6 +158,43 @@ export default function SuperAdminPartnersPage() {
             if (selectedPartner?.id === id) setSelectedPartner(p => p ? { ...p, status: "REJECTED" } : null);
         } catch (err: any) { toast.error(err.message); }
         finally { setActionLoading(null); }
+    };
+
+    const handleToggleStatus = async (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === "ACTIVE" ? "RESTRICTED" : "ACTIVE";
+        setUpdatingId(`${id}-status`);
+        try {
+            const res = await fetch(`/api/admin/partner/${id}/status`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: newStatus }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            setPartners(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+            toast.success(`Partner ${newStatus === "ACTIVE" ? "activated" : "deactivated"}`);
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const handleDeletePartner = async (id: string, name: string) => {
+        if (!confirm(`Are you sure you want to completely remove partner "${name}" and all their data? This action cannot be undone.`)) return;
+        
+        setUpdatingId(`${id}-delete`);
+        try {
+            const res = await fetch(`/api/admin/partner/${id}`, { method: "DELETE" });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            toast.success("Partner removed successfully.");
+            setPartners(prev => prev.filter(p => p.id !== id));
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setUpdatingId(null);
+        }
     };
 
     const updateSlab = async (id: string, type: "commission" | "discount", val: number) => {
@@ -288,6 +327,8 @@ export default function SuperAdminPartnersPage() {
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Commission</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Status</th>
+                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Login Access</th>
+                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Delete</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center hidden lg:table-cell">Joined</th>
                             </tr>
                         </thead>
@@ -337,6 +378,36 @@ export default function SuperAdminPartnersPage() {
                                         </div>
                                     </td>
                                     <td className="px-4 py-5 text-center"><StatusBadge status={p.status} /></td>
+                                    <td className="px-4 py-5">
+                                        <div className="flex items-center justify-center">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleToggleStatus(p.id, p.status); }}
+                                                disabled={updatingId === `${p.id}-status` || (p.status !== "ACTIVE" && p.status !== "RESTRICTED")}
+                                                className={cn(
+                                                    "relative inline-flex h-5 w-10 items-center rounded-full transition-all duration-300 outline-none border border-gray-300 shadow-inner",
+                                                    p.status === "ACTIVE" ? "bg-green-500" : "bg-gray-200"
+                                                )}
+                                            >
+                                                <span
+                                                    className={cn(
+                                                        "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-300",
+                                                        p.status === "ACTIVE" ? "translate-x-5.5" : "translate-x-1"
+                                                    )}
+                                                />
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-5">
+                                        <div className="flex items-center justify-center">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeletePartner(p.id, p.name); }}
+                                                disabled={updatingId === `${p.id}-delete`}
+                                                className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                                            >
+                                                {updatingId === `${p.id}-delete` ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td className="px-4 py-5 text-center hidden lg:table-cell">
                                         <p className="text-xs text-gray-400 font-medium">{new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
                                     </td>

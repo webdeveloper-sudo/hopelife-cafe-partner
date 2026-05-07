@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
     TrendingUp,
@@ -96,6 +97,7 @@ function downloadQR(partnerCode: string, partnerName: string) {
 }
 
 export default function PartnerDashboard() {
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [stats,   setStats]   = useState<any>(null);
 
@@ -104,6 +106,19 @@ export default function PartnerDashboard() {
             try {
                 const res  = await fetch("/api/partner/stats?partnerId=demo");
                 const data = await res.json();
+
+                if (res.status === 403 && data.error === "RESTRICTED") {
+                    toast.error(data.message || "Your account has been restricted.");
+                    sessionStorage.removeItem("hopecafe_partner_session");
+                    try {
+                        await fetch("/api/auth/logout", { method: "POST" });
+                    } catch (e) {
+                        console.error("Logout error:", e);
+                    }
+                    router.push("/login");
+                    return;
+                }
+
                 if (data.success) setStats(data);
             } catch {
                 toast.error("Failed to load dashboard metrics.");
