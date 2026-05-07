@@ -363,9 +363,9 @@ export default function PartnerDetailsPage() {
                                         <Calendar className="w-4 h-4" />
                                         <p className="text-[10px] font-black uppercase tracking-widest">Joined {new Date(partner.createdAt).toLocaleDateString()}</p>
                                     </div>
-                                    <Button variant="ghost" className="h-8 px-3 rounded-md border border-gray-300 text-[10px] font-black uppercase tracking-widest text-hope-green hover:bg-hope-green/5">
+                                    {/* <Button variant="ghost" className="h-8 px-3 rounded-md border border-gray-300 text-[10px] font-black uppercase tracking-widest text-hope-green hover:bg-hope-green/5">
                                         Edit Profile
-                                    </Button>
+                                    </Button> */}
                                 </div>
                             </CardContent>
                         </Card>

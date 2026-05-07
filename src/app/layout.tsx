@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   description: "Join the HOPE Cafe Channel Program and earn commissions by referring guests.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
+    icon: "/logo.png",
+    shortcut: "/logo.png",
     apple: "/logo.png",
   },
   appleWebApp: {
