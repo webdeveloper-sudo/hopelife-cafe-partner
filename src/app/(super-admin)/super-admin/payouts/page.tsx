@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Wallet,
     Search as SearchIcon,
@@ -42,6 +42,14 @@ export default function AdminPayoutsPage() {
     const [monthlyData, setMonthlyData] = useState<any[]>([]);
     const [config, setConfig] = useState<any>(null);
     const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+    const [tempThreshold, setTempThreshold] = useState<string>("");
+    const [isEditingThreshold, setIsEditingThreshold] = useState(false);
+
+    useEffect(() => {
+        if (config?.minPayoutAmount !== undefined && !isEditingThreshold) {
+            setTempThreshold(config.minPayoutAmount.toString());
+        }
+    }, [config?.minPayoutAmount, isEditingThreshold]);
 
     const fetchEligible = useCallback(async () => {
         try {
@@ -185,11 +193,44 @@ export default function AdminPayoutsPage() {
                         <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest whitespace-nowrap">Min Threshold</span>
                         <input 
                             type="number" 
-                            className="w-16 border-none focus:ring-0 text-sm font-bold text-hope-purple" 
-                            defaultValue={config?.minPayoutAmount || 100}
-                            onBlur={(e) => handleUpdateThreshold(e.target.value)}
+                            className="w-16 border-none focus:ring-0 text-sm font-bold text-hope-purple outline-none focus:outline-none" 
+                            value={tempThreshold}
+                            onChange={(e) => {
+                                setTempThreshold(e.target.value);
+                                setIsEditingThreshold(true);
+                            }}
                         />
                     </div>
+                    <AnimatePresence>
+                        {isEditingThreshold && tempThreshold !== config?.minPayoutAmount?.toString() && (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95 }} 
+                                animate={{ opacity: 1, scale: 1 }} 
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.15 }}
+                                className="flex items-center gap-2"
+                            >
+                                <Button
+                                    onClick={async () => {
+                                        await handleUpdateThreshold(tempThreshold);
+                                        setIsEditingThreshold(false);
+                                    }}
+                                    className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-hope-green text-white hover:bg-hope-green/90 rounded-md border-none flex items-center justify-center shadow-md shadow-hope-green/20"
+                                >
+                                    Save
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        setTempThreshold(config?.minPayoutAmount?.toString() || "100");
+                                        setIsEditingThreshold(false);
+                                    }}
+                                    className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 hover:text-gray-700 rounded-md flex items-center justify-center"
+                                >
+                                    Discard
+                                </Button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
             <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest px-2">

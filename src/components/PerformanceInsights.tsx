@@ -27,6 +27,29 @@ export default function PerformanceInsights({
     data?: PerformanceData[],
     commissionRate?: number
 }) {
+    const [rate, setRate] = React.useState(commissionRate);
+
+    React.useEffect(() => {
+        setRate(commissionRate);
+    }, [commissionRate]);
+
+    React.useEffect(() => {
+        if (commissionRate === 7.5) {
+            const fetchConfig = async () => {
+                try {
+                    const res = await fetch("/api/config");
+                    const json = await res.json();
+                    if (json.success && typeof json.baseCommission === "number") {
+                        setRate(json.baseCommission);
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch default commission rate", e);
+                }
+            };
+            fetchConfig();
+        }
+    }, [commissionRate]);
+
     // Fallback if data is empty
     const chartData = data.length > 0 ? data : [
         { name: "Mon", referrals: 0, revenue: 0 },
@@ -39,7 +62,7 @@ export default function PerformanceInsights({
     ];
 
     const todayVelocity = data.length > 0 ? data[data.length - 1].referrals : 0;
-    const totalExpectedPayout = data.reduce((acc, curr) => acc + curr.revenue, 0) * (commissionRate / 100);
+    const totalExpectedPayout = data.reduce((acc, curr) => acc + curr.revenue, 0) * (rate / 100);
 
     return (
         <div className="grid grid-cols-1 gap-8">

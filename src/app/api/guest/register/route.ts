@@ -37,7 +37,8 @@ export async function POST(req: Request) {
                         partnerCode: "demo",
                         name: "Grand Hope Cafe (Demo)",
                         mobile: "0000000000",
-                        commissionSlab: config?.baseCommission || 7.5
+                        commissionSlab: config?.baseCommission || 7.5,
+                        guestDiscountSlab: config?.baseGuestDiscount || 7.5
                     }
                 });
             }
@@ -54,21 +55,46 @@ export async function POST(req: Request) {
             partnerDbId = partner.id;
         }
 
-        // 1. Find or create the Guest
+        // 1. Find or create the Guest (include dynamicQr to check daily pass limits)
         let guest = await prisma.guest.findUnique({
-            where: { mobileNumber: mobile } // Assuming 1 guest per mobile for simplicity
+            where: { mobileNumber: mobile },
+            include: { dynamicQr: true }
         });
+
+        // Enforce 1 pass per mobile number per calendar day (resets at 12:00 AM local server time)
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+        if (guest && guest.dynamicQr) {
+            const passCreated = new Date(guest.dynamicQr.createdAt);
+            if (passCreated >= startOfToday && passCreated <= endOfToday) {
+                return NextResponse.json({
+                    error: "A pass has already been generated for this mobile number today. Please wait until 12 AM tomorrow to generate a new pass."
+                }, { status: 400 });
+            }
+        }
 
         if (!guest) {
             guest = await prisma.guest.create({
                 data: {
                     name,
                     mobileNumber: mobile,
-                    partnerId: partnerDbId
-                }
+                    partnerId: partnerDbId,
+                    isRedeemed: false
+                },
+                include: { dynamicQr: true }
             });
         } else {
-            // Optional: update name and partner if they changed? Not doing for now to keep history intact.
+            // Reset isRedeemed status to false for the new daily pass, and update name if it changed
+            guest = await prisma.guest.update({
+                where: { id: guest.id },
+                data: {
+                    name,
+                    isRedeemed: false
+                },
+                include: { dynamicQr: true }
+            });
         }
 
         // 2. Generate/Update Dynamic QR Secret
@@ -85,11 +111,13 @@ export async function POST(req: Request) {
             create: {
                 guestId: guest.id,
                 secretKey,
-                expiresAt
+                expiresAt,
+                createdAt: new Date() // Record creation timestamp
             },
             update: {
                 secretKey,
-                expiresAt
+                expiresAt,
+                createdAt: new Date() // Record refresh/update timestamp for daily resets
             }
         });
 

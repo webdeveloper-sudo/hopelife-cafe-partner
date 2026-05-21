@@ -60,9 +60,7 @@ export async function GET(
         });
 
         // Check for redemption status
-        const redemption = await prisma.scanLog.findFirst({
-            where: { guestId: guest.id }
-        });
+        const redemption = guest.isRedeemed;
 
         return NextResponse.json({
             success: true,

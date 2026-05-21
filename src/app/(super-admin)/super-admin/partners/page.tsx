@@ -31,6 +31,98 @@ const BUSINESS_TYPES = [
     { value: "others", label: "Others" },
 ];
 
+interface SlabInputProps {
+    partnerId: string;
+    type: "commission" | "discount";
+    initialValue: number;
+    onSave: (id: string, type: "commission" | "discount", val: number) => Promise<void>;
+    disabled?: boolean;
+}
+
+const SlabInput = ({ partnerId, type, initialValue, onSave, disabled }: SlabInputProps) => {
+    const [inputValue, setInputValue] = useState<string>(initialValue.toString());
+    const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+        if (!isEditing) {
+            setInputValue(initialValue.toString());
+        }
+    }, [initialValue, isEditing]);
+
+    const handleCommit = async (valStr: string) => {
+        let val = parseFloat(valStr);
+        if (isNaN(val)) {
+            setInputValue(initialValue.toString());
+            return;
+        }
+        val = Math.round(val * 10) / 10;
+        if (val < 1) val = 1;
+        if (val > 40) val = 40;
+        
+        setInputValue(val.toString());
+        if (val !== initialValue) {
+            await onSave(partnerId, type, val);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            e.currentTarget.blur();
+        } else if (e.key === "Escape") {
+            setInputValue(initialValue.toString());
+            e.currentTarget.blur();
+        }
+    };
+
+    const adjust = async (amount: number) => {
+        let current = parseFloat(inputValue);
+        if (isNaN(current)) current = initialValue;
+        let next = current + amount;
+        next = Math.round(next * 10) / 10;
+        if (next < 1) next = 1;
+        if (next > 40) next = 40;
+        setInputValue(next.toString());
+        await onSave(partnerId, type, next);
+    };
+
+    return (
+        <div className="flex items-center justify-center gap-1.5" onClick={e => e.stopPropagation()}>
+            <button
+                type="button"
+                onClick={async (e) => { e.stopPropagation(); await adjust(-0.5); }}
+                disabled={disabled || parseFloat(inputValue) <= 1}
+                className="text-gray-300 hover:text-red-500 disabled:opacity-20 transition-all hover:scale-110 p-1"
+            >
+                <MinusCircle className="w-4 h-4" />
+            </button>
+            <div className="relative flex items-center justify-center w-16 bg-gray-50 border border-gray-300 rounded-md focus-within:border-black transition-all">
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onFocus={() => setIsEditing(true)}
+                    onBlur={() => {
+                        setIsEditing(false);
+                        handleCommit(inputValue);
+                    }}
+                    onKeyDown={handleKeyDown}
+                    disabled={disabled}
+                    className="w-10 text-center text-sm font-black text-gray-900 bg-transparent border-0 outline-none p-1.5 pr-0.5"
+                />
+                <span className="text-[10px] font-bold text-gray-400 select-none pr-1.5">%</span>
+            </div>
+            <button
+                type="button"
+                onClick={async (e) => { e.stopPropagation(); await adjust(0.5); }}
+                disabled={disabled || parseFloat(inputValue) >= 40}
+                className="text-gray-300 hover:text-green-500 disabled:opacity-20 transition-all hover:scale-110 p-1"
+            >
+                <PlusCircle className="w-4 h-4" />
+            </button>
+        </div>
+    );
+};
+
 interface Partner {
     id: string;
     name: string;
@@ -99,10 +191,11 @@ export default function SuperAdminPartnersPage() {
                 const configRes = await fetch('/api/admin/config');
                 const configData = await configRes.json();
                 const baseComm = configData.config?.baseCommission || 7.5;
+                const baseDisc = configData.config?.baseGuestDiscount || 7.5;
                 
                 setPartners(data.map((p: any) => ({ 
                     ...p, 
-                    guestDiscountSlab: p.guestDiscountSlab || p.commissionSlab || baseComm 
+                    guestDiscountSlab: p.guestDiscountSlab ?? baseDisc
                 })));
             }
         } catch { toast.error("Failed to load partners"); }
@@ -326,6 +419,7 @@ export default function SuperAdminPartnersPage() {
                                 <th className="px-8 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest">Partner</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Commission</th>
+                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Discount</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Status</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Login Access</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Delete</th>
@@ -334,9 +428,9 @@ export default function SuperAdminPartnersPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
-                                <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
+                                <tr><td colSpan={8} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={5} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
+                                <tr><td colSpan={8} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
                             ) : filtered.map((p, i) => (
                                 <motion.tr
                                     key={p.id}
@@ -363,19 +457,22 @@ export default function SuperAdminPartnersPage() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-5">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button onClick={e => { e.stopPropagation(); updateSlab(p.id, "commission", p.commissionSlab - 0.5); }}
-                                                disabled={updatingId === `${p.id}-commission` || p.commissionSlab <= 1}
-                                                className="text-gray-300 hover:text-red-500 disabled:opacity-20 transition-all hover:scale-110">
-                                                <MinusCircle className="w-4 h-4" />
-                                            </button>
-                                            <span className="text-sm font-black text-gray-900 w-14 text-center bg-gray-50 py-1.5 rounded-md border border-gray-300">{p.commissionSlab}%</span>
-                                            <button onClick={e => { e.stopPropagation(); updateSlab(p.id, "commission", p.commissionSlab + 0.5); }}
-                                                disabled={updatingId === `${p.id}-commission` || p.commissionSlab >= 40}
-                                                className="text-gray-300 hover:text-green-500 disabled:opacity-20 transition-all hover:scale-110">
-                                                <PlusCircle className="w-4 h-4" />
-                                            </button>
-                                        </div>
+                                        <SlabInput
+                                            partnerId={p.id}
+                                            type="commission"
+                                            initialValue={p.commissionSlab}
+                                            onSave={updateSlab}
+                                            disabled={updatingId === `${p.id}-commission`}
+                                        />
+                                    </td>
+                                    <td className="px-4 py-5">
+                                        <SlabInput
+                                            partnerId={p.id}
+                                            type="discount"
+                                            initialValue={p.guestDiscountSlab ?? 7.5}
+                                            onSave={updateSlab}
+                                            disabled={updatingId === `${p.id}-discount`}
+                                        />
                                     </td>
                                     <td className="px-4 py-5 text-center"><StatusBadge status={p.status} /></td>
                                     <td className="px-4 py-5">

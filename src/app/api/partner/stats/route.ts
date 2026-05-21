@@ -34,6 +34,7 @@ export async function GET(req: Request) {
                     email: "demo@partner.hub",
                     mobile: "0000000000",
                     commissionSlab: baseCommission,
+                    guestDiscountSlab: config?.baseGuestDiscount || 7.5,
                     bonusCommission: 0,
                     retentionStreak: 0,
                 }
@@ -182,7 +183,7 @@ export async function GET(req: Request) {
                 slab: partner.commissionSlab,
                 bonusCommission: partner.bonusCommission ?? 0,
                 effectiveSlab: effectiveCommission,
-                guestDiscountSlab: partner.guestDiscountSlab || partner.commissionSlab,
+                guestDiscountSlab: partner.guestDiscountSlab ?? config?.baseGuestDiscount ?? 7.5,
                 retentionStreak: partner.retentionStreak ?? 0,
                 currentTier: partner.currentTier || "BRONZE",
                 businessType: partner.businessType || "N/A",

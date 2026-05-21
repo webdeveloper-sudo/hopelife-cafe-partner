@@ -25,6 +25,7 @@ export async function POST() {
             include: {
                 guests: {
                     include: {
+                        dynamicQr: true,
                         scanLogs: {
                             where: { status: { in: ["SETTLED", "PAID"] } }
                         }
@@ -66,11 +67,19 @@ export async function POST() {
 
             // F. Sync Guest isRedeemed status (Repair Logic)
             for (const guest of partner.guests) {
-                const hasScan = guest.scanLogs.length > 0;
-                if (guest.isRedeemed !== hasScan) {
+                const hasActivePass = !!guest.dynamicQr;
+                let shouldBeRedeemed = false;
+                if (hasActivePass) {
+                    const passGeneratedAt = guest.dynamicQr!.createdAt;
+                    shouldBeRedeemed = guest.scanLogs.some((log: any) => new Date(log.createdAt) >= new Date(passGeneratedAt));
+                } else {
+                    shouldBeRedeemed = guest.scanLogs.length > 0;
+                }
+
+                if (guest.isRedeemed !== shouldBeRedeemed) {
                     await prisma.guest.update({
                         where: { id: guest.id },
-                        data: { isRedeemed: hasScan }
+                        data: { isRedeemed: shouldBeRedeemed }
                     });
                 }
             }

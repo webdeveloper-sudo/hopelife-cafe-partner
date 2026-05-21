@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { LogIn, Mail, Lock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { LogIn, Mail, Lock, ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -15,6 +15,7 @@ export default function PartnerLoginPage() {
     const [loading, setLoading] = React.useState(false);
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [showPassword, setShowPassword] = React.useState(false);
 
     React.useEffect(() => {
         const session = sessionStorage.getItem("hopecafe_partner_session");
@@ -120,13 +121,20 @@ export default function PartnerLoginPage() {
                                     <div className="relative">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                         <Input
-                                            className="pl-12 h-12"
+                                            className="pl-12 pr-12 h-12"
                                             placeholder="••••••••"
                                             required
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        </button>
                                     </div>
                                 </div>
 

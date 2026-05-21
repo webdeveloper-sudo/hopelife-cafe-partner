@@ -92,14 +92,8 @@ export async function POST(req: Request) {
             if (!billAmount) return NextResponse.json({ error: "Missing Bill Amount" }, { status: 400 });
 
             // ENFORCE OPTION A: STRICT ONE-TIME USE
-            // Ensure no duplicate settlements EVER for this guest
-            const existingScan = await prisma.scanLog.findFirst({
-                where: {
-                    guestId: guest.id,
-                }
-            });
-
-            if (existingScan) {
+            // Ensure no duplicate settlements for the current active pass
+            if (guest.isRedeemed) {
                 return NextResponse.json({ error: "Pass ALREADY REDEEMED. This is a one-time discount only." }, { status: 400 });
             }
 
@@ -170,9 +164,7 @@ export async function POST(req: Request) {
         }
 
         // Just returning verification data
-        const redemptionCheck = await prisma.scanLog.findFirst({
-            where: { guestId: guest.id }
-        });
+        const redemptionCheck = guest.isRedeemed;
 
         return NextResponse.json({
             success: true,
