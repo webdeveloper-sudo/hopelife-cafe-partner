@@ -118,7 +118,7 @@ export async function POST(req: Request) {
                 prisma.scanLog.create({
                     data: {
                         guestId: guest.id,
-                        adminId: adminId || "SYSTEM",
+                        adminId: session.id || "SYSTEM",
                         billAmount,
                         discountAmount: guestDiscountAmount,
                         guestDiscountAmount,

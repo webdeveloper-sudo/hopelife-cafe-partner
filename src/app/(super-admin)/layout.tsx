@@ -14,7 +14,8 @@ import {
     LogOut,
     Activity,
     Menu,
-    X
+    X,
+    Coffee
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,6 +23,7 @@ const navLinks = [
     { name: "Overview", href: "/super-admin/dashboard", icon: BarChart3 },
     { name: "Partners", href: "/super-admin/partners", icon: Users },
     { name: "Marketing Team", href: "/super-admin/marketing-team", icon: Crown },
+    { name: "Cafe Earnings", href: "/super-admin/earnings", icon: Coffee },
     { name: "Payouts", href: "/super-admin/payouts", icon: CreditCard },
     { name: "Slabs & Fees", href: "/super-admin/slabs", icon: Settings2 },
     { name: "System Logs", href: "/super-admin/logs", icon: Activity },

@@ -25,7 +25,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
             where: { partnerId: id },
             select: { id: true }
         });
-        const guestIds = partnerGuests.map(g => g.id);
+        const guestIds = partnerGuests.map((g: { id: string }) => g.id);
         
         await prisma.scanLog.deleteMany({
             where: { guestId: { in: guestIds } }

@@ -37,7 +37,7 @@ export default function CafeAdminLoginPage() {
             const data = await res.json();
 
             if (data.success && data.role === "ADMIN") {
-                sessionStorage.setItem("hopecafe_admin_session", JSON.stringify({ role: "ADMIN", ts: Date.now() }));
+                sessionStorage.setItem("hopecafe_admin_session", JSON.stringify({ role: "ADMIN", name: data.name, ts: Date.now() }));
                 toast.success("Cafe Admin Authorization Granted");
                 router.push("/admin/dashboard");
             } else if (data.success && data.role !== "ADMIN") {

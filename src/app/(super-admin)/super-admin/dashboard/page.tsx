@@ -12,6 +12,8 @@ import {
   XCircle,
   Bell,
   Crown,
+  Coffee,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -225,6 +227,95 @@ export default function SuperAdminDashboard() {
             </motion.div>
           ))}
         </div>
+
+        {/* Cafe Branch Performance Section */}
+        <motion.div variants={item} className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Cafe Outlet Earnings</h2>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Live Performance Breakdown By Branch</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* White Town Cafe */}
+            <Card className="border border-gray-300 bg-white shadow-xl shadow-gray-200/50 rounded-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full blur-2xl pointer-events-none" />
+              <CardContent className="p-8">
+                <div className="flex justify-between items-start">
+                  <div className="w-14 h-14 rounded-md border border-gray-300 bg-green-50 flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                    <Coffee className="w-7 h-7 text-hope-green" />
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase bg-green-50 border border-green-200 text-hope-green tracking-wider">
+                    White Town
+                  </span>
+                </div>
+                <div className="mt-6">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    HOPE Cafe White Town
+                  </h3>
+                  <p className="text-4xl font-extrabold text-gray-900 mt-2 tracking-tight">
+                    ₹{stats.whiteTownEarnings?.toLocaleString() || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium mt-2">
+                    Individual cafe branch total settled earnings.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Auroville Cafe */}
+            <Card className="border border-gray-300 bg-white shadow-xl shadow-gray-200/50 rounded-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+              <CardContent className="p-8">
+                <div className="flex justify-between items-start">
+                  <div className="w-14 h-14 rounded-md border border-gray-300 bg-blue-50 flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                    <Coffee className="w-7 h-7 text-blue-500" />
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase bg-blue-50 border border-blue-200 text-blue-600 tracking-wider">
+                    Auroville
+                  </span>
+                </div>
+                <div className="mt-6">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    HOPE Cafe Auroville
+                  </h3>
+                  <p className="text-4xl font-extrabold text-gray-900 mt-2 tracking-tight">
+                    ₹{stats.aurovilleEarnings?.toLocaleString() || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium mt-2">
+                    Individual cafe branch total settled earnings.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Combined Cafe Earnings */}
+            <Card className="border border-gray-300 bg-gradient-to-br from-emerald-950/5 via-emerald-900/5 to-transparent bg-white shadow-xl shadow-gray-200/50 rounded-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              <CardContent className="p-8">
+                <div className="flex justify-between items-start">
+                  <div className="w-14 h-14 rounded-md border border-gray-300 bg-emerald-50 flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                    <TrendingUp className="w-7 h-7 text-emerald-600" />
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase bg-emerald-50 border border-emerald-200 text-emerald-700 tracking-wider">
+                    Combined Cafe
+                  </span>
+                </div>
+                <div className="mt-6">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    Combined Cafe Revenue
+                  </h3>
+                  <p className="text-4xl font-extrabold text-gray-900 mt-2 tracking-tight">
+                    ₹{stats.combinedCafeEarnings?.toLocaleString() || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium mt-2">
+                    Aggregated earnings across all active branches.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
 
         <motion.div variants={item}>
           <PerformanceInsights data={data.weeklyPerformance || []} />

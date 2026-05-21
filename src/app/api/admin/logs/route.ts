@@ -16,17 +16,25 @@ export async function GET() {
 
         const prisma = getPrisma();
 
-        // Fetch data to construct logs
+        // Fetch data to construct logs (restricted to individual branch if not SUPER_ADMIN)
+        const isSuperAdmin = session.role === "SUPER_ADMIN";
+        
+        let scanLogsQuery: any = {};
+        if (!isSuperAdmin) {
+            scanLogsQuery.adminId = session.id;
+        }
+
         const [scanLogs, partners, payouts] = await Promise.all([
             prisma.scanLog.findMany({ 
+                where: scanLogsQuery,
                 include: { 
                     guest: {
                         include: { partner: true }
                     } 
                 } 
             }),
-            prisma.partner.findMany(),
-            prisma.payout.findMany()
+            isSuperAdmin ? prisma.partner.findMany() : Promise.resolve([]),
+            isSuperAdmin ? prisma.payout.findMany() : Promise.resolve([])
         ]);
 
         const logs: any[] = [];

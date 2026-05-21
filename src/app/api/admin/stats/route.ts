@@ -19,6 +19,22 @@ export async function GET() {
         const guests = await prisma.guest.findMany();
         const scanLogs = await prisma.scanLog.findMany();
 
+        // Calculate branch-specific and combined earnings
+        const [whiteTownAdmin, aurovilleAdmin] = await Promise.all([
+            prisma.admin.findUnique({ where: { email: "whitetown@hopecafe.com" } }),
+            prisma.admin.findUnique({ where: { email: "auroville@hopecafe.com" } })
+        ]);
+
+        const whiteTownSales = whiteTownAdmin 
+            ? scanLogs.filter((log: any) => (log.status === "SETTLED" || log.status === "PAID") && log.adminId === whiteTownAdmin.id)
+                      .reduce((acc: number, log: any) => acc + (log.billAmount || 0), 0)
+            : 0;
+
+        const aurovilleSales = aurovilleAdmin
+            ? scanLogs.filter((log: any) => (log.status === "SETTLED" || log.status === "PAID") && log.adminId === aurovilleAdmin.id)
+                      .reduce((acc: number, log: any) => acc + (log.billAmount || 0), 0)
+            : 0;
+
         // 1. Active Partners (Only those with status ACTIVE)
         const activePartners = partners.filter((p: any) => p.status === "ACTIVE").length;
 
@@ -90,7 +106,10 @@ export async function GET() {
                 monthlyRevenue: `₹${(salesTotal / 1000).toFixed(1)}K`, 
                 actualRevenue: salesTotal,
                 avgCommission: `${avgCommission.toFixed(1)}%`,
-                totalOwed: `₹${(totalOwedAmount / 1000).toFixed(2)}K`
+                totalOwed: `₹${(totalOwedAmount / 1000).toFixed(2)}K`,
+                whiteTownEarnings: whiteTownSales,
+                aurovilleEarnings: aurovilleSales,
+                combinedCafeEarnings: whiteTownSales + aurovilleSales
             },
             recentApprovals,
             weeklyPerformance

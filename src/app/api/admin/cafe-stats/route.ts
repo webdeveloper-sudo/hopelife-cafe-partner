@@ -1,18 +1,34 @@
 export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export async function GET() {
     try {
+        const session = await getSession();
+        if (!session || session.role !== "ADMIN") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const prisma = getPrisma();
 
-        // Fetch all scan logs (no admin-scope filter — cafe admin sees all outlet scans)
+        // Retrieve custom branch name
+        const adminRecord = await prisma.admin.findUnique({
+            where: { id: session.id },
+            select: { name: true }
+        });
+        const cafeName = adminRecord?.name || "Cafe Partner";
+
+        // Fetch scan logs scoped strictly to this outlet's adminId
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         const [allScans, todayScans, recentActivity] = await Promise.all([
             prisma.scanLog.findMany({
-                where: { status: { in: ["SETTLED", "COMPLETED"] } },
+                where: { 
+                    status: { in: ["SETTLED", "COMPLETED"] },
+                    adminId: session.id
+                },
                 select: {
                     billAmount: true,
                     discountAmount: true,
@@ -24,6 +40,7 @@ export async function GET() {
             prisma.scanLog.findMany({
                 where: {
                     status: { in: ["SETTLED", "COMPLETED"] },
+                    adminId: session.id,
                     createdAt: { gte: startOfToday }
                 },
                 select: {
@@ -34,7 +51,10 @@ export async function GET() {
                 }
             }),
             prisma.scanLog.findMany({
-                where: { status: { in: ["SETTLED", "COMPLETED"] } },
+                where: { 
+                    status: { in: ["SETTLED", "COMPLETED"] },
+                    adminId: session.id
+                },
                 orderBy: { createdAt: "desc" },
                 take: 20,
                 include: {
@@ -70,6 +90,7 @@ export async function GET() {
 
         return NextResponse.json({
             success: true,
+            cafeName,
             stats: {
                 totalTransactions: allScans.length,
                 totalSales: totalSales.toFixed(2),

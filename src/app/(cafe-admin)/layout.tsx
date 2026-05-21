@@ -26,6 +26,7 @@ export default function CafeAdminLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = React.useState(false);
+    const [adminName, setAdminName] = React.useState("Cafe Admin");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
     React.useEffect(() => {
@@ -42,6 +43,7 @@ export default function CafeAdminLayout({ children }: { children: React.ReactNod
                         router.replace("/admin/login");
                         return;
                     }
+                    if (session.name) setAdminName(session.name);
                     setIsAuthorized(true);
                 } catch {
                     router.replace("/admin/login");
@@ -54,8 +56,10 @@ export default function CafeAdminLayout({ children }: { children: React.ReactNod
                     if (data.authenticated && data.user.role === "ADMIN") {
                         sessionStorage.setItem("hopecafe_admin_session", JSON.stringify({ 
                             role: "ADMIN", 
+                            name: data.user.name,
                             ts: Date.now() 
                         }));
+                        if (data.user.name) setAdminName(data.user.name);
                         setIsAuthorized(true);
                     } else if (!isPublicPage) {
                         router.replace("/admin/login");
@@ -112,7 +116,7 @@ export default function CafeAdminLayout({ children }: { children: React.ReactNod
             <div className="px-6 pb-4">
                 <div className="flex items-center gap-2 px-4 py-2 rounded-md border border-green-200 bg-green-50 text-hope-green text-[10px] font-black uppercase tracking-widest">
                     <Coffee className="w-3 h-3" />
-                    Cafe Admin
+                    {adminName}
                 </div>
             </div>
 

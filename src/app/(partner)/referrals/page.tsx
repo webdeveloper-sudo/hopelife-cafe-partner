@@ -69,35 +69,6 @@ export default function ReferralsPage() {
         fetchReferrals();
     }, []);
 
-    const handleAddGuest = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newMobile.length !== 10 || !newName.trim()) return;
-
-        setSubmitting(true);
-        try {
-            const res = await fetch("/api/guest/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: newName,
-                    mobile: newMobile,
-                    partnerId: "session" // API now derives from session
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setSuccessData({ guestId: data.guestId });
-                toast.success(`Guest referral generated!`);
-                fetchReferrals();
-            } else {
-                toast.error(data.error || "Failed to generate security pass. Please verify the guest details.");
-            }
-        } catch (err: any) {
-            toast.error("Generation Link Failure: Unable to connect to the pass engine. Please check your network.");
-        } finally {
-            setSubmitting(false);
-        }
-    };
 
     const filteredReferrals = referrals.filter(r => 
         r.name.toLowerCase().includes(search.toLowerCase()) || 

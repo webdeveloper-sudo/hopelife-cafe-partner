@@ -46,6 +46,7 @@ function formatTimeAgo(date: string) {
 export default function CafeAdminDashboard() {
   const [loading, setLoading] = React.useState(true);
   const [stats, setStats] = React.useState<any>(null);
+  const [cafeName, setCafeName] = React.useState("Cafe Partner");
   const [activityFeed, setActivityFeed] = React.useState<any[]>([]);
 
   const fetchData = async () => {
@@ -54,6 +55,7 @@ export default function CafeAdminDashboard() {
       const json = await res.json();
       if (json.success) {
         setStats(json.stats);
+        setCafeName(json.cafeName || "Cafe Partner");
         setActivityFeed(json.activityFeed || []);
       } else {
         toast.error("Failed to load dashboard data.");
@@ -172,7 +174,7 @@ export default function CafeAdminDashboard() {
               <ScanLine className="w-5 h-5 text-hope-green" />
             </div>
             <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
-              Cafe Dashboard
+              {cafeName} Dashboard
             </h1>
           </div>
           <p className="text-gray-500 mt-1 font-medium text-sm ml-1">

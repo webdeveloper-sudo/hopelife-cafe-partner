@@ -41,6 +41,13 @@ export async function GET() {
                 cookieStore.delete("session");
                 return NextResponse.json({ authenticated: false, error: "Account deactivated" }, { status: 401 });
             }
+        } else if (session.role === "ADMIN" || session.role === "SUPER_ADMIN") {
+            const prisma = getPrisma();
+            const admin = await prisma.admin.findUnique({
+                where: { id: session.id },
+                select: { name: true }
+            });
+            extraData = { name: admin?.name };
         }
 
         return NextResponse.json({

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
             const redirectUrl = adminRole === "SUPER_ADMIN" ? "/super-admin/dashboard" : "/admin/dashboard";
 
             await login({ role: adminRole, id: adminUser.id });
-            return NextResponse.json({ success: true, role: adminRole, redirectUrl });
+            return NextResponse.json({ success: true, role: adminRole, redirectUrl, name: adminUser.name });
 
         } else if (role === "PARTNER") {
             const partner = (email) ?
