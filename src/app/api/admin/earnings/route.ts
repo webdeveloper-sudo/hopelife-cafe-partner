@@ -140,9 +140,9 @@ export async function GET() {
         });
 
         // Convert key-value objects to structured arrays for easier charting/listing
-        const dailyData = Object.keys(daily).map(key => ({ name: key, ...daily[key] }));
-        const weeklyData = Object.keys(weekly).map(key => ({ name: key, ...weekly[key] })).reverse(); // order chronologically
-        const monthlyData = Object.keys(monthly).map(key => ({ name: key, ...monthly[key] }));
+        const dailyData = Object.keys(daily).map(key => ({ name: key, ...daily[key] })).reverse();
+        const weeklyData = Object.keys(weekly).map(key => ({ name: key, ...weekly[key] })).reverse();
+        const monthlyData = Object.keys(monthly).map(key => ({ name: key, ...monthly[key] })).reverse();
 
         return NextResponse.json({
             success: true,
