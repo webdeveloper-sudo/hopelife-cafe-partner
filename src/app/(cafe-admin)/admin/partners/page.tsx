@@ -125,58 +125,60 @@ export default function CafeAdminPartnersPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-gray-50/30 border-b border-gray-100">
-                                <th className="px-8 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest">Partner</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Referred By</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Status</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center hidden lg:table-cell">Joined</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
-                            ) : filtered.length === 0 ? (
-                                <tr><td colSpan={5} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
-                            ) : filtered.map((p, i) => (
-                                <motion.tr
-                                    key={p.id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: i * 0.03 }}
-                                    className="group hover:bg-gray-50 transition-colors"
-                                >
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-900 rounded-md border border-gray-300 flex items-center justify-center text-white font-black text-sm shrink-0 group-hover:scale-110 transition-transform">
-                                                {p.name[0]}
+                    <div className="w-full overflow-x-auto">
+                        <table className="w-full text-left min-w-[700px]">
+                            <thead>
+                                <tr className="bg-gray-50/30 border-b border-gray-100">
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest">Partner</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Referred By</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center  hidden md:table-cell">Status</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {loading ? (
+                                    <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
+                                ) : filtered.length === 0 ? (
+                                    <tr><td colSpan={5} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
+                                ) : filtered.map((p, i) => (
+                                    <motion.tr
+                                        key={p.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: i * 0.03 }}
+                                        className="group hover:bg-gray-50 transition-colors"
+                                    >
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-gray-900 rounded-md border border-gray-300 flex items-center justify-center text-white font-black text-sm shrink-0 group-hover:scale-110 transition-transform">
+                                                    {p.name[0]}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-900 text-sm">{p.name}</p>
+                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">{p.partnerCode} · {p.mobile}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900 text-sm">{p.name}</p>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">{p.partnerCode} · {p.mobile}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-5 hidden md:table-cell">
-                                        <span className="text-[10px] font-black text-gray-400 border border-gray-300 px-3 py-1 rounded-md uppercase">
-                                            {p.businessType?.replace(/_/g, " ") || "N/A"}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-5 text-center">
-                                        <span className="text-xs font-bold text-gray-600">
-                                            {p.referredBy || "-"}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-5 text-center"><StatusBadge status={p.status} /></td>
-                                    <td className="px-4 py-5 text-center hidden lg:table-cell">
-                                        <p className="text-xs text-gray-400 font-medium">{new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
-                                    </td>
-                                </motion.tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                        </td>
+                                        <td className="px-4 py-5 hidden md:table-cell">
+                                            <span className="text-[10px] font-black text-gray-400 border border-gray-300 px-3 py-1 rounded-md uppercase">
+                                                {p.businessType?.replace(/_/g, " ") || "N/A"}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-5 text-center">
+                                            <span className="text-xs font-bold text-gray-600">
+                                                {p.referredBy || "-"}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-5 text-center hidden lg:table-cell"><StatusBadge status={p.status} /></td>
+                                        <td className="px-4 py-5 text-center ">
+                                            <p className="text-xs text-gray-400 font-medium">{new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </CardContent>
             </Card>
         </div>

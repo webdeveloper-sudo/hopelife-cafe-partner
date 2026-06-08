@@ -449,111 +449,113 @@ export default function SuperAdminPartnersPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-gray-50/30 border-b border-gray-100">
-                                <th className="px-8 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest">Partner</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Commission</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Discount</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Referred By</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Status</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Login Access</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Delete</th>
-                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center hidden lg:table-cell">Joined</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr><td colSpan={9} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
-                            ) : filtered.length === 0 ? (
-                                <tr><td colSpan={9} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
-                            ) : filtered.map((p, i) => (
-                                <motion.tr
-                                    key={p.id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: i * 0.03 }}
-                                    onClick={() => router.push(`/super-admin/partners/${p.id}`)}
-                                    className="group hover:bg-gray-50 transition-colors cursor-pointer"
-                                >
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-900 rounded-md border border-gray-300 flex items-center justify-center text-white font-black text-sm shrink-0 group-hover:scale-110 transition-transform">
-                                                {p.name[0]}
+                    <div className="w-full overflow-x-auto">
+                        <table className="w-full text-left min-w-[1000px]">
+                            <thead>
+                                <tr className="bg-gray-50/30 border-b border-gray-100">
+                                    <th className="px-8 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest">Partner</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Commission</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Discount</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Referred By</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Status</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Login Access</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Delete</th>
+                                    <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center hidden lg:table-cell">Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {loading ? (
+                                    <tr><td colSpan={9} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
+                                ) : filtered.length === 0 ? (
+                                    <tr><td colSpan={9} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
+                                ) : filtered.map((p, i) => (
+                                    <motion.tr
+                                        key={p.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: i * 0.03 }}
+                                        onClick={() => router.push(`/super-admin/partners/${p.id}`)}
+                                        className="group hover:bg-gray-50 transition-colors cursor-pointer"
+                                    >
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-gray-900 rounded-md border border-gray-300 flex items-center justify-center text-white font-black text-sm shrink-0 group-hover:scale-110 transition-transform">
+                                                    {p.name[0]}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-900 text-sm">{p.name}</p>
+                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">{p.partnerCode} · {p.mobile}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900 text-sm">{p.name}</p>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">{p.partnerCode} · {p.mobile}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-5 hidden md:table-cell">
-                                        <span className="text-[10px] font-black text-gray-400 border border-gray-300 px-3 py-1 rounded-md uppercase">
-                                            {p.businessType?.replace(/_/g, " ") || "N/A"}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-5">
-                                        <SlabInput
-                                            partnerId={p.id}
-                                            type="commission"
-                                            initialValue={p.commissionSlab}
-                                            onSave={updateSlab}
-                                            disabled={updatingId === `${p.id}-commission`}
-                                        />
-                                    </td>
-                                    <td className="px-4 py-5">
-                                        <SlabInput
-                                            partnerId={p.id}
-                                            type="discount"
-                                            initialValue={p.guestDiscountSlab ?? 7.5}
-                                            onSave={updateSlab}
-                                            disabled={updatingId === `${p.id}-discount`}
-                                        />
-                                    </td>
-                                    <td className="px-4 py-5 text-center">
-                                        <span className="text-xs font-bold text-gray-600">
-                                            {p.referredBy || "-"}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-5 text-center"><StatusBadge status={p.status} /></td>
-                                    <td className="px-4 py-5">
-                                        <div className="flex items-center justify-center">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleToggleStatus(p.id, p.status); }}
-                                                disabled={updatingId === `${p.id}-status` || (p.status !== "ACTIVE" && p.status !== "RESTRICTED")}
-                                                className={cn(
-                                                    "relative inline-flex h-5 w-10 items-center rounded-full transition-all duration-300 outline-none border border-gray-300 shadow-inner",
-                                                    p.status === "ACTIVE" ? "bg-green-500" : "bg-gray-200"
-                                                )}
-                                            >
-                                                <span
+                                        </td>
+                                        <td className="px-4 py-5 hidden md:table-cell">
+                                            <span className="text-[10px] font-black text-gray-400 border border-gray-300 px-3 py-1 rounded-md uppercase">
+                                                {p.businessType?.replace(/_/g, " ") || "N/A"}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <SlabInput
+                                                partnerId={p.id}
+                                                type="commission"
+                                                initialValue={p.commissionSlab}
+                                                onSave={updateSlab}
+                                                disabled={updatingId === `${p.id}-commission`}
+                                            />
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <SlabInput
+                                                partnerId={p.id}
+                                                type="discount"
+                                                initialValue={p.guestDiscountSlab ?? 7.5}
+                                                onSave={updateSlab}
+                                                disabled={updatingId === `${p.id}-discount`}
+                                            />
+                                        </td>
+                                        <td className="px-4 py-5 text-center">
+                                            <span className="text-xs font-bold text-gray-600">
+                                                {p.referredBy || "-"}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-5 text-center"><StatusBadge status={p.status} /></td>
+                                        <td className="px-4 py-5">
+                                            <div className="flex items-center justify-center">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleToggleStatus(p.id, p.status); }}
+                                                    disabled={updatingId === `${p.id}-status` || (p.status !== "ACTIVE" && p.status !== "RESTRICTED")}
                                                     className={cn(
-                                                        "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-300",
-                                                        p.status === "ACTIVE" ? "translate-x-5.5" : "translate-x-1"
+                                                        "relative inline-flex h-5 w-10 items-center rounded-full transition-all duration-300 outline-none border border-gray-300 shadow-inner",
+                                                        p.status === "ACTIVE" ? "bg-green-500" : "bg-gray-200"
                                                     )}
-                                                />
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-5">
-                                        <div className="flex items-center justify-center">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDeletePartner(p.id, p.name); }}
-                                                disabled={updatingId === `${p.id}-delete`}
-                                                className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                                            >
-                                                {updatingId === `${p.id}-delete` ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-5 text-center hidden lg:table-cell">
-                                        <p className="text-xs text-gray-400 font-medium">{new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
-                                    </td>
-                                </motion.tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-300",
+                                                            p.status === "ACTIVE" ? "translate-x-5.5" : "translate-x-1"
+                                                        )}
+                                                    />
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <div className="flex items-center justify-center">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDeletePartner(p.id, p.name); }}
+                                                    disabled={updatingId === `${p.id}-delete`}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                                                >
+                                                    {updatingId === `${p.id}-delete` ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-5 text-center hidden lg:table-cell">
+                                            <p className="text-xs text-gray-400 font-medium">{new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </CardContent>
             </Card>
 
