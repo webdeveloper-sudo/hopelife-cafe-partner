@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { partnerName, contactName, mobile, email, businessType, address, city, pincode, commissionSlab } = body;
+        const { partnerName, contactName, mobile, email, businessType, address, city, pincode, commissionSlab, referredBy } = body;
 
         if (!partnerName || !contactName || !mobile || !email) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -58,6 +58,7 @@ export async function POST(req: Request) {
                 walletBalance: 0,
                 bonusCommission: 0,
                 retentionStreak: 0,
+                referredBy: referredBy || "volunteer",
             }
         });
 

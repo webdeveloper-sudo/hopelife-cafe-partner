@@ -46,6 +46,7 @@ model Partner {
   updatedAt               DateTime   @default(now()) @updatedAt
   incomeLogs              IncomeLog[]
   upiId                  String?
+  referredBy             String?
   guests            Guest[]
   payouts           Payout[]
   

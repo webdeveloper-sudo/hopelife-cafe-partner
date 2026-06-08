@@ -41,6 +41,8 @@ interface FormData {
     city: string;
     pincode: string;
     upiId: string;
+    referredBySelect: string;
+    referredByCustom: string;
 }
 
 export default function RegisterPage() {
@@ -48,7 +50,8 @@ export default function RegisterPage() {
     const [step, setStep] = useState<Step>("form");
     const [formData, setFormData] = useState<FormData>({
         partnerName: "", contactName: "", email: "", mobile: "",
-        businessType: "", address: "", city: "Pondicherry", pincode: "", upiId: ""
+        businessType: "", address: "", city: "Pondicherry", pincode: "", upiId: "",
+        referredBySelect: "", referredByCustom: ""
     });
     const [errors, setErrors] = useState<Partial<FormData>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,10 +92,26 @@ export default function RegisterPage() {
             const res = await fetch("/api/partner/send-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: formData.email }),
+                body: JSON.stringify({ email: formData.email, mobile: formData.mobile }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+            if (!res.ok) {
+                if (data.error === "email_exists") {
+                    setErrors(er => ({ ...er, email: data.message }));
+                    setTimeout(() => {
+                        document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 50);
+                    throw new Error(data.message);
+                } else if (data.error === "mobile_exists") {
+                    setErrors(er => ({ ...er, mobile: data.message }));
+                    setTimeout(() => {
+                        document.getElementById("mobile")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 50);
+                    throw new Error(data.message);
+                } else {
+                    throw new Error(data.error || "Failed to send OTP");
+                }
+            }
             toast.success(`OTP sent to ${formData.email}`);
             setStep("otp");
             setResendTimer(60);
@@ -141,10 +160,25 @@ export default function RegisterPage() {
             setVerificationToken(data.verificationToken);
 
             // Now register the partner
+            let finalReferredBy = "volunteer";
+            if (formData.referredBySelect) {
+                if (formData.referredBySelect === "Hope Partner") {
+                    finalReferredBy = formData.referredByCustom ? `Hope Partner: ${formData.referredByCustom}` : "Hope Partner";
+                } else if (formData.referredBySelect === "Others") {
+                    finalReferredBy = formData.referredByCustom ? `Others: ${formData.referredByCustom}` : "Others";
+                } else {
+                    finalReferredBy = formData.referredBySelect;
+                }
+            }
+
             const regRes = await fetch("/api/partner/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...formData, verificationToken: data.verificationToken }),
+                body: JSON.stringify({
+                    ...formData,
+                    referredBy: finalReferredBy,
+                    verificationToken: data.verificationToken
+                }),
             });
             const regData = await regRes.json();
             if (!regRes.ok) throw new Error(regData.error || "Registration failed");
@@ -204,6 +238,7 @@ export default function RegisterPage() {
         <div className={`space-y-1.5 ${className}`}>
             <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{label}</label>
             <Input
+                id={key}
                 type={type}
                 value={formData[key]}
                 onChange={e => {
@@ -300,6 +335,51 @@ export default function RegisterPage() {
                                             <p className="text-[10px] font-semibold text-red-600 uppercase tracking-widest mb-2 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/> Settlement Account</p>
                                             {field("UPI ID (For Settlements)", "upiId", "yourname@upi")}
                                             <p className="text-[10px] text-red-500 mt-2 font-medium leading-relaxed">Ensure this UPI ID is active and accurate for your weekly commissions.</p>
+                                        </div>
+
+                                        <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50/50">
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Referred By (Optional)</label>
+                                                <select
+                                                    value={formData.referredBySelect}
+                                                    onChange={e => setFormData(f => ({ ...f, referredBySelect: e.target.value, referredByCustom: "" }))}
+                                                    className="flex h-12 w-full rounded-md border-2 bg-white px-4 text-sm transition-all outline-none border-gray-300 focus:border-[#1a6b3a]"
+                                                >
+                                                    <option value="">Select Referral Source (Optional)</option>
+                                                    <option value="Hope Cafe (White Town)">Hope Cafe (White Town)</option>
+                                                    <option value="Hope Cafe (Auroville)">Hope Cafe (Auroville)</option>
+                                                    <option value="Hope Partner">Hope Partner</option>
+                                                    <option value="Others">Others</option>
+                                                </select>
+                                            </div>
+
+                                            {formData.referredBySelect === "Hope Partner" && (
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Hope Partner Name</label>
+                                                    <Input
+                                                        type="text"
+                                                        value={formData.referredByCustom}
+                                                        onChange={e => setFormData(f => ({ ...f, referredByCustom: e.target.value }))}
+                                                        placeholder="Enter the hope partner name"
+                                                        required
+                                                        className="h-12 border-2 border-gray-300 focus:border-[#1a6b3a]"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {formData.referredBySelect === "Others" && (
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Name of Person</label>
+                                                    <Input
+                                                        type="text"
+                                                        value={formData.referredByCustom}
+                                                        onChange={e => setFormData(f => ({ ...f, referredByCustom: e.target.value }))}
+                                                        placeholder="Enter the name of the person"
+                                                        required
+                                                        className="h-12 border-2 border-gray-300 focus:border-[#1a6b3a]"
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
 
                                         <Button type="submit" className="w-full h-13 text-base font-bold mt-2" isLoading={isSubmitting}>

@@ -24,6 +24,7 @@ export async function GET() {
                 guestDiscountSlab: true,
                 walletBalance: true,
                 createdAt: true,
+                referredBy: true,
             }
         });
         return NextResponse.json(partners);

@@ -10,7 +10,7 @@ function generateOTP(): string {
 
 export async function POST(req: Request) {
     try {
-        const { email, mobile } = await req.json();
+        const { email } = await req.json();
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
@@ -18,21 +18,16 @@ export async function POST(req: Request) {
 
         const prisma = getPrisma();
 
-        // Check duplicate mobile
-        if (mobile) {
-            const existingMobile = await prisma.partner.findUnique({ where: { mobile } });
-            if (existingMobile) {
-                return NextResponse.json({ error: "mobile_exists", message: "A partner with this mobile number already exists." }, { status: 409 });
-            }
+        // Check if partner with this email exists
+        const partner = await prisma.partner.findFirst({
+            where: { email: email.toLowerCase() }
+        });
+
+        if (!partner) {
+            return NextResponse.json({ error: "Enter a valid email that is associated with your partner account" }, { status: 404 });
         }
 
-        // Check duplicate email
-        const existingEmail = await prisma.partner.findFirst({ where: { email: email.toLowerCase() } });
-        if (existingEmail) {
-            return NextResponse.json({ error: "email_exists", message: "A partner with this email already exists." }, { status: 409 });
-        }
-
-        // Invalidate old OTPs
+        // Invalidate old OTPs for this email
         await prisma.partnerOTP.updateMany({
             where: { email: email.toLowerCase(), isUsed: false },
             data: { isUsed: true }
@@ -55,7 +50,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, message: `OTP sent to ${email}` });
     } catch (err) {
-        console.error("Send OTP error:", err);
+        console.error("Forgot password send OTP error:", err);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

@@ -12,13 +12,15 @@ import {
     Coffee,
     Activity,
     Menu,
-    X
+    X,
+    Users
 } from "lucide-react";
 import { toast } from "sonner";
 
 const navLinks = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Scan Pass", href: "/admin/scan", icon: ScanLine },
+    { name: "Registered Partners", href: "/admin/partners", icon: Users },
     { name: "System Logs", href: "/admin/logs", icon: Activity },
 ];
 

@@ -13,7 +13,8 @@ export async function POST(req: Request) {
             verificationToken,
             partnerName, contactName, mobile, email,
             businessType, address, city, pincode, commissionSlab, upiId,
-            registeredByMarketingRepId: bodyRepId
+            registeredByMarketingRepId: bodyRepId,
+            referredBy
         } = body;
         
         const session = await getSession();
@@ -93,6 +94,7 @@ export async function POST(req: Request) {
                 guestDiscountSlab: parseFloat(commissionSlab) || baseDisc,
                 status: finalStatus,
                 walletBalance: 0,
+                referredBy: referredBy || "volunteer",
                 ...(validRepId ? { registeredByMarketingRepId: validRepId } : {})
             }
         });

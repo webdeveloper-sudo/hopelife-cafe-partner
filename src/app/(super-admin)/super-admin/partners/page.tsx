@@ -139,6 +139,7 @@ interface Partner {
     guestDiscountSlab?: number;
     walletBalance?: number;
     createdAt: string;
+    referredBy?: string;
 }
 
 type FilterTab = "all" | "approved" | "pending";
@@ -175,10 +176,12 @@ export default function SuperAdminPartnersPage() {
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [config, setConfig] = useState<any>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const [newPartner, setNewPartner] = useState({
         partnerName: "", contactName: "", email: "", mobile: "",
         businessType: "", address: "", city: "", pincode: "", commissionSlab: 7.5,
+        referredBySelect: "", referredByCustom: "",
     });
     const [isOnboarding, setIsOnboarding] = useState(false);
 
@@ -312,16 +315,44 @@ export default function SuperAdminPartnersPage() {
         e.preventDefault();
         setIsOnboarding(true);
         try {
+            let finalReferredBy = "volunteer";
+            if (newPartner.referredBySelect) {
+                if (newPartner.referredBySelect === "Hope Partner") {
+                    finalReferredBy = newPartner.referredByCustom ? `Hope Partner: ${newPartner.referredByCustom}` : "Hope Partner";
+                } else if (newPartner.referredBySelect === "Others") {
+                    finalReferredBy = newPartner.referredByCustom ? `Others: ${newPartner.referredByCustom}` : "Others";
+                } else {
+                    finalReferredBy = newPartner.referredBySelect;
+                }
+            }
+
             const res = await fetch("/api/admin/partner/onboard", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newPartner),
+                body: JSON.stringify({
+                    ...newPartner,
+                    referredBy: finalReferredBy
+                }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+            if (!res.ok) {
+                if (data.error && data.error.toLowerCase().includes("email")) {
+                    setErrors(er => ({ ...er, email: data.error }));
+                    setTimeout(() => {
+                        document.getElementById("email")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 50);
+                } else if (data.error && data.error.toLowerCase().includes("mobile")) {
+                    setErrors(er => ({ ...er, mobile: data.error }));
+                    setTimeout(() => {
+                        document.getElementById("mobile")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 50);
+                }
+                throw new Error(data.error || "Failed to onboard partner");
+            }
             toast.success("Partner onboarded! Welcome email sent. ✅");
             setShowOnboard(false);
-            setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "", pincode: "", commissionSlab: config?.baseCommission || 7.5 });
+            setErrors({});
+            setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "", pincode: "", commissionSlab: config?.baseCommission || 7.5, referredBySelect: "", referredByCustom: "" });
             fetchPartners();
         } catch (err: any) { toast.error(err.message); }
         finally { setIsOnboarding(false); }
@@ -339,8 +370,13 @@ export default function SuperAdminPartnersPage() {
     };
 
     const np = (key: keyof typeof newPartner) => ({
+        id: key,
         value: newPartner[key] as string,
-        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setNewPartner(f => ({ ...f, [key]: e.target.value })),
+        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+            setNewPartner(f => ({ ...f, [key]: e.target.value }));
+            setErrors(er => ({ ...er, [key]: "" }));
+        },
+        error: !!errors[key],
         className: "h-12 rounded-md border border-gray-300 focus:border-[#1a6b3a]",
     });
 
@@ -356,7 +392,7 @@ export default function SuperAdminPartnersPage() {
 {/* <Button variant="outline" className="gap-2 h-11 border border-gray-300 rounded-md" onClick={exportCSV}>
                         <Download className="w-4 h-4" /> Export CSV
                     </Button> */}
-                    <Button className="gap-2 h-11 bg-gray-900 hover:bg-black text-white px-6 rounded-md border border-gray-300" onClick={() => setShowOnboard(true)}>
+                    <Button className="gap-2 h-11 bg-gray-900 hover:bg-black text-white px-6 rounded-md border border-gray-300" onClick={() => { setErrors({}); setShowOnboard(true); }}>
                         <Plus className="w-4 h-4" /> New Partner
                     </Button>
                 </div>
@@ -420,6 +456,7 @@ export default function SuperAdminPartnersPage() {
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest hidden md:table-cell">Business</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Commission</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Discount</th>
+                                <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Referred By</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Status</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Login Access</th>
                                 <th className="px-4 py-4 font-black text-[10px] text-gray-400 uppercase tracking-widest text-center">Delete</th>
@@ -428,9 +465,9 @@ export default function SuperAdminPartnersPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
-                                <tr><td colSpan={8} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
+                                <tr><td colSpan={9} className="py-20 text-center"><Loader2 className="w-6 h-6 animate-spin text-gray-300 mx-auto" /></td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={8} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
+                                <tr><td colSpan={9} className="py-20 text-center text-gray-300 text-sm font-bold">No partners found</td></tr>
                             ) : filtered.map((p, i) => (
                                 <motion.tr
                                     key={p.id}
@@ -473,6 +510,11 @@ export default function SuperAdminPartnersPage() {
                                             onSave={updateSlab}
                                             disabled={updatingId === `${p.id}-discount`}
                                         />
+                                    </td>
+                                    <td className="px-4 py-5 text-center">
+                                        <span className="text-xs font-bold text-gray-600">
+                                            {p.referredBy || "-"}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-5 text-center"><StatusBadge status={p.status} /></td>
                                     <td className="px-4 py-5">
@@ -521,18 +563,18 @@ export default function SuperAdminPartnersPage() {
                 {showOnboard && (
                     <div className="fixed inset-0 z-50 flex items-center justify-end">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setShowOnboard(false)}
+                            onClick={() => { setErrors({}); setShowOnboard(false); }}
                             className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" />
                         <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
                             className="relative w-full max-w-lg h-full bg-white shadow-2xl flex flex-col z-10">
-
+ 
                             <div className="p-8 border-b border-gray-100 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-2xl font-black text-gray-900">Onboard Partner</h3>
                                     <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Added immediately as Active</p>
                                 </div>
-                                <button onClick={() => setShowOnboard(false)} className="w-10 h-10 bg-gray-100 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                                <button onClick={() => { setErrors({}); setShowOnboard(false); }} className="w-10 h-10 bg-gray-100 rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-200 transition-colors">
                                     <X className="w-5 h-5 text-gray-500" />
                                 </button>
                             </div>
@@ -552,10 +594,12 @@ export default function SuperAdminPartnersPage() {
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email *</label>
                                         <Input required type="email" placeholder="partner@email.com" {...np("email")} />
+                                        {errors.email && <p className="text-[10px] text-red-500 font-bold">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mobile *</label>
                                         <Input required type="tel" placeholder="98765 43210" {...np("mobile")} />
+                                        {errors.mobile && <p className="text-[10px] text-red-500 font-bold">{errors.mobile}</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
@@ -589,6 +633,51 @@ export default function SuperAdminPartnersPage() {
                                             className="h-12 rounded-md border border-gray-300 text-center font-bold w-28" />
                                         <p className="text-xs text-gray-400">Standard rate is {config?.baseCommission || 7.5}%</p>
                                     </div>
+                                </div>
+
+                                <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50/50">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Referred By (Optional)</label>
+                                        <select
+                                            value={newPartner.referredBySelect}
+                                            onChange={e => setNewPartner(f => ({ ...f, referredBySelect: e.target.value, referredByCustom: "" }))}
+                                            className="flex h-12 w-full rounded-md border border-gray-300 bg-white px-4 text-sm focus:border-[#1a6b3a] outline-none transition-all"
+                                        >
+                                            <option value="">Select Referral Source (Optional)</option>
+                                            <option value="Hope Cafe (White Town)">Hope Cafe (White Town)</option>
+                                            <option value="Hope Cafe (Auroville)">Hope Cafe (Auroville)</option>
+                                            <option value="Hope Partner">Hope Partner</option>
+                                            <option value="Others">Others</option>
+                                        </select>
+                                    </div>
+
+                                    {newPartner.referredBySelect === "Hope Partner" && (
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Hope Partner Name</label>
+                                            <Input
+                                                type="text"
+                                                value={newPartner.referredByCustom}
+                                                onChange={e => setNewPartner(f => ({ ...f, referredByCustom: e.target.value }))}
+                                                placeholder="Enter the hope partner name"
+                                                required
+                                                className="h-12"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {newPartner.referredBySelect === "Others" && (
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Name of Person</label>
+                                            <Input
+                                                type="text"
+                                                value={newPartner.referredByCustom}
+                                                onChange={e => setNewPartner(f => ({ ...f, referredByCustom: e.target.value }))}
+                                                placeholder="Enter the name of the person"
+                                                required
+                                                className="h-12"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="pt-4 border-t border-gray-100">
