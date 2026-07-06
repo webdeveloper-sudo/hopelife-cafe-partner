@@ -23,6 +23,9 @@ export default function EarningsCalculator({
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) setCommission(data.baseCommission);
+                })
+                .catch(err => {
+                    console.log("Config fetch failed, using default commission slab:", err.message);
                 });
         }
     }, [initialCommission]);

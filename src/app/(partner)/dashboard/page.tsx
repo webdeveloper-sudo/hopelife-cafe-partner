@@ -12,7 +12,9 @@ import {
     CheckCircle2,
     Copy,
     ImageDown,
-    ChevronRight
+    ChevronRight,
+    Share2,
+    MessageSquare
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
@@ -384,6 +386,47 @@ export default function PartnerDashboard() {
                                 </p>
                                 <Copy className="w-3.5 h-3.5 text-white/40 group-hover/link:text-white transition-colors" />
                             </button>
+
+                            {/* Share Buttons */}
+                            <div className="grid grid-cols-2 gap-3 mt-5 px-2">
+                                <button
+                                    onClick={() => {
+                                        const shareUrl = `${window.location.origin}/p/${stats.partnerDetails.code}`;
+                                        const text = encodeURIComponent(`Hey! Use my referral link to get a special discount at HOPE Cafe 🌴🌺:\n${shareUrl}`);
+                                        window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+                                    }}
+                                    className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-[10px] uppercase tracking-widest py-3 px-4 rounded-md transition-all active:scale-95 shadow-md cursor-pointer border-none"
+                                >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    WhatsApp
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        const shareUrl = `${window.location.origin}/p/${stats.partnerDetails.code}`;
+                                        if (navigator.share) {
+                                            try {
+                                                await navigator.share({
+                                                    title: "HOPE Cafe Referral",
+                                                    text: `Get a special discount at HOPE Cafe! Use my referral code: ${stats.partnerDetails.code}`,
+                                                    url: shareUrl,
+                                                });
+                                            } catch (err: any) {
+                                                if (err.name !== "AbortError") {
+                                                    navigator.clipboard.writeText(shareUrl);
+                                                    toast.success("Link copied to clipboard!");
+                                                }
+                                            }
+                                        } else {
+                                            navigator.clipboard.writeText(shareUrl);
+                                            toast.success("Link copied to clipboard!");
+                                        }
+                                    }}
+                                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold text-[10px] uppercase tracking-widest py-3 px-4 rounded-md border border-white/20 transition-all active:scale-95 shadow-md cursor-pointer"
+                                >
+                                    <Share2 className="w-3.5 h-3.5" />
+                                    Share
+                                </button>
+                            </div>
 
                         </CardContent>
                     </Card>

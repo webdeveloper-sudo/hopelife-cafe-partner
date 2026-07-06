@@ -63,6 +63,7 @@ describe('Partner Stats API Endpoint', () => {
             name: 'Test Partner',
             commissionSlab: 10,
             bonusCommission: 2,
+            walletBalance: 5000,
             walletTotal: 5000,
             claimedTierBonuses: ['TIER1'],
         };

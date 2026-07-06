@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Smartphone, User, ArrowRight, CheckCircle2, Copy, ExternalLink } from "lucide-react";
+import { ShieldCheck, CheckCircle2, Copy, ExternalLink, ImageDown, Sparkles } from "lucide-react";
+import QRCode from "react-qr-code";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -10,14 +11,9 @@ import { AuthLayout } from "@/components/AuthLayout";
 
 export default function GuestRegistrationPage({ params }: { params: Promise<{ partnerId: string }> }) {
     const unwrappedParams = React.use(params);
-    const [name, setName] = useState("");
-    const [mobile, setMobile] = useState("");
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [successData, setSuccessData] = useState<{ guestId: string } | null>(null);
     const [partnerData, setPartnerData] = useState<{ name: string, discount: number } | null>(null);
     const [partnerError, setPartnerError] = useState<string | null>(null);
     const [partnerLoading, setPartnerLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     React.useEffect(() => {
         const fetchPartner = async () => {
@@ -41,41 +37,66 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
     }, [unwrappedParams.partnerId]);
 
     const partnerName = partnerData?.name || (unwrappedParams.partnerId === "demo" ? "Grand Hope Cafe" : `Partner #${unwrappedParams.partnerId}`);
-    const discountSlab = partnerData?.discount || 0;
+    const discountSlab = partnerData?.discount || 7.5;
 
-    const handleGenerate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (mobile.length !== 10 || !name.trim()) return;
+    const downloadQR = () => {
+        const svgEl = document.getElementById("guest-partner-qr-svg")?.querySelector("svg");
+        if (!svgEl) { toast.error("QR code not found"); return; }
 
-        setError(null);
-        setIsGenerating(true);
+        const qrSize = 512;
+        const padding = 48;
+        const footerH = 80;
+        const canvasW = qrSize + padding * 2;
+        const canvasH = qrSize + padding * 2 + footerH;
 
-        try {
-            const response = await fetch("/api/guest/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name,
-                    mobile,
-                    partnerId: unwrappedParams.partnerId
-                })
-            });
+        const canvas = document.createElement("canvas");
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        const ctx = canvas.getContext("2d")!;
 
-            const data = await response.json();
+        // White background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvasW, canvasH);
 
-            if (data.success) {
-                setSuccessData({ guestId: data.guestId });
-                toast.success("Live pass generated successfully!");
-            } else {
-                setError(data.error || "Failed to register.");
-                toast.error(data.error || "Failed to register.");
-            }
-        } catch (error) {
-            setError("Network connection failed. Please check your internet.");
-            toast.error("Network error. Please try again.");
-        } finally {
-            setIsGenerating(false);
-        }
+        // Light card shadow behind QR
+        ctx.shadowColor = "rgba(0,0,0,0.07)";
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetY = 4;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(padding - 8, padding - 8, qrSize + 16, qrSize + 16);
+        ctx.shadowColor = "transparent";
+
+        // Serialize SVG → Blob URL → Image → draw on canvas
+        const svgData = new XMLSerializer().serializeToString(svgEl);
+        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+        const svgUrl = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+        img.onload = () => {
+            ctx.drawImage(img, padding, padding, qrSize, qrSize);
+            URL.revokeObjectURL(svgUrl);
+
+            // Green footer bar
+            ctx.fillStyle = "#1a6b3a";
+            ctx.fillRect(0, canvasH - footerH, canvasW, footerH);
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 22px Poppins, -apple-system, BlinkMacSystemFont, sans-serif";
+            ctx.fillText("HOPE Cafe Referral Pass", canvasW / 2, canvasH - footerH + 30);
+
+            ctx.font = "16px Poppins, -apple-system, BlinkMacSystemFont, sans-serif";
+            ctx.fillStyle = "rgba(255,255,255,0.72)";
+            ctx.fillText(`Via Partner: ${partnerName}`, canvasW / 2, canvasH - footerH + 56);
+
+            const link = document.createElement("a");
+            link.download = `hopecafe-referral-${unwrappedParams.partnerId}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            toast.success("Referral QR downloaded! 🎉");
+        };
+        img.onerror = () => toast.error("Failed to render QR image.");
+        img.src = svgUrl;
     };
 
     return (
@@ -88,11 +109,11 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                     </div>
                     <h1 className="text-2xl font-black text-white tracking-tighter">HOPE Cafe</h1>
                     <p className="text-white/70 font-medium text-sm mt-1">
-                        {partnerLoading ? "Validating Referrer..." : partnerError ? "Invalid Referral Link" : `Special Guest Pass via ${partnerName}`}
+                        {partnerLoading ? "Validating Referrer..." : partnerError ? "Invalid Referral Link" : `Referral Pass via ${partnerName}`}
                     </p>
                 </div>
 
-                {partnerError && !successData && (
+                {partnerError && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-8 rounded-md shadow-2xl border border-red-100 text-center mb-8">
                         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <ShieldCheck className="w-8 h-8 text-red-400" />
@@ -104,114 +125,60 @@ export default function GuestRegistrationPage({ params }: { params: Promise<{ pa
                 )}
 
                 <AnimatePresence mode="wait">
-                    {!successData && !partnerError ? (
+                    {!partnerLoading && !partnerError && (
                         <motion.div
-                            key="form"
+                            key="referral-card"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white p-8 rounded-md shadow-2xl shadow-black/20 border border-gray-300"
-                        >
-                            <div className="mb-8 text-center">
-                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 text-green-600 mb-4">
-                                    <ShieldCheck className="w-6 h-6" />
-                                </div>
-                                <h2 className="text-xl font-bold text-gray-900 mb-2">Claim Your {discountSlab}% Discount</h2>
-                                <p className="text-sm text-gray-500">Register to generate your unique Live Discount Pass.</p>
-                            </div>
-
-                            <form onSubmit={handleGenerate} className="space-y-6">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <User className="h-5 w-5 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-                                            className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
-                                            placeholder="John Doe"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Mobile Number</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Smartphone className="h-5 w-5 text-gray-400" />
-                                            <span className="ml-2 text-gray-900 font-medium">+91</span>
-                                        </div>
-                                        <input
-                                            type="tel"
-                                            maxLength={10}
-                                            value={mobile}
-                                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                                            className="block w-full pl-20 pr-4 py-4 bg-gray-50 border border-gray-300 rounded-md text-lg font-bold text-gray-900 focus:ring-2 focus:ring-hope-green focus:border-hope-green transition-all placeholder:text-gray-300 placeholder:font-normal"
-                                            placeholder="99999 99999"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                
-                                {error && (
-                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-md">
-                                        <ShieldCheck className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                                        <p className="text-sm font-bold text-red-700">{error}</p>
-                                    </motion.div>
-                                )}
-
-                                <Button
-                                    type="submit"
-                                    disabled={mobile.length !== 10 || !name.trim() || isGenerating}
-                                    className="w-full h-14 text-lg bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20"
-                                    isLoading={isGenerating}
-                                >
-                                    Generate Live Pass <ArrowRight className="w-5 h-5 ml-2" />
-                                </Button>
-                            </form>
-
-                            <div className="mt-6 text-center">
-                                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Zero Friction Transfer</p>
-                                <p className="text-xs text-gray-500 mt-1">We will send you a seamless validation link to show at checkout to enforce non-transferability.</p>
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="success"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
                             className="bg-white p-8 rounded-md shadow-2xl shadow-black/20 border border-gray-300 text-center"
                         >
-                            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <CheckCircle2 className="w-10 h-10 text-green-500" />
+                            <div className="mb-6">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 text-green-600 mb-4 border border-green-100">
+                                    <Sparkles className="w-6 h-6" />
+                                </div>
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">You Have Been Referred!</h2>
+                                <p className="text-sm text-gray-500 font-medium">Claim your {discountSlab}% discount at HOPE Cafe.</p>
                             </div>
-                             <h2 className="text-2xl font-black text-gray-900 mb-2">Registration Successful!</h2>
-                             <p className="text-gray-500 mb-8 font-medium">
-                                 Your Special Guest Pass is ready. Use the buttons below to copy the link or view your pass.
-                             </p>
 
-                             <div className="space-y-4">
+                            {/* QR Code */}
+                            <div className="bg-gray-50 p-6 rounded-md border border-gray-200 inline-block mb-6 shadow-inner">
+                                <div id="guest-partner-qr-svg" className="bg-white p-4 rounded-md border border-gray-300">
+                                    <QRCode
+                                        value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/${unwrappedParams.partnerId}`}
+                                        size={200}
+                                        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                                        viewBox="0 0 256 256"
+                                        fgColor="#1a6b3a"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-amber-50 border border-amber-100 p-4 rounded-md text-left mb-6">
+                                <p className="text-[11px] text-amber-700 font-semibold leading-relaxed">
+                                    👉 <strong>HOW TO USE:</strong> Save this QR code (screenshot or download) and present it to the Cafe Cashier during checkout to claim your discount.
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
                                 <Button 
+                                    onClick={downloadQR}
+                                    className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black uppercase tracking-widest gap-2 shadow-xl shadow-green-600/10"
+                                >
+                                    <ImageDown className="w-5 h-5" /> Download Pass QR
+                                </Button>
+                                <Button 
+                                    variant="outline"
                                     onClick={() => {
-                                        const url = `${window.location.origin}/pass/${successData?.guestId}`;
+                                        const url = `${window.location.origin}/p/${unwrappedParams.partnerId}`;
                                         navigator.clipboard.writeText(url);
-                                        toast.success("Pass link copied!");
+                                        toast.success("Referral link copied!");
                                     }}
-                                    className="w-full h-14 bg-gray-900 text-white font-black uppercase tracking-widest gap-2"
+                                    className="w-full h-14 border-gray-300 font-black uppercase tracking-widest gap-2"
                                 >
                                     <Copy className="w-5 h-5" /> Copy Pass Link
                                 </Button>
-                                <Link href={`/pass/${successData?.guestId}`} className="block">
-                                    <Button variant="outline" className="w-full h-14 border-gray-300 font-black uppercase tracking-widest gap-2">
-                                        <ExternalLink className="w-5 h-5" /> View Live Pass
-                                    </Button>
-                                </Link>
-                             </div>
-
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
