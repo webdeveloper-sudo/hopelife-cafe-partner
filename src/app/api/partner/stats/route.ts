@@ -12,19 +12,43 @@ export async function GET(req: Request) {
         const session = await getSession();
         const partnerCodeFromSession = session?.partnerCode as string | undefined;
 
-        // Allow admin override via query param only for admin tokens
+        // Allow partnerCode or partnerId override
         const { searchParams } = new URL(req.url);
-        const queryPartnerId = searchParams.get('partnerId');
-        const partnerId = (session?.role === "ADMIN" && queryPartnerId)
-            ? queryPartnerId
-            : (partnerCodeFromSession || 'demo');
+        const queryPartnerCode = searchParams.get('partnerCode') || searchParams.get('partnerId');
+        
+        let targetCode = partnerCodeFromSession || queryPartnerCode || 'demo';
+        if (targetCode.includes('/p/')) {
+            const parts = targetCode.split('/p/');
+            targetCode = parts[parts.length - 1].split('?')[0].split('#')[0].split('/')[0];
+        }
+        targetCode = targetCode.trim();
 
-        let partner = await prisma.partner.findUnique({
-            where: { partnerCode: partnerId }
-        });
+        let partner = null;
+        try {
+            if (typeof prisma.partner.findFirst === 'function') {
+                partner = await prisma.partner.findFirst({
+                    where: {
+                        OR: [
+                            { partnerCode: targetCode },
+                            { partnerCode: targetCode.toUpperCase() },
+                            { partnerCode: targetCode.toLowerCase() },
+                            { id: targetCode }
+                        ]
+                    }
+                });
+            }
+        } catch (e) {}
+
+        if (!partner && typeof prisma.partner.findUnique === 'function') {
+            try {
+                partner = await prisma.partner.findUnique({
+                    where: { partnerCode: targetCode }
+                });
+            } catch (e) {}
+        }
 
         // Auto-seed for demo purposes if it doesn't exist yet
-        if (!partner && partnerId === 'demo') {
+        if (!partner && targetCode.toLowerCase() === 'demo') {
             const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
             const baseCommission = config?.baseCommission ?? 7.5;
             partner = await prisma.partner.create({

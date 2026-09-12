@@ -116,7 +116,18 @@ export default function PartnerDashboard() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res  = await fetch("/api/partner/stats?partnerId=demo");
+                let url = "/api/partner/stats";
+                const sessionRaw = sessionStorage.getItem("hopecafe_partner_session");
+                if (sessionRaw) {
+                    try {
+                        const parsed = JSON.parse(sessionRaw);
+                        if (parsed.partnerCode && parsed.partnerCode !== "demo") {
+                            url += `?partnerCode=${encodeURIComponent(parsed.partnerCode)}`;
+                        }
+                    } catch (e) {}
+                }
+
+                const res = await fetch(url);
                 const data = await res.json();
 
                 if (res.status === 403 && data.error === "RESTRICTED") {
@@ -139,7 +150,7 @@ export default function PartnerDashboard() {
             }
         };
         fetchStats();
-    }, []);
+    }, [router]);
 
     if (loading || !stats) {
         return (

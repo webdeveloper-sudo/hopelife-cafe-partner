@@ -30,8 +30,11 @@ import {
     Target,
     Award,
     Sparkles,
-    Briefcase
+    Briefcase,
+    QrCode,
+    ImageDown
 } from "lucide-react";
+import QRCode from "react-qr-code";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
@@ -40,6 +43,67 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import PerformanceInsights from "@/components/PerformanceInsights";
 import { cn } from "@/lib/utils";
+
+/** Downloads the partner referral QR code as a branded PNG */
+function downloadPartnerQR(partnerCode: string, partnerName: string) {
+    const svgEl = document.getElementById(`super-admin-partner-qr-svg-${partnerCode}`)?.querySelector("svg");
+    if (!svgEl) { toast.error("QR code not found"); return; }
+
+    const qrSize = 512;
+    const padding = 48;
+    const footerH = 80;
+    const canvasW = qrSize + padding * 2;
+    const canvasH = qrSize + padding * 2 + footerH;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+    const ctx = canvas.getContext("2d")!;
+
+    // White background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    // Light card shadow behind QR
+    ctx.shadowColor = "rgba(0,0,0,0.07)";
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(padding - 8, padding - 8, qrSize + 16, qrSize + 16);
+    ctx.shadowColor = "transparent";
+
+    // Serialize SVG → Blob URL → Image → draw on canvas
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = () => {
+        ctx.drawImage(img, padding, padding, qrSize, qrSize);
+        URL.revokeObjectURL(svgUrl);
+
+        // Green footer bar
+        ctx.fillStyle = "#1a6b3a";
+        ctx.fillRect(0, canvasH - footerH, canvasW, footerH);
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 22px Poppins, -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillText("HOPE Cafe Referral Pass", canvasW / 2, canvasH - footerH + 30);
+
+        ctx.font = "16px Poppins, -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,0.72)";
+        ctx.fillText(`Partner: ${partnerName || partnerCode}`, canvasW / 2, canvasH - footerH + 56);
+
+        const link = document.createElement("a");
+        link.download = `hopecafe-referral-${partnerCode}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        toast.success("Referral QR downloaded! 🎉");
+    };
+    img.onerror = () => toast.error("Failed to render QR image.");
+    img.src = svgUrl;
+}
 
 const BUSINESS_TYPES = [
     { value: "homestay", label: "Homestays & Guest Houses" },
@@ -519,6 +583,83 @@ export default function PartnerDetailsPage() {
                                         Edit Profile
                                     </Button>
                                 </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
+                    {/* Partner Referral QR Pass */}
+                    <motion.div variants={item}>
+                        <Card className="border border-gray-300 bg-white shadow-2xl shadow-gray-200/40 rounded-md overflow-hidden">
+                            <CardHeader className="p-6 border-b border-gray-300 bg-gray-50/30 flex flex-row items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-md bg-green-50 border border-green-200 flex items-center justify-center text-hope-green">
+                                        <QrCode className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base font-black uppercase tracking-tight">Referral QR Pass</CardTitle>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Permanent Pass for Guests</p>
+                                    </div>
+                                </div>
+                                <span className="inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
+                                    {partner.guestDiscountSlab || 7.5}% OFF
+                                </span>
+                            </CardHeader>
+                            <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                                <div className="p-3.5 bg-gray-50 rounded-xl border border-gray-200 shadow-inner inline-block">
+                                    <div 
+                                        id={`super-admin-partner-qr-svg-${partner.partnerCode}`} 
+                                        className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm"
+                                    >
+                                        <QRCode
+                                            value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/${partner.partnerCode}`}
+                                            size={160}
+                                            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                                            viewBox="0 0 256 256"
+                                            fgColor="#1a6b3a"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="w-full space-y-1">
+                                    <p className="text-xs font-mono font-bold text-gray-900 bg-gray-50 px-3 py-2 rounded-md border border-gray-200 break-all text-center">
+                                        {typeof window !== "undefined" ? window.location.origin : ""}/p/{partner.partnerCode}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                        Encodes Partner Code: <span className="font-mono text-gray-700">{partner.partnerCode}</span>
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 w-full pt-1">
+                                    <Button
+                                        type="button"
+                                        onClick={() => downloadPartnerQR(partner.partnerCode, partner.name)}
+                                        className="h-10 bg-hope-green hover:bg-hope-green/90 text-white font-bold text-xs rounded-md gap-1.5 shadow-sm"
+                                    >
+                                        <ImageDown className="w-3.5 h-3.5" /> Download PNG
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            const url = `${window.location.origin}/p/${partner.partnerCode}`;
+                                            copyToClipboard(url, "Referral Pass Link");
+                                        }}
+                                        className="h-10 border-gray-300 font-bold text-xs rounded-md gap-1.5"
+                                    >
+                                        <Copy className="w-3.5 h-3.5" /> Copy Link
+                                    </Button>
+                                </div>
+
+                                <a
+                                    href={`/p/${partner.partnerCode}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs font-bold text-hope-green hover:underline pt-0.5"
+                                >
+                                    <span>Preview Guest Pass Page</span>
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
                             </CardContent>
                         </Card>
                     </motion.div>

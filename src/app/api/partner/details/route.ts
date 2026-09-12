@@ -13,16 +13,27 @@ export async function GET(req: Request) {
         }
 
         const prisma = getPrisma();
-        const partner = await prisma.partner.findUnique({
-            where: { partnerCode: code },
+        const cleanCode = code.trim();
+
+        const partner = await prisma.partner.findFirst({
+            where: {
+                OR: [
+                    { partnerCode: cleanCode },
+                    { partnerCode: cleanCode.toUpperCase() },
+                    { partnerCode: cleanCode.toLowerCase() },
+                    { id: cleanCode }
+                ]
+            },
             select: {
                 name: true,
-                guestDiscountSlab: true
+                partnerCode: true,
+                guestDiscountSlab: true,
+                status: true
             }
         });
 
         if (!partner) {
-            return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+            return NextResponse.json({ error: `Partner not found with code: ${cleanCode}` }, { status: 404 });
         }
 
         const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
@@ -30,6 +41,8 @@ export async function GET(req: Request) {
         return NextResponse.json({
             success: true,
             name: partner.name,
+            code: partner.partnerCode,
+            status: partner.status,
             discount: partner.guestDiscountSlab || config?.baseGuestDiscount || 7.5
         });
     } catch (error) {

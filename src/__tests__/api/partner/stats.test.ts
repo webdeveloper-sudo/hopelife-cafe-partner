@@ -6,6 +6,7 @@ const { mockPrismaInstance } = vi.hoisted(() => ({
     mockPrismaInstance: {
         partner: {
             findUnique: vi.fn(),
+            findFirst: vi.fn(),
             create: vi.fn(),
         },
         guest: {

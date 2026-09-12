@@ -16,6 +16,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     flavorDimensions "appRole"
     productFlavors {
         partner {

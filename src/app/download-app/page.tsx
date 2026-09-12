@@ -24,10 +24,10 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
-const APK_FILENAME = "hope-hub.apk";
+const APK_FILENAME = "hope-partners-programm.apk";
 const APK_DOWNLOAD_PATH = `/${APK_FILENAME}`;
 const APP_VERSION = "1.0.0";
-const PACKAGE_NAME = "network.hopecafe.hub";
+const PACKAGE_NAME = "network.hopecafe.hub.partner";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 15 },
@@ -39,7 +39,7 @@ const installSteps = [
   {
     step: "01",
     title: "Download the APK",
-    description: "Tap the download button above to save the official hope-hub.apk installer to your Android device."
+    description: "Tap the download button above to save the official hope-partners-programm.apk installer to your Android device."
   },
   {
     step: "02",

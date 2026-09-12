@@ -17,7 +17,9 @@ import {
     Store, 
     Percent, 
     ShieldCheck, 
-    RotateCcw 
+    RotateCcw,
+    Keyboard,
+    Camera
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -44,6 +46,10 @@ export default function CashierScanPage() {
     const [scanStatus, setScanStatus] = useState<
         "idle" | "scanning" | "verifying" | "partner-detected" | "guest-info" | "validating" | "billing" | "settling" | "settled" | "error"
     >("idle");
+    
+    // Scanner vs Manual Mode Tab
+    const [scanMode, setScanMode] = useState<"camera" | "manual">("camera");
+    const [manualCode, setManualCode] = useState("");
     
     // Partner Data
     const [scannedPartner, setScannedPartner] = useState<any>(null);
@@ -73,7 +79,40 @@ export default function CashierScanPage() {
         }
     }, [billAmount]);
 
+    const verifyPartnerCode = async (code: string) => {
+        if (!code || !code.trim()) {
+            toast.error("Please provide a valid Partner Code or URL");
+            return;
+        }
+
+        setScanStatus("verifying");
+        setRawQrData(code.trim());
+
+        try {
+            const response = await fetch("/api/admin/scan-partner", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ partnerCode: code.trim(), action: "verify" })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setScannedPartner(data.partner);
+                setScanStatus("partner-detected");
+                toast.success("Partner identified successfully!");
+            } else {
+                toast.error(data.error || "Partner not found with this code");
+                setScanStatus(scanMode === "camera" ? "scanning" : "idle");
+            }
+        } catch (err) {
+            toast.error("Network error during verification.");
+            setScanStatus(scanMode === "camera" ? "scanning" : "idle");
+        }
+    };
+
     const handleStartScan = () => {
+        setScanMode("camera");
         setScanStatus("scanning");
         setErrorMsg("");
     };
@@ -81,34 +120,15 @@ export default function CashierScanPage() {
     const handleScan = async (detectedCodes: any[]) => {
         if (detectedCodes && detectedCodes.length > 0) {
             const code = detectedCodes[0].rawValue;
-
-            if (scanStatus === "scanning") {
-                setScanStatus("verifying");
-                setRawQrData(code);
-
-                try {
-                    const response = await fetch("/api/admin/scan-partner", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ partnerCode: code, action: "verify" })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        setScannedPartner(data.partner);
-                        setScanStatus("partner-detected");
-                        toast.success("Partner identified successfully!");
-                    } else {
-                        toast.error(data.error || "Invalid QR Code");
-                        setScanStatus("scanning");
-                    }
-                } catch (err) {
-                    toast.error("Network error during verification.");
-                    setScanStatus("scanning");
-                }
+            if (scanStatus === "scanning" && code) {
+                verifyPartnerCode(code);
             }
         }
+    };
+
+    const handleManualVerify = (e: React.FormEvent) => {
+        e.preventDefault();
+        verifyPartnerCode(manualCode);
     };
 
     // Step: Proceed to Guest Information form
@@ -188,6 +208,7 @@ export default function CashierScanPage() {
 
     const handleReset = () => {
         setScanStatus("idle");
+        setManualCode("");
         setGuestName("");
         setGuestMobile("");
         setBillAmount("");
@@ -200,14 +221,14 @@ export default function CashierScanPage() {
 
     return (
         <div className="px-4 py-8 md:py-12 max-w-md mx-auto min-h-[calc(100vh-4rem)] flex flex-col items-center">
-            <div className="text-center mb-8 w-full">
+            <div className="text-center mb-6 w-full">
                 <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Referral Settlement</h1>
-                <p className="text-sm text-gray-500 font-medium mt-1">Scan partner referral QR code to apply guest discount.</p>
+                <p className="text-sm text-gray-500 font-medium mt-1">Scan partner referral QR or enter code to apply guest discount.</p>
             </div>
 
             <div className="w-full relative">
                 <AnimatePresence mode="wait">
-                    {/* STEP 1: SCANNER */}
+                    {/* STEP 1: SCANNER & MANUAL ENTRY */}
                     {(scanStatus === "idle" || scanStatus === "scanning" || scanStatus === "verifying") && (
                         <motion.div
                             key="step-scanner"
@@ -216,29 +237,65 @@ export default function CashierScanPage() {
                             exit={{ opacity: 0, scale: 0.98 }}
                             className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 w-full"
                         >
-                            {scanStatus === "idle" && (
+                            {/* Mode Toggle */}
+                            <div className="grid grid-cols-2 p-1 bg-gray-100 rounded-xl mb-6 border border-gray-200">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setScanMode("camera");
+                                        setScanStatus("idle");
+                                    }}
+                                    className={cn(
+                                        "py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5",
+                                        scanMode === "camera" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"
+                                    )}
+                                >
+                                    <Camera className="w-4 h-4" /> Camera Scan
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setScanMode("manual");
+                                        setScanStatus("idle");
+                                    }}
+                                    className={cn(
+                                        "py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5",
+                                        scanMode === "manual" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"
+                                    )}
+                                >
+                                    <Keyboard className="w-4 h-4" /> Enter Code
+                                </button>
+                            </div>
+
+                            {/* CAMERA MODE - IDLE */}
+                            {scanMode === "camera" && scanStatus === "idle" && (
                                 <div className="text-center space-y-6">
                                     <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto border-2 border-dashed border-gray-200">
                                         <ScanLine className="w-10 h-10 text-gray-400" />
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-1">Ready to Scan</h3>
-                                        <p className="text-sm text-gray-500 mb-8 max-w-[220px] mx-auto">Scan guest's referral QR code or partner standee.</p>
-                                        <Button onClick={handleStartScan} className="w-full py-6 text-lg rounded-xl shadow-lg shadow-hope-green/20 bg-hope-green hover:bg-hope-green/90">
-                                            Start Camera
+                                        <p className="text-sm text-gray-500 mb-6 max-w-[220px] mx-auto">Scan guest&apos;s referral QR code from their mobile.</p>
+                                        <Button onClick={handleStartScan} className="w-full py-6 text-lg rounded-xl shadow-lg shadow-hope-green/20 bg-hope-green hover:bg-hope-green/90 gap-2">
+                                            <Camera className="w-5 h-5" /> Open Camera
                                         </Button>
                                     </div>
                                 </div>
                             )}
 
-                            {(scanStatus === "scanning" || scanStatus === "verifying") && (
+                            {/* CAMERA MODE - SCANNING & VERIFYING */}
+                            {scanMode === "camera" && (scanStatus === "scanning" || scanStatus === "verifying") && (
                                 <div className="w-full relative text-center">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Scanning Referral QR</h3>
+                                    <h3 className="text-base font-bold text-gray-900 mb-4">Scanning Referral QR</h3>
                                     <div className="w-full aspect-square bg-gray-900 rounded-xl overflow-hidden relative shadow-inner">
                                         {scanStatus === "scanning" && (
                                             <div className="absolute inset-0 z-0">
                                                 <Scanner
                                                     onScan={handleScan}
+                                                    onError={(err) => {
+                                                        console.warn("Scanner error:", err);
+                                                    }}
+                                                    constraints={{ facingMode: "environment" }}
                                                     components={{ finder: false }}
                                                     styles={{
                                                         container: { width: "100%", height: "100%" },
@@ -270,10 +327,56 @@ export default function CashierScanPage() {
                                             </div>
                                         )}
                                     </div>
-                                    <Button onClick={handleReset} variant="outline" className="mt-6 w-full rounded-xl py-5">
-                                        Cancel Scan
-                                    </Button>
+
+                                    <div className="mt-4 flex gap-2">
+                                        <Button onClick={handleReset} variant="outline" className="flex-1 rounded-xl py-5">
+                                            Cancel Scan
+                                        </Button>
+                                        <Button onClick={() => setScanMode("manual")} variant="secondary" className="rounded-xl py-5 text-xs font-bold gap-1.5">
+                                            <Keyboard className="w-4 h-4" /> Enter Manually
+                                        </Button>
+                                    </div>
                                 </div>
+                            )}
+
+                            {/* MANUAL MODE */}
+                            {scanMode === "manual" && (
+                                <form onSubmit={handleManualVerify} className="space-y-4">
+                                    <div className="text-center mb-4">
+                                        <h3 className="text-lg font-bold text-gray-900">Enter Partner Code</h3>
+                                        <p className="text-xs text-gray-500 mt-1">Enter code (e.g. <span className="font-mono font-bold text-gray-800">SAM7602</span>) or paste URL</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Partner Code or Referral Link</label>
+                                        <input
+                                            type="text"
+                                            value={manualCode}
+                                            onChange={(e) => setManualCode(e.target.value)}
+                                            placeholder="e.g. SAM7602 or https://.../p/SAM7602"
+                                            className="block w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-md font-mono font-bold text-gray-950 focus:ring-2 focus:ring-hope-green focus:border-hope-green placeholder:text-gray-300"
+                                            required
+                                            autoFocus
+                                            disabled={scanStatus === "verifying"}
+                                        />
+                                    </div>
+
+                                    <Button 
+                                        type="submit" 
+                                        disabled={!manualCode.trim() || scanStatus === "verifying"}
+                                        className="w-full py-6 rounded-xl text-md font-bold shadow-lg shadow-hope-green/20 bg-hope-green hover:bg-hope-green/90 gap-2"
+                                    >
+                                        {scanStatus === "verifying" ? (
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin" /> Verifying Partner...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Verify Partner <ArrowRight className="w-4 h-4" />
+                                            </>
+                                        )}
+                                    </Button>
+                                </form>
                             )}
                         </motion.div>
                     )}
