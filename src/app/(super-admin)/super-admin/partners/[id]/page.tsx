@@ -23,7 +23,14 @@ import {
     History,
     Zap,
     IndianRupee,
-    ArrowUpRight
+    ArrowUpRight,
+    Edit3,
+    Save,
+    X,
+    Target,
+    Award,
+    Sparkles,
+    Briefcase
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +40,38 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import PerformanceInsights from "@/components/PerformanceInsights";
 import { cn } from "@/lib/utils";
+
+const BUSINESS_TYPES = [
+    { value: "homestay", label: "Homestays & Guest Houses" },
+    { value: "resort", label: "Resorts & Boutique Stays" },
+    { value: "hostel", label: "Hostels & Backpacker Lodges" },
+    { value: "taxi", label: "Taxi & Car Rentals" },
+    { value: "bike", label: "Bike & Scooter Rentals" },
+    { value: "travel_agency", label: "Tour & Travel Agencies" },
+    { value: "guide", label: "Local Travel Guides" },
+    { value: "wellness", label: "Yoga & Wellness Centers" },
+    { value: "adventure", label: "Adventure Activity Centers" },
+    { value: "water_sports", label: "Water Sports Centers" },
+    { value: "events", label: "Event Organizers" },
+    { value: "cafe_restaurant", label: "Cafe & Restaurants" },
+    { value: "retail", label: "Retail & Shopping" },
+    { value: "freelance", label: "Freelance Guide" },
+    { value: "others", label: "Others" },
+];
+
+const TIER_OPTIONS = [
+    { value: "BRONZE", label: "Bronze Tier", color: "text-amber-700 bg-amber-50 border-amber-200" },
+    { value: "SILVER", label: "Silver Tier", color: "text-slate-700 bg-slate-100 border-slate-300" },
+    { value: "GOLD", label: "Gold Tier", color: "text-yellow-700 bg-yellow-50 border-yellow-300" },
+    { value: "PLATINUM", label: "Platinum Tier", color: "text-purple-700 bg-purple-50 border-purple-300" },
+];
+
+const STATUS_OPTIONS = [
+    { value: "ACTIVE", label: "Active" },
+    { value: "PENDING", label: "Pending" },
+    { value: "SUSPENDED", label: "Suspended" },
+    { value: "REJECTED", label: "Rejected" },
+];
 
 const container = {
     hidden: { opacity: 0 },
@@ -61,12 +100,58 @@ export default function PartnerDetailsPage() {
     const [showSlabsModal, setShowSlabsModal] = React.useState(false);
     const [slabValues, setSlabValues] = React.useState({ commission: 0, discount: 0 });
 
+    // Edit Partner Modal State
+    const [showEditModal, setShowEditModal] = React.useState(false);
+    const [editLoading, setEditLoading] = React.useState(false);
+    const [marketingReps, setMarketingReps] = React.useState<any[]>([]);
+    const [editForm, setEditForm] = React.useState({
+        name: "",
+        contactName: "",
+        mobile: "",
+        email: "",
+        businessType: "",
+        address: "",
+        city: "",
+        pincode: "",
+        upiId: "",
+        status: "ACTIVE",
+        currentTier: "BRONZE",
+        referralGoal: 10,
+        commissionSlab: 7.5,
+        guestDiscountSlab: 7.5,
+        registeredByMarketingRepId: "",
+        referredBy: ""
+    });
+
+    const populateEditForm = React.useCallback((partnerData: any) => {
+        if (!partnerData) return;
+        setEditForm({
+            name: partnerData.name || "",
+            contactName: partnerData.contactName || "",
+            mobile: partnerData.mobile || "",
+            email: partnerData.email || "",
+            businessType: partnerData.businessType || "",
+            address: partnerData.address || "",
+            city: partnerData.city || "",
+            pincode: partnerData.pincode || "",
+            upiId: partnerData.upiId || "",
+            status: partnerData.status || "ACTIVE",
+            currentTier: partnerData.currentTier || "BRONZE",
+            referralGoal: partnerData.referralGoal ?? 10,
+            commissionSlab: partnerData.commissionSlab ?? 7.5,
+            guestDiscountSlab: partnerData.guestDiscountSlab ?? 7.5,
+            registeredByMarketingRepId: partnerData.registeredByMarketingRepId || "",
+            referredBy: partnerData.referredBy || ""
+        });
+    }, []);
+
     const fetchPartnerDetails = React.useCallback(async () => {
         try {
             const res = await fetch(`/api/admin/partner/${params.id}/details`);
             const json = await res.json();
             if (json.success) {
                 setData(json);
+                populateEditForm(json.partner);
             } else {
                 toast.error(json.error || "Failed to load partner details");
             }
@@ -75,7 +160,7 @@ export default function PartnerDetailsPage() {
         } finally {
             setLoading(false);
         }
-    }, [params.id]);
+    }, [params.id, populateEditForm]);
 
     React.useEffect(() => {
         fetchPartnerDetails();
@@ -90,6 +175,14 @@ export default function PartnerDetailsPage() {
                     }));
                 }
             });
+
+        // Fetch marketing reps list for re-assignment
+        fetch('/api/super-admin/marketing-team')
+            .then(res => res.json())
+            .then(json => {
+                if (json.reps) setMarketingReps(json.reps);
+            })
+            .catch(() => {});
     }, [fetchPartnerDetails]);
 
     const handleApprove = async () => {
@@ -166,14 +259,47 @@ export default function PartnerDetailsPage() {
         }
     };
 
+    const handleSavePartnerDetails = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editForm.name.trim()) {
+            toast.error("Partner entity name is required.");
+            return;
+        }
+        if (!editForm.mobile.trim()) {
+            toast.error("Primary mobile number is required.");
+            return;
+        }
+        setEditLoading(true);
+        try {
+            const res = await fetch(`/api/admin/partner/${params.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editForm)
+            });
+            const json = await res.json();
+            if (json.success) {
+                toast.success("Partner details updated successfully!");
+                setShowEditModal(false);
+                fetchPartnerDetails();
+            } else {
+                toast.error(json.error || "Failed to update partner details.");
+            }
+        } catch (err) {
+            toast.error("Network error while updating partner details.");
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
     React.useEffect(() => {
         if (data && data.partner) {
             setSlabValues({
                 commission: data.partner.commissionSlab,
                 discount: data.partner.guestDiscountSlab
             });
+            populateEditForm(data.partner);
         }
-    }, [data]);
+    }, [data, populateEditForm]);
 
     if (loading) {
         return (
@@ -256,14 +382,22 @@ export default function PartnerDetailsPage() {
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-3">
-{/* <Button variant="outline" className="h-12 border-gray-100 font-bold px-6">
-                        Export Report
-                    </Button> */}
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button 
+                        onClick={() => {
+                            if (partner) populateEditForm(partner);
+                            setShowEditModal(true);
+                        }}
+                        variant="outline"
+                        className="h-12 border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 font-black uppercase tracking-wider text-xs px-6 shadow-sm flex items-center gap-2 rounded-md transition-all hover:border-hope-green"
+                    >
+                        <Edit3 className="w-4 h-4 text-hope-green" />
+                        Edit Partner
+                    </Button>
                     <Button 
                         disabled={partner.status === "PENDING"}
                         onClick={() => setShowSlabsModal(true)}
-                        className="h-12 bg-hope-green hover:bg-hope-green/90 text-white font-bold px-8 shadow-xl shadow-hope-green/20"
+                        className="h-12 bg-hope-green hover:bg-hope-green/90 text-white font-black uppercase tracking-wider text-xs px-8 shadow-xl shadow-hope-green/20 rounded-md"
                     >
                         Adjust Slabs
                     </Button>
@@ -298,8 +432,18 @@ export default function PartnerDetailsPage() {
                     {/* Partner Profile */}
                     <motion.div variants={item}>
                         <Card className="border border-gray-300 bg-white shadow-2xl shadow-gray-200/40 rounded-md overflow-hidden">
-                            <CardHeader className="p-8 border-b border-gray-300 bg-gray-50/30">
+                            <CardHeader className="p-8 border-b border-gray-300 bg-gray-50/30 flex flex-row items-center justify-between">
                                 <CardTitle className="text-xl font-black uppercase tracking-tight">Partner Profile</CardTitle>
+                                <button
+                                    onClick={() => {
+                                        if (partner) populateEditForm(partner);
+                                        setShowEditModal(true);
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-hope-green hover:bg-gray-100 rounded-md transition-colors"
+                                    title="Edit Partner Profile"
+                                >
+                                    <Edit3 className="w-4 h-4" />
+                                </button>
                             </CardHeader>
                             <CardContent className="p-8 space-y-6">
                                 <div className="space-y-4">
@@ -363,9 +507,17 @@ export default function PartnerDetailsPage() {
                                         <Calendar className="w-4 h-4" />
                                         <p className="text-[10px] font-black uppercase tracking-widest">Joined {new Date(partner.createdAt).toLocaleDateString()}</p>
                                     </div>
-                                    {/* <Button variant="ghost" className="h-8 px-3 rounded-md border border-gray-300 text-[10px] font-black uppercase tracking-widest text-hope-green hover:bg-hope-green/5">
+                                    <Button 
+                                        variant="ghost" 
+                                        onClick={() => {
+                                            if (partner) populateEditForm(partner);
+                                            setShowEditModal(true);
+                                        }}
+                                        className="h-8 px-3 rounded-md border border-gray-300 text-[10px] font-black uppercase tracking-widest text-hope-green hover:bg-hope-green/5 flex items-center gap-1.5"
+                                    >
+                                        <Edit3 className="w-3.5 h-3.5" />
                                         Edit Profile
-                                    </Button> */}
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -749,6 +901,328 @@ export default function PartnerDetailsPage() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Edit Partner Modal (Super Admin Only) */}
+            <AnimatePresence>
+                {showEditModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }}
+                            onClick={() => !editLoading && setShowEditModal(false)}
+                            className="fixed inset-0 bg-gray-950/50 backdrop-blur-md" 
+                        />
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }} 
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-3xl bg-white rounded-lg border border-gray-300 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden my-auto z-10"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-6 sm:p-8 border-b border-gray-200 bg-gray-50/70 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-hope-green/10 rounded-md border border-hope-green/20 flex items-center justify-center text-hope-green">
+                                        <Edit3 className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-xl sm:text-2xl font-black text-gray-900 uppercase tracking-tight">Edit Partner Details</h3>
+                                            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded text-[9px] font-black uppercase tracking-widest">
+                                                Super Admin
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-bold mt-0.5">
+                                            Partner Code: <span className="font-mono text-gray-800">{partner.partnerCode}</span> • ID: <span className="font-mono text-gray-500">{partner.id.slice(0, 8)}...</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => !editLoading && setShowEditModal(false)}
+                                    className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-200/50 rounded-md transition-colors"
+                                    disabled={editLoading}
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Modal Form Body */}
+                            <form id="edit-partner-form" onSubmit={handleSavePartnerDetails} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
+                                {/* Section 1: Business & Contact Info */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                                        <Building2 className="w-4 h-4 text-hope-green" />
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-800">1. Business & Contact Information</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Entity / Partner Name <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={editForm.name}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                                placeholder="e.g. Mountain View Cafe & Stay"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Contact Person Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.contactName}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, contactName: e.target.value }))}
+                                                placeholder="e.g. Rahul Sharma"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Primary Mobile Number <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                required
+                                                value={editForm.mobile}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, mobile: e.target.value }))}
+                                                placeholder="e.g. 9876543210"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Email Address
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={editForm.email}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                                                placeholder="e.g. partner@example.com"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Business Category
+                                            </label>
+                                            <select
+                                                value={editForm.businessType}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, businessType: e.target.value }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            >
+                                                <option value="">Select Business Type</option>
+                                                {BUSINESS_TYPES.map(bt => (
+                                                    <option key={bt.value} value={bt.value}>{bt.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Section 2: Location & Address */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                                        <MapPin className="w-4 h-4 text-hope-green" />
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-800">2. Operational Base & Location</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div className="sm:col-span-3">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Street Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.address}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                                                placeholder="e.g. 12/A Mall Road, Near Clock Tower"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                City / Town
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.city}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))}
+                                                placeholder="e.g. Manali"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Pincode / Postal Code
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.pincode}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, pincode: e.target.value }))}
+                                                placeholder="e.g. 175131"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Section 3: Payout & Slabs */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                                        <CreditCard className="w-4 h-4 text-hope-green" />
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-800">3. Payout & Commission Architecture</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div className="sm:col-span-3">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Settlement UPI ID (VPA)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.upiId}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, upiId: e.target.value }))}
+                                                placeholder="e.g. partnername@okhdfcbank"
+                                                className="w-full h-11 px-4 text-sm font-mono font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Partner Commission (%)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                min="0"
+                                                max="50"
+                                                value={editForm.commissionSlab}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, commissionSlab: parseFloat(e.target.value) || 0 }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Guest Referral Discount (%)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                min="0"
+                                                max="50"
+                                                value={editForm.guestDiscountSlab}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, guestDiscountSlab: parseFloat(e.target.value) || 0 }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Monthly Referral Goal
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={editForm.referralGoal}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, referralGoal: parseInt(e.target.value) || 10 }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Section 4: Status, Tier & Marketing Assignment */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+                                        <Award className="w-4 h-4 text-hope-green" />
+                                        <h4 className="text-xs font-black uppercase tracking-wider text-gray-800">4. Status, Tier & Marketing Assignment</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Account Status
+                                            </label>
+                                            <select
+                                                value={editForm.status}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            >
+                                                {STATUS_OPTIONS.map(st => (
+                                                    <option key={st.value} value={st.value}>{st.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Current Tier Level
+                                            </label>
+                                            <select
+                                                value={editForm.currentTier}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, currentTier: e.target.value }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            >
+                                                {TIER_OPTIONS.map(tr => (
+                                                    <option key={tr.value} value={tr.value}>{tr.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Assigned Marketing Representative
+                                            </label>
+                                            <select
+                                                value={editForm.registeredByMarketingRepId}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, registeredByMarketingRepId: e.target.value }))}
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            >
+                                                <option value="">None / Direct (Organic Partner)</option>
+                                                {marketingReps.map(rep => (
+                                                    <option key={rep.id} value={rep.id}>{rep.name} ({rep.email})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">
+                                                Referred By Source
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.referredBy}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, referredBy: e.target.value }))}
+                                                placeholder="e.g. Volunteer / Marketing Code"
+                                                className="w-full h-11 px-4 text-sm font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-md focus:bg-white focus:border-hope-green focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {/* Modal Footer */}
+                            <div className="p-6 border-t border-gray-200 bg-gray-50/70 flex items-center justify-end gap-3">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setShowEditModal(false)}
+                                    disabled={editLoading}
+                                    className="h-12 px-6 rounded-md border border-gray-300 font-black uppercase tracking-widest text-xs text-gray-600 hover:bg-gray-100"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    form="edit-partner-form"
+                                    isLoading={editLoading}
+                                    className="h-12 px-8 bg-gray-900 hover:bg-black text-white font-black uppercase tracking-widest text-xs rounded-md shadow-xl shadow-gray-900/20 flex items-center gap-2"
+                                >
+                                    <Save className="w-4 h-4" />
+                                    Save Partner Details
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Adjust Slabs Modal */}
             {showSlabsModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">

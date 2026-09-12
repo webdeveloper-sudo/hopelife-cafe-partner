@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     namespace = "network.hopecafe.hub"
     compileSdk = rootProject.ext.compileSdkVersion
+
     defaultConfig {
         applicationId "network.hopecafe.hub"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -11,11 +12,38 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
+    flavorDimensions "appRole"
+    productFlavors {
+        partner {
+            dimension "appRole"
+            applicationId "network.hopecafe.hub.partner"
+            resValue "string", "app_name", "HOPE Hub – Partner"
+            buildConfigField "String", "APP_ROLE", "\"partner\""
+        }
+        cafeAdmin {
+            dimension "appRole"
+            applicationId "network.hopecafe.hub.cafeadmin"
+            resValue "string", "app_name", "HOPE Hub – Cafe Admin"
+            buildConfigField "String", "APP_ROLE", "\"cafeadmin\""
+        }
+        superAdmin {
+            dimension "appRole"
+            applicationId "network.hopecafe.hub.superadmin"
+            resValue "string", "app_name", "HOPE Hub – Super Admin"
+            buildConfigField "String", "APP_ROLE", "\"superadmin\""
+        }
+        marketing {
+            dimension "appRole"
+            applicationId "network.hopecafe.hub.marketing"
+            resValue "string", "app_name", "HOPE Hub – Marketing"
+            buildConfigField "String", "APP_ROLE", "\"marketing\""
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

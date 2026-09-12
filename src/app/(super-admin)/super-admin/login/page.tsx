@@ -20,7 +20,21 @@ export default function SuperAdminLoginPage() {
         const session = sessionStorage.getItem("hopecafe_superadmin_session");
         if (session) {
             router.push("/super-admin/dashboard");
+            return;
         }
+
+        fetch("/api/auth/session")
+            .then(res => res.json())
+            .then(data => {
+                if (data.authenticated && data.user?.role === "SUPER_ADMIN") {
+                    sessionStorage.setItem("hopecafe_superadmin_session", JSON.stringify({ 
+                        role: "SUPER_ADMIN", 
+                        ts: Date.now() 
+                    }));
+                    router.push("/super-admin/dashboard");
+                }
+            })
+            .catch(() => {});
     }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {

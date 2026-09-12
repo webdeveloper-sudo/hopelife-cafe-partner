@@ -8,7 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "cap:sync": "npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios",
+    "build:android:apk": "cd android && gradlew.bat assembleDebug",
+    "build:android:all": "cd android && gradlew.bat assembleDebug",
+    "build:android:partner": "cd android && gradlew.bat assemblePartnerDebug",
+    "build:android:cafeadmin": "cd android && gradlew.bat assembleCafeAdminDebug",
+    "build:android:superadmin": "cd android && gradlew.bat assembleSuperAdminDebug",
+    "build:android:marketing": "cd android && gradlew.bat assembleMarketingDebug",
+    "build:android:aab": "cd android && gradlew.bat bundleDebug",
+    "build:ios:ipa": "cd ios/App && xcodebuild -scheme App -configuration Release -archivePath ./build/App.xcarchive archive && xcodebuild -exportArchive -archivePath ./build/App.xcarchive -exportPath ./build -exportOptionsPlist ./ExportOptions.plist"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",

@@ -17,6 +17,17 @@ export default function MarketingLoginPage() {
     const [showPassword, setShowPassword] = React.useState(false);
 
     const router = useRouter();
+
+    React.useEffect(() => {
+        fetch("/api/auth/session")
+            .then(res => res.json())
+            .then(data => {
+                if (data.authenticated && data.user?.role === "MARKETING") {
+                    router.push("/marketing/dashboard");
+                }
+            })
+            .catch(() => {});
+    }, [router]);
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);

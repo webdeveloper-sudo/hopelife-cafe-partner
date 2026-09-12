@@ -3,7 +3,22 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ScanLine, CheckCircle2, AlertCircle, IndianRupee, X, Loader2, User, Smartphone } from "lucide-react";
+import { 
+    ScanLine, 
+    CheckCircle2, 
+    AlertCircle, 
+    IndianRupee, 
+    X, 
+    Loader2, 
+    User, 
+    Smartphone, 
+    ArrowRight, 
+    ArrowLeft, 
+    Store, 
+    Percent, 
+    ShieldCheck, 
+    RotateCcw 
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "sonner";
@@ -27,7 +42,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function CashierScanPage() {
     const router = useRouter();
     const [scanStatus, setScanStatus] = useState<
-        "idle" | "scanning" | "verifying" | "detected" | "validating" | "billing" | "settling" | "settled" | "error"
+        "idle" | "scanning" | "verifying" | "partner-detected" | "guest-info" | "validating" | "billing" | "settling" | "settled" | "error"
     >("idle");
     
     // Partner Data
@@ -51,7 +66,7 @@ export default function CashierScanPage() {
     useEffect(() => {
         if (billAmount && !isNaN(Number(billAmount)) && Number(billAmount) > 0) {
             setIsCalculating(true);
-            const timer = setTimeout(() => setIsCalculating(false), 500);
+            const timer = setTimeout(() => setIsCalculating(false), 300);
             return () => clearTimeout(timer);
         } else {
             setIsCalculating(false);
@@ -82,8 +97,8 @@ export default function CashierScanPage() {
 
                     if (data.success) {
                         setScannedPartner(data.partner);
-                        setScanStatus("detected");
-                        toast.success("Partner QR Scanned!");
+                        setScanStatus("partner-detected");
+                        toast.success("Partner identified successfully!");
                     } else {
                         toast.error(data.error || "Invalid QR Code");
                         setScanStatus("scanning");
@@ -96,9 +111,18 @@ export default function CashierScanPage() {
         }
     };
 
+    // Step: Proceed to Guest Information form
+    const handleProceedToGuestInfo = () => {
+        setScanStatus("guest-info");
+    };
+
+    // Step: Submit Guest Details and move to Billing
     const handleGuestSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (guestMobile.length !== 10 || !guestName.trim()) return;
+        if (guestMobile.length !== 10 || !guestName.trim()) {
+            toast.error("Please provide a valid 10-digit mobile number and guest name.");
+            return;
+        }
 
         setScanStatus("validating");
         setErrorMsg("");
@@ -110,8 +134,8 @@ export default function CashierScanPage() {
                 body: JSON.stringify({
                     action: "register-guest",
                     partnerCode: scannedPartner.partnerCode,
-                    guestName: guestName,
-                    guestMobile: guestMobile
+                    guestName: guestName.trim(),
+                    guestMobile: guestMobile.trim()
                 })
             });
 
@@ -120,7 +144,7 @@ export default function CashierScanPage() {
             if (response.ok && data.success) {
                 setRegisteredGuest(data.guest);
                 setScanStatus("billing");
-                toast.success("Guest details validated and registered.");
+                toast.success("Guest verified! Proceed to bill amount.");
             } else {
                 setErrorMsg(data.error || "Partner status validation failed.");
                 setScanStatus("error");
@@ -128,10 +152,11 @@ export default function CashierScanPage() {
             }
         } catch (err) {
             toast.error("Network error. Please try again.");
-            setScanStatus("detected");
+            setScanStatus("guest-info");
         }
     };
 
+    // Step: Complete Transaction / Settle Bill
     const handleCompleteTransaction = async () => {
         setScanStatus("settling");
         try {
@@ -177,7 +202,7 @@ export default function CashierScanPage() {
         <div className="px-4 py-8 md:py-12 max-w-md mx-auto min-h-[calc(100vh-4rem)] flex flex-col items-center">
             <div className="text-center mb-8 w-full">
                 <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Referral Settlement</h1>
-                <p className="text-sm text-gray-500 font-medium mt-1">Scan partner QR code to apply guest discount.</p>
+                <p className="text-sm text-gray-500 font-medium mt-1">Scan partner referral QR code to apply guest discount.</p>
             </div>
 
             <div className="w-full relative">
@@ -198,7 +223,7 @@ export default function CashierScanPage() {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-1">Ready to Scan</h3>
-                                        <p className="text-sm text-gray-500 mb-8 max-w-[200px] mx-auto">Scan the partner's standee or unique QR code.</p>
+                                        <p className="text-sm text-gray-500 mb-8 max-w-[220px] mx-auto">Scan guest's referral QR code or partner standee.</p>
                                         <Button onClick={handleStartScan} className="w-full py-6 text-lg rounded-xl shadow-lg shadow-hope-green/20 bg-hope-green hover:bg-hope-green/90">
                                             Start Camera
                                         </Button>
@@ -208,7 +233,7 @@ export default function CashierScanPage() {
 
                             {(scanStatus === "scanning" || scanStatus === "verifying") && (
                                 <div className="w-full relative text-center">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Scanning Partner Standee</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">Scanning Referral QR</h3>
                                     <div className="w-full aspect-square bg-gray-900 rounded-xl overflow-hidden relative shadow-inner">
                                         {scanStatus === "scanning" && (
                                             <div className="absolute inset-0 z-0">
@@ -241,7 +266,7 @@ export default function CashierScanPage() {
                                         {scanStatus === "verifying" && (
                                             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
                                                 <span className="w-8 h-8 rounded-full border-4 border-hope-green border-t-transparent animate-spin mb-3"></span>
-                                                <p className="text-sm font-bold text-white tracking-widest uppercase">Verifying Partner...</p>
+                                                <p className="text-sm font-bold text-white tracking-widest uppercase">Resolving Partner...</p>
                                             </div>
                                         )}
                                     </div>
@@ -253,8 +278,74 @@ export default function CashierScanPage() {
                         </motion.div>
                     )}
 
-                    {/* STEP 2: GUEST DETAILS COLLECTION */}
-                    {(scanStatus === "detected" || scanStatus === "validating") && (
+                    {/* STEP 2: PARTNER IDENTIFIED (PROCEED BUTTON) */}
+                    {scanStatus === "partner-detected" && (
+                        <motion.div
+                            key="step-partner-detected"
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 w-full"
+                        >
+                            <div className="flex items-center gap-3 pb-4 mb-5 border-b border-gray-100">
+                                <div className="w-10 h-10 rounded-full bg-green-50 border border-green-200 flex items-center justify-center text-green-600">
+                                    <ShieldCheck className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Referral Partner</p>
+                                    <h3 className="text-lg font-extrabold text-gray-900">{scannedPartner?.name}</h3>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3 mb-6">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Partner Code</span>
+                                    <span className="font-mono font-bold text-gray-900 bg-white px-2.5 py-1 rounded border border-gray-200 text-xs">
+                                        {scannedPartner?.partnerCode}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Account Status</span>
+                                    <StatusBadge status={scannedPartner?.status} />
+                                </div>
+
+                                {scannedPartner?.businessType && scannedPartner.businessType !== "N/A" && (
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Type</span>
+                                        <span className="font-semibold text-gray-800 text-xs">{scannedPartner.businessType}</span>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200/60">
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Guest Discount</span>
+                                    <span className="font-extrabold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 text-xs">
+                                        {scannedPartner?.guestDiscountSlab || 7.5}% OFF
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <Button 
+                                    onClick={handleProceedToGuestInfo}
+                                    className="w-full py-6 rounded-xl text-md font-bold shadow-lg shadow-hope-green/20 bg-hope-green hover:bg-hope-green/90 border-none gap-2"
+                                >
+                                    Proceed <ArrowRight className="w-5 h-5" />
+                                </Button>
+                                <Button 
+                                    type="button" 
+                                    onClick={handleReset} 
+                                    variant="ghost" 
+                                    className="w-full text-gray-500 hover:text-gray-900 font-medium"
+                                >
+                                    Cancel & Rescan
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* STEP 3: GUEST DETAILS COLLECTION */}
+                    {(scanStatus === "guest-info" || scanStatus === "validating") && (
                         <motion.div
                             key="step-guest-details"
                             initial={{ opacity: 0, y: 15 }}
@@ -263,41 +354,25 @@ export default function CashierScanPage() {
                             className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 w-full"
                         >
                             {/* Partner Header Summary */}
-                            <div className="flex items-center justify-between gap-4 mb-6 pb-6 border-b border-gray-100">
+                            <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-100">
                                 <div>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Scanned Partner</p>
-                                    <h3 className="text-lg font-bold text-gray-900 truncate">{scannedPartner?.name}</h3>
-                                    <p className="text-xs text-gray-500 font-medium">Code: {scannedPartner?.partnerCode}</p>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Referred By</p>
+                                    <h3 className="text-md font-bold text-gray-900 truncate">{scannedPartner?.name}</h3>
+                                    <p className="text-xs text-gray-500 font-mono">Code: {scannedPartner?.partnerCode}</p>
                                 </div>
                                 <div className="shrink-0 text-right">
-                                    <StatusBadge status={scannedPartner?.status} />
+                                    <span className="inline-block px-2.5 py-1 bg-green-50 text-green-700 rounded-md text-xs font-bold border border-green-200">
+                                        {scannedPartner?.guestDiscountSlab || 7.5}% OFF
+                                    </span>
                                 </div>
                             </div>
 
                             <div className="mb-6">
-                                <h4 className="text-sm font-bold text-gray-900 mb-1">Enter Guest Details</h4>
-                                <p className="text-xs text-gray-500">Collect guest details to validate and proceed to billing.</p>
+                                <h4 className="text-base font-bold text-gray-900 mb-1">Guest Details</h4>
+                                <p className="text-xs text-gray-500">Enter the guest&apos;s name and mobile number to proceed.</p>
                             </div>
 
                             <form onSubmit={handleGuestSubmit} className="space-y-5">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Guest Name</label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <User className="h-4 w-4 text-gray-400" />
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={guestName}
-                                            onChange={(e) => setGuestName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-                                            className="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-md font-semibold text-gray-950 focus:ring-2 focus:ring-hope-green focus:border-hope-green placeholder:text-gray-300"
-                                            placeholder="Guest Full Name"
-                                            required
-                                            disabled={scanStatus === "validating"}
-                                        />
-                                    </div>
-                                </div>
-
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Guest Mobile Number</label>
                                     <div className="relative">
@@ -310,38 +385,65 @@ export default function CashierScanPage() {
                                             maxLength={10}
                                             value={guestMobile}
                                             onChange={(e) => setGuestMobile(e.target.value.replace(/\D/g, ''))}
-                                            className="block w-full pl-16 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-md font-semibold text-gray-950 focus:ring-2 focus:ring-hope-green focus:border-hope-green placeholder:text-gray-300"
+                                            className="block w-full pl-16 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-md font-semibold text-gray-950 focus:ring-2 focus:ring-hope-green focus:border-hope-green placeholder:text-gray-300"
                                             placeholder="99999 99999"
+                                            required
+                                            autoFocus
+                                            disabled={scanStatus === "validating"}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Guest Name</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <User className="h-4 w-4 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={guestName}
+                                            onChange={(e) => setGuestName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                                            className="block w-full pl-10 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-md font-semibold text-gray-950 focus:ring-2 focus:ring-hope-green focus:border-hope-green placeholder:text-gray-300"
+                                            placeholder="Guest Full Name"
                                             required
                                             disabled={scanStatus === "validating"}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="pt-2">
+                                <div className="pt-2 space-y-2">
                                     <Button 
                                         type="submit" 
                                         disabled={guestMobile.length !== 10 || !guestName.trim() || scanStatus === "validating"} 
-                                        className="w-full py-6 rounded-xl text-md font-bold shadow-lg bg-hope-green hover:bg-hope-green/90 border-none gap-2"
+                                        className="w-full py-6 rounded-xl text-md font-bold shadow-lg shadow-hope-green/20 bg-hope-green hover:bg-hope-green/90 border-none gap-2"
                                     >
                                         {scanStatus === "validating" ? (
                                             <>
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                Validating Referral...
+                                                Validating Guest...
                                             </>
                                         ) : (
-                                            "Validate & Proceed"
+                                            <>
+                                                Next <ArrowRight className="w-4 h-4" />
+                                            </>
                                         )}
                                     </Button>
-                                    <Button type="button" onClick={handleReset} variant="ghost" className="w-full mt-2 text-gray-500 hover:text-gray-900 font-medium">
-                                        Cancel
+                                    <Button 
+                                        type="button" 
+                                        onClick={() => setScanStatus("partner-detected")} 
+                                        variant="ghost" 
+                                        className="w-full text-gray-500 hover:text-gray-900 font-medium"
+                                        disabled={scanStatus === "validating"}
+                                    >
+                                        <ArrowLeft className="w-4 h-4 mr-1" /> Back to Partner
                                     </Button>
                                 </div>
                             </form>
                         </motion.div>
                     )}
 
-                    {/* STEP 3: BILLING PROCESS */}
+                    {/* STEP 4: BILLING PROCESS */}
                     {(scanStatus === "billing" || scanStatus === "settling") && (
                         <motion.div
                             key="step-billing"
@@ -353,7 +455,7 @@ export default function CashierScanPage() {
                             {/* Verified Info */}
                             <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100">
                                 <div>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Verified Guest</p>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Guest Verified</p>
                                     <h3 className="text-lg font-bold text-gray-900 truncate">{registeredGuest?.name}</h3>
                                     <p className="text-xs text-green-600 font-bold mt-1 flex items-center gap-1">
                                         <CheckCircle2 className="w-3.5 h-3.5" /> +91 {registeredGuest?.mobile} (Visit #{registeredGuest?.referralCount})
@@ -377,6 +479,7 @@ export default function CashierScanPage() {
                                             onChange={(e) => setBillAmount(e.target.value)}
                                             className="block w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-xl font-bold text-gray-900 focus:ring-2 focus:ring-green-500 transition-all shadow-inner"
                                             placeholder="0.00"
+                                            autoFocus
                                             disabled={scanStatus === "settling"}
                                         />
                                     </div>
@@ -431,7 +534,7 @@ export default function CashierScanPage() {
                         </motion.div>
                     )}
 
-                    {/* STEP 4: TRANSACTION SETTLED */}
+                    {/* STEP 5: TRANSACTION SETTLED */}
                     {scanStatus === "settled" && (
                         <motion.div
                             key="step-settled"
@@ -443,7 +546,7 @@ export default function CashierScanPage() {
                                 <CheckCircle2 className="w-10 h-10 text-green-600" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-1">Transaction Settled</h3>
-                            <p className="text-sm text-gray-500 mb-6">Discount applied successfully. Commission recorded.</p>
+                            <p className="text-sm text-gray-500 mb-6">Discount applied successfully. Commission recorded for partner.</p>
 
                             <div className="bg-gray-50 rounded-xl p-4 text-left border border-gray-200 mb-6 text-sm space-y-2">
                                 <div className="flex justify-between font-medium text-gray-500">
@@ -481,7 +584,7 @@ export default function CashierScanPage() {
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Referral Blocked</h3>
                             <p className="text-sm text-red-600 font-bold mb-8 px-4 leading-relaxed">{errorMsg}</p>
                             <Button onClick={handleReset} variant="outline" className="w-full py-6 rounded-xl text-lg font-bold border-red-200 text-red-600 hover:bg-red-50">
-                                Try Another Standee
+                                Try Another Standee / QR
                             </Button>
                         </motion.div>
                     )}

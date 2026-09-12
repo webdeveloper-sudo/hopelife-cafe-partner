@@ -20,7 +20,22 @@ export default function CafeAdminLoginPage() {
         const session = sessionStorage.getItem("hopecafe_admin_session");
         if (session) {
             router.push("/admin/dashboard");
+            return;
         }
+
+        fetch("/api/auth/session")
+            .then(res => res.json())
+            .then(data => {
+                if (data.authenticated && (data.user?.role === "ADMIN" || data.user?.role === "SUPER_ADMIN")) {
+                    sessionStorage.setItem("hopecafe_admin_session", JSON.stringify({ 
+                        role: data.user.role, 
+                        name: data.user.name, 
+                        ts: Date.now() 
+                    }));
+                    router.push("/admin/dashboard");
+                }
+            })
+            .catch(() => {});
     }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {

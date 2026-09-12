@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { QrCode, LogIn, Shield } from "lucide-react";
+import { QrCode, LogIn, Shield, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -55,16 +55,24 @@ export default function Header() {
 
                     {/* Navigation */}
                     {!isAuthPage && (
-                        <nav className="flex items-center gap-4 relative z-10">
+                        <nav className="flex items-center gap-3 sm:gap-4 relative z-10">
+                            <Link
+                                href="/download-app"
+                                className="text-sm font-bold text-[#1A1A1A] hover:text-hope-purple transition-all px-3 py-2 rounded-md hover:bg-hope-purple/5 flex items-center gap-1.5"
+                            >
+                                <Smartphone className="w-4 h-4 text-hope-purple" />
+                                <span className="hidden xs:inline">App</span>
+                            </Link>
+
                             <Link
                                 href="/login"
-                                className="text-sm font-bold text-[#1A1A1A] hover:text-hope-purple transition-all px-4 py-2 rounded-md hover:bg-hope-purple/5"
+                                className="text-sm font-bold text-[#1A1A1A] hover:text-hope-purple transition-all px-3 sm:px-4 py-2 rounded-md hover:bg-hope-purple/5"
                             >
                                 Partner Login
                             </Link>
 
                             <Link href="/register">
-                                <Button className="rounded-md bg-hope-purple text-white hover:bg-[#4A2470] font-bold text-sm px-6 h-10 shadow-lg shadow-hope-purple/10">
+                                <Button className="rounded-md bg-hope-purple text-white hover:bg-[#4A2470] font-bold text-sm px-4 sm:px-6 h-10 shadow-lg shadow-hope-purple/10">
                                     Join Network
                                 </Button>
                             </Link>

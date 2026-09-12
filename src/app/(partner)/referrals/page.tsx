@@ -12,6 +12,7 @@ import {
     Clock,
     XCircle,
     UserPlus,
+    QrCode,
     Smartphone,
     User,
     ArrowRight,
@@ -98,7 +99,7 @@ export default function ReferralsPage() {
                         onClick={() => router.push(`/p/${partnerCode}`)}
                         className="gap-2 h-11 px-6 bg-hope-green hover:bg-hope-green/90 shadow-lg shadow-hope-green/10 border-none"
                     >
-                        <UserPlus className="w-4 h-4" /> Refer Guest
+                        <QrCode className="w-4 h-4" /> My Referral QR
                     </Button>
 {/* <Button variant="secondary" className="gap-2 h-11" onClick={() => toast.success("Exporting report...")}>
                         <Download className="w-4 h-4" /> Export Report

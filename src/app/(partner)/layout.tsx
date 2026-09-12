@@ -15,7 +15,8 @@ import {
     ExternalLink,
     CreditCard,
     Menu,
-    X
+    X,
+    Smartphone
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,12 +31,13 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
     const sidebarLinks = [
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { name: "Referrals", href: "/referrals", icon: UserPlus },
-        { name: "Register Guest", href: `/p/${partnerCode}`, icon: QrCode },
+        { name: "My Referral QR", href: `/p/${partnerCode}`, icon: QrCode },
         { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
         { name: "Earnings & Payouts", href: "/payouts", icon: CreditCard },
     ];
 
     const secondaryLinks = [
+        { name: "Download App", href: "/download-app", icon: Smartphone },
         { name: "Settings", href: "/settings", icon: Settings },
         { name: "Help & Support", href: "/support", icon: HelpCircle },
     ];

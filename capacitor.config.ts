@@ -3,22 +3,22 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'network.hopecafe.hub',
   appName: 'HOPE Hub',
-  webDir: 'out',
+  webDir: 'public',
   server: {
-    url: 'https://hopelife-cafe-partner.vercel.app',
+    url: 'https://hopepartners.hopelife.in',
     cleartext: false
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 3000,
+      launchShowDuration: 2000,
       launchAutoHide: true,
-      backgroundColor: "#ffffffff",
+      backgroundColor: "#FFF9F0",
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       showSpinner: true,
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
-      spinnerColor: "#999999",
+      spinnerColor: "#5D2E8C",
       splashFullScreen: true,
       splashImmersive: true,
     }
@@ -26,3 +26,4 @@ const config: CapacitorConfig = {
 };
 
 export default config;
+

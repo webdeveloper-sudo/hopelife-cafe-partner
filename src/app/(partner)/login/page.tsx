@@ -36,7 +36,22 @@ export default function PartnerLoginPage() {
         const session = sessionStorage.getItem("hopecafe_partner_session");
         if (session) {
             router.push("/dashboard");
+            return;
         }
+
+        fetch("/api/auth/session")
+            .then(res => res.json())
+            .then(data => {
+                if (data.authenticated && data.user?.role === "PARTNER") {
+                    sessionStorage.setItem("hopecafe_partner_session", JSON.stringify({ 
+                        role: "PARTNER", 
+                        partnerCode: data.user.partnerCode, 
+                        ts: Date.now() 
+                    }));
+                    router.push("/dashboard");
+                }
+            })
+            .catch(() => {});
     }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {

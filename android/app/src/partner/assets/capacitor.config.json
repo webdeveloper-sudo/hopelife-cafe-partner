@@ -1,0 +1,23 @@
+{
+  "appId": "network.hopecafe.hub.partner",
+  "appName": "HOPE Hub – Partner",
+  "webDir": "public",
+  "server": {
+    "url": "https://hopepartners.hopelife.in",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#FFF9F0",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "androidSpinnerStyle": "large",
+      "spinnerColor": "#5D2E8C",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  }
+}

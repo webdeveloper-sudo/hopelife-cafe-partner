@@ -46,12 +46,15 @@ export async function POST(req: Request) {
 
         // --- ACTION 1: VERIFY ---
         if (data.action === "verify") {
-            let code = data.partnerCode;
+            let code = data.partnerCode.trim();
             
-            // Extract code if it's a full URL (e.g. http://localhost:5000/p/PARTNER_CODE)
+            // Extract code if it's a full URL (e.g. http://localhost:3000/p/PARTNER_CODE or /refer/PARTNER_CODE)
             if (code.includes("/p/")) {
                 const parts = code.split("/p/");
-                code = parts[parts.length - 1].split("?")[0].split("#")[0];
+                code = parts[parts.length - 1].split("?")[0].split("#")[0].split("/")[0];
+            } else if (code.includes("/refer/")) {
+                const parts = code.split("/refer/");
+                code = parts[parts.length - 1].split("?")[0].split("#")[0].split("/")[0];
             }
 
             const partner = await prisma.partner.findUnique({
