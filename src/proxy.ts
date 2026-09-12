@@ -40,12 +40,15 @@ export async function proxy(request: NextRequest) {
     const isPartnerRoute = (pathname.startsWith("/dashboard") || pathname.startsWith("/settings") || pathname.startsWith("/referrals") || pathname.startsWith("/payouts") || pathname.startsWith("/transactions") || pathname.startsWith("/support")) && !isPublicPartnerRoute;
     const isMarketingRoute = pathname.startsWith('/marketing') && pathname !== '/marketing/login' && pathname !== '/marketing/set-password';
 
-    // Public API routes (no auth required for registration/login flow)
+    // Public API routes (no auth required for registration/login flow, partner details, guest passes)
     const isPublicApi =
         pathname === "/api/partner/send-otp" ||
         pathname === "/api/partner/verify-otp" ||
         pathname === "/api/partner/register" ||
         pathname === "/api/partner/set-password" ||
+        pathname === "/api/partner/details" ||
+        pathname === "/api/config" ||
+        pathname.startsWith("/api/guest") ||
         pathname === "/api/marketing/set-password" ||
         pathname.startsWith("/api/auth/login");
 
@@ -84,7 +87,7 @@ export async function proxy(request: NextRequest) {
             return NextResponse.redirect(new URL("/", request.url));
         }
         
-        // Protect APIs from cross-role access (except when Marketing hits partner registration API which is public)
+        // Protect APIs from cross-role access (except public APIs like register or details)
         const currentRole = session.role?.toUpperCase();
         if (pathname.startsWith("/api/admin") && (currentRole !== "ADMIN" && currentRole !== "SUPER_ADMIN")) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -92,12 +95,10 @@ export async function proxy(request: NextRequest) {
         if (pathname.startsWith("/api/super-admin") && currentRole !== "SUPER_ADMIN") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
-        // Note: The /api/partner/register is public, so it bypasses `isProtectedApiRoute`. 
-        if (pathname.startsWith("/api/partner") && currentRole !== "PARTNER") {
-            // Wait, what if Marketing Rep calls some partner API? We don't have any right now except register.
+        if (pathname.startsWith("/api/partner") && !isPublicApi && currentRole !== "PARTNER") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
-        if (pathname.startsWith("/api/marketing") && currentRole !== "MARKETING") {
+        if (pathname.startsWith("/api/marketing") && !isPublicApi && currentRole !== "MARKETING") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
     }

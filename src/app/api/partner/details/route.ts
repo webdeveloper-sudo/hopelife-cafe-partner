@@ -33,6 +33,16 @@ export async function GET(req: Request) {
         });
 
         if (!partner) {
+            if (cleanCode.toLowerCase() === "demo") {
+                const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
+                return NextResponse.json({
+                    success: true,
+                    name: "Grand Hope Cafe (Demo)",
+                    code: "demo",
+                    status: "ACTIVE",
+                    discount: config?.baseGuestDiscount || 7.5
+                });
+            }
             return NextResponse.json({ error: `Partner not found with code: ${cleanCode}` }, { status: 404 });
         }
 
