@@ -138,6 +138,7 @@ interface Partner {
     commissionSlab: number;
     guestDiscountSlab?: number;
     walletBalance?: number;
+    upiId?: string;
     createdAt: string;
     referredBy?: string;
 }
@@ -180,7 +181,7 @@ export default function SuperAdminPartnersPage() {
 
     const [newPartner, setNewPartner] = useState({
         partnerName: "", contactName: "", email: "", mobile: "",
-        businessType: "", address: "", city: "", pincode: "", commissionSlab: 7.5,
+        businessType: "", address: "", city: "Pondicherry", pincode: "", upiId: "", commissionSlab: 7.5,
         referredBySelect: "", referredByCustom: "",
     });
     const [isOnboarding, setIsOnboarding] = useState(false);
@@ -313,6 +314,26 @@ export default function SuperAdminPartnersPage() {
 
     const handleOnboard = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Client-side validation matching /register
+        const errs: Record<string, string> = {};
+        if (!newPartner.partnerName.trim()) errs.partnerName = "Business name is required";
+        if (!newPartner.contactName.trim()) errs.contactName = "Contact name is required";
+        if (!newPartner.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newPartner.email)) errs.email = "Valid email is required";
+        if (!newPartner.mobile || newPartner.mobile.replace(/\D/g, "").length < 10) errs.mobile = "Valid 10-digit phone number is required";
+        if (!newPartner.businessType) errs.businessType = "Business type is required";
+        if (!newPartner.address.trim()) errs.address = "Address is required";
+        if (!newPartner.city.trim()) errs.city = "City is required";
+        if (!newPartner.pincode || !/^\d{6}$/.test(newPartner.pincode)) errs.pincode = "Valid 6-digit pincode is required";
+        if (!newPartner.upiId || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(newPartner.upiId)) {
+            errs.upiId = "Valid UPI ID is required for settlements (e.g. name@bank)";
+        }
+        if (Object.keys(errs).length > 0) {
+            setErrors(errs);
+            toast.error("Please fill all required fields correctly.");
+            return;
+        }
+
         setIsOnboarding(true);
         try {
             let finalReferredBy = "volunteer";
@@ -346,13 +367,15 @@ export default function SuperAdminPartnersPage() {
                     setTimeout(() => {
                         document.getElementById("mobile")?.scrollIntoView({ behavior: "smooth", block: "center" });
                     }, 50);
+                } else if (data.error && data.error.toLowerCase().includes("upi")) {
+                    setErrors(er => ({ ...er, upiId: data.error }));
                 }
                 throw new Error(data.error || "Failed to onboard partner");
             }
             toast.success("Partner onboarded! Welcome email sent. ✅");
             setShowOnboard(false);
             setErrors({});
-            setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "", pincode: "", commissionSlab: config?.baseCommission || 7.5, referredBySelect: "", referredByCustom: "" });
+            setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "Pondicherry", pincode: "", upiId: "", commissionSlab: config?.baseCommission || 7.5, referredBySelect: "", referredByCustom: "" });
             fetchPartners();
         } catch (err: any) { toast.error(err.message); }
         finally { setIsOnboarding(false); }
@@ -373,7 +396,13 @@ export default function SuperAdminPartnersPage() {
         id: key,
         value: newPartner[key] as string,
         onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-            setNewPartner(f => ({ ...f, [key]: e.target.value }));
+            let value = e.target.value;
+            if (key === "mobile") {
+                value = value.replace(/\D/g, "").slice(0, 10);
+            } else if (key === "pincode") {
+                value = value.replace(/\D/g, "").slice(0, 6);
+            }
+            setNewPartner(f => ({ ...f, [key]: value }));
             setErrors(er => ({ ...er, [key]: "" }));
         },
         error: !!errors[key],
@@ -624,7 +653,22 @@ export default function SuperAdminPartnersPage() {
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pincode</label>
                                         <Input placeholder="605001" {...np("pincode")} />
+                                        {errors.pincode && <p className="text-[10px] text-red-500 font-bold">{errors.pincode}</p>}
                                     </div>
+                                </div>
+
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                                    <p className="text-[10px] font-semibold text-red-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                        <ShieldCheck className="w-3.5 h-3.5" /> Settlement Account
+                                    </p>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">UPI ID (For Settlements) *</label>
+                                        <Input required placeholder="yourname@upi" {...np("upiId")} />
+                                        {errors.upiId && <p className="text-[10px] text-red-500 font-bold">{errors.upiId}</p>}
+                                    </div>
+                                    <p className="text-[10px] text-red-500 mt-2 font-medium leading-relaxed">
+                                        Ensure this UPI ID is active and accurate for weekly commissions.
+                                    </p>
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Commission Slab (%)</label>

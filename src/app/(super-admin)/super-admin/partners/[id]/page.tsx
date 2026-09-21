@@ -543,6 +543,20 @@ export default function PartnerDetailsPage() {
                                             <p className="font-bold text-gray-900 mt-1 truncate">{partner.email || "-"}</p>
                                         </div>
                                     </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-red-50 rounded-md border border-red-200 flex items-center justify-center text-red-500">
+                                            <ShieldCheck className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest leading-none">Settlement UPI ID</p>
+                                            <p className="font-bold text-gray-900 mt-1 font-mono text-sm truncate">{partner.upiId || "Not Provided"}</p>
+                                        </div>
+                                        {partner.upiId && (
+                                            <button onClick={() => copyToClipboard(partner.upiId, "UPI ID")} className="text-gray-300 hover:text-gray-900 transition-colors">
+                                                <Copy className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                     {partner.registeredByMarketingRep && (
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 bg-purple-50 rounded-md border border-purple-200 flex items-center justify-center text-purple-500">

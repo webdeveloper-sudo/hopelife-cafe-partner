@@ -20,6 +20,7 @@ export async function GET() {
                 address: true,
                 city: true,
                 pincode: true,
+                upiId: true,
                 commissionSlab: true,
                 guestDiscountSlab: true,
                 walletBalance: true,

@@ -8,10 +8,15 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { partnerName, contactName, mobile, email, businessType, address, city, pincode, commissionSlab, referredBy } = body;
+        const { partnerName, contactName, mobile, email, businessType, address, city, pincode, commissionSlab, upiId, referredBy } = body;
 
-        if (!partnerName || !contactName || !mobile || !email) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        if (!partnerName || !contactName || !mobile || !email || !upiId) {
+            return NextResponse.json({ error: "Missing required fields (including Settlement UPI ID)" }, { status: 400 });
+        }
+
+        const cleanUpi = upiId.trim();
+        if (!/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(cleanUpi)) {
+            return NextResponse.json({ error: "Valid UPI ID is required for settlements (e.g. name@bank)" }, { status: 400 });
         }
 
         const prisma = getPrisma();
@@ -52,6 +57,7 @@ export async function POST(req: Request) {
                 address: address || null,
                 city: city || null,
                 pincode: pincode || null,
+                upiId: cleanUpi,
                 commissionSlab: effectiveCommission,
                 guestDiscountSlab: effectiveDiscount,
                 status: "ACTIVE",

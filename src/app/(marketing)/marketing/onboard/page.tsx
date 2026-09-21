@@ -48,6 +48,8 @@ export default function AddPartnerPage() {
         pincode: "",
         commissionSlab: "7.5",
         upiId: "",
+        referredBySelect: "",
+        referredByCustom: "",
     });
 
     useEffect(() => {
@@ -156,10 +158,25 @@ export default function AddPartnerPage() {
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            let finalReferredBy = "marketing_rep";
+            if (formData.referredBySelect) {
+                if (formData.referredBySelect === "Hope Partner") {
+                    finalReferredBy = formData.referredByCustom ? `Hope Partner: ${formData.referredByCustom}` : "Hope Partner";
+                } else if (formData.referredBySelect === "Others") {
+                    finalReferredBy = formData.referredByCustom ? `Others: ${formData.referredByCustom}` : "Others";
+                } else {
+                    finalReferredBy = formData.referredBySelect;
+                }
+            }
+
             const res = await fetch("/api/partner/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...formData, verificationToken }),
+                body: JSON.stringify({ 
+                    ...formData, 
+                    referredBy: finalReferredBy,
+                    verificationToken 
+                }),
             });
             const data = await res.json();
             if (!res.ok) {
@@ -356,6 +373,53 @@ export default function AddPartnerPage() {
                                              placeholder="605001"
                                              required
                                          />
+                                     </div>
+                                     <div className="md:col-span-2 space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50/50">
+                                         <div>
+                                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Referred By (Optional)</label>
+                                             <select
+                                                 name="referredBySelect"
+                                                 value={formData.referredBySelect}
+                                                 onChange={(e) => setFormData({ ...formData, referredBySelect: e.target.value, referredByCustom: "" })}
+                                                 className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                             >
+                                                 <option value="">Select Referral Source (Optional)</option>
+                                                 <option value="Hope Cafe (White Town)">Hope Cafe (White Town)</option>
+                                                 <option value="Hope Cafe (Auroville)">Hope Cafe (Auroville)</option>
+                                                 <option value="Hope Partner">Hope Partner</option>
+                                                 <option value="Others">Others</option>
+                                             </select>
+                                         </div>
+
+                                         {formData.referredBySelect === "Hope Partner" && (
+                                             <div>
+                                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Hope Partner Name</label>
+                                                 <input
+                                                     type="text"
+                                                     name="referredByCustom"
+                                                     value={formData.referredByCustom}
+                                                     onChange={handleChange}
+                                                     placeholder="Enter the hope partner name"
+                                                     required
+                                                     className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                                 />
+                                             </div>
+                                         )}
+
+                                         {formData.referredBySelect === "Others" && (
+                                             <div>
+                                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1">Name of Person</label>
+                                                 <input
+                                                     type="text"
+                                                     name="referredByCustom"
+                                                     value={formData.referredByCustom}
+                                                     onChange={handleChange}
+                                                     placeholder="Enter the name of the person"
+                                                     required
+                                                     className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-md font-medium focus:ring-2 focus:ring-hope-purple"
+                                                 />
+                                             </div>
+                                         )}
                                      </div>
                                  </div>
                              </div>
