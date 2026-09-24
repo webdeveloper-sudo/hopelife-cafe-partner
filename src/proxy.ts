@@ -36,7 +36,7 @@ export async function proxy(request: NextRequest) {
     // Define protected application routes
     const isPublicAdminRoute = pathname === "/admin/login" || pathname === "/super-admin/login" || pathname.startsWith("/api/auth/login");
     const isAdminRoute = (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) && !isPublicAdminRoute;
-    const isPublicPartnerRoute = pathname === "/login" || pathname === "/register" || pathname === "/scan" || pathname.startsWith("/api/auth/login");
+    const isPublicPartnerRoute = pathname === "/login" || pathname === "/register" || pathname === "/verify-partner" || pathname === "/scan" || pathname.startsWith("/api/auth/login");
     const isPartnerRoute = (pathname.startsWith("/dashboard") || pathname.startsWith("/settings") || pathname.startsWith("/referrals") || pathname.startsWith("/payouts") || pathname.startsWith("/transactions") || pathname.startsWith("/support")) && !isPublicPartnerRoute;
     const isMarketingRoute = pathname.startsWith('/marketing') && pathname !== '/marketing/login' && pathname !== '/marketing/set-password';
 

@@ -53,21 +53,21 @@ async function sendMail(options: nodemailer.SendMailOptions): Promise<boolean> {
 
 // ---- Email Templates ----
 
-export async function sendPartnerOTPEmail(email: string, otp: string): Promise<boolean> {
-    const subject = "Your OTP — HOPE Cafe Partner Program";
+export async function sendPasswordResetOTPEmail(email: string, otp: string): Promise<boolean> {
+    const subject = "Password Reset OTP — HOPE Cafe";
     const html = `
     <div style="font-family:'Poppins','Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
       <div style="background:linear-gradient(135deg,#1a6b3a,#2d9651);padding:40px 32px;text-align:center">
         <h1 style="color:#fff;margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px">HOPE Cafe</h1>
-        <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Partner Program</p>
+        <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Account Recovery</p>
       </div>
       <div style="padding:48px 40px;text-align:center">
-        <h2 style="color:#1a1a1a;font-size:22px;font-weight:700;margin:0 0 16px">Verify Your Email</h2>
-        <p style="color:#666;font-size:15px;line-height:1.6;margin:0 0 32px">Use the code below to complete your partner registration. This code is valid for <strong>10 minutes</strong>.</p>
+        <h2 style="color:#1a1a1a;font-size:22px;font-weight:700;margin:0 0 16px">Password Reset Code</h2>
+        <p style="color:#666;font-size:15px;line-height:1.6;margin:0 0 32px">Use the code below to reset your password. This code is valid for <strong>10 minutes</strong>.</p>
         <div style="background:#f0fdf4;border:2px solid #1a6b3a;border-radius:12px;padding:24px 40px;display:inline-block;margin:0 auto">
           <div style="font-size:42px;font-weight:900;letter-spacing:12px;color:#1a6b3a;font-family:'Courier New',monospace">${otp}</div>
         </div>
-        <p style="color:#999;font-size:13px;margin:32px 0 0">If you didn't request this, you can safely ignore this email.</p>
+        <p style="color:#999;font-size:13px;margin:32px 0 0">If you didn't request a password reset, you can safely ignore this email.</p>
       </div>
       <div style="background:#f9fafb;padding:24px 40px;text-align:center;border-top:1px solid #f0f0f0">
         <p style="color:#bbb;font-size:12px;margin:0">© ${new Date().getFullYear()} HOPE Cafe — Achariya Campus, Pondicherry</p>

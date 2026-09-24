@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import { sendPartnerOTPEmail } from "@/lib/email";
+import { sendWhatsAppOTP } from "@/lib/msg91";
 
 export const runtime = 'nodejs';
 
@@ -10,52 +10,95 @@ function generateOTP(): string {
 
 export async function POST(req: Request) {
     try {
-        const { email, mobile } = await req.json();
+        const body = await req.json();
+        const rawMobile = body.mobile;
 
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+        if (!rawMobile || typeof rawMobile !== "string") {
+            return NextResponse.json({ error: "Mobile number is required." }, { status: 400 });
+        }
+
+        const cleanMobile = rawMobile.replace(/\D/g, "").slice(-10);
+        if (cleanMobile.length !== 10) {
+            return NextResponse.json({ error: "Please enter a valid 10-digit mobile number." }, { status: 400 });
         }
 
         const prisma = getPrisma();
 
-        // Check duplicate mobile
-        if (mobile) {
-            const existingMobile = await prisma.partner.findUnique({ where: { mobile } });
-            if (existingMobile) {
-                return NextResponse.json({ error: "mobile_exists", message: "A partner with this mobile number already exists." }, { status: 409 });
+        // Find partner by mobile
+        const partner = await prisma.partner.findFirst({
+            where: {
+                OR: [
+                    { mobile: cleanMobile },
+                    { mobile: `+91${cleanMobile}` },
+                    { mobile: `91${cleanMobile}` }
+                ]
             }
-        }
-
-        // Check duplicate email
-        const existingEmail = await prisma.partner.findFirst({ where: { email: email.toLowerCase() } });
-        if (existingEmail) {
-            return NextResponse.json({ error: "email_exists", message: "A partner with this email already exists." }, { status: 409 });
-        }
-
-        // Invalidate old OTPs
-        await prisma.partnerOTP.updateMany({
-            where: { email: email.toLowerCase(), isUsed: false },
-            data: { isUsed: true }
         });
 
-        // Generate + save new OTP
+        if (!partner) {
+            return NextResponse.json({ 
+                error: "No partner account found with this mobile number. Please register first." 
+            }, { status: 404 });
+        }
+
+        // Invalidate previous unused OTPs for this mobile
+        try {
+            await prisma.partnerOTP.updateMany({
+                where: {
+                    mobile: cleanMobile,
+                    isUsed: false
+                },
+                data: { isUsed: true }
+            });
+        } catch (e: any) {
+            console.warn("Prisma updateMany fallback to raw SQL:", e.message);
+            await prisma.$executeRaw`
+                UPDATE "PartnerOTP"
+                SET "isUsed" = true
+                WHERE ("mobile" = ${cleanMobile} OR ("email" IS NOT NULL AND "email" = ${partner.email || ''}))
+                  AND "isUsed" = false
+            `;
+        }
+
+        // Generate 6-digit OTP and store
         const otp = generateOTP();
-        await prisma.partnerOTP.create({
-            data: {
-                email: email.toLowerCase(),
-                otp,
-                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 min
-            }
-        });
-
-        const sent = await sendPartnerOTPEmail(email, otp);
-        if (!sent) {
-            return NextResponse.json({ error: "Failed to send OTP email. Please try again." }, { status: 500 });
+        try {
+            await prisma.partnerOTP.create({
+                data: {
+                    mobile: cleanMobile,
+                    email: partner.email || null,
+                    otp,
+                    expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+                    isUsed: false,
+                    attempts: 0
+                }
+            });
+        } catch (e: any) {
+            console.warn("Prisma create fallback to raw SQL:", e.message);
+            const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+            await prisma.$executeRaw`
+                INSERT INTO "PartnerOTP" ("id", "mobile", "email", "otp", "expiresAt", "isUsed", "attempts", "createdAt")
+                VALUES (gen_random_uuid(), ${cleanMobile}, ${partner.email || null}, ${otp}, ${expiresAt}, false, 0, NOW())
+            `;
         }
 
-        return NextResponse.json({ success: true, message: `OTP sent to ${email}` });
-    } catch (err) {
-        console.error("Send OTP error:", err);
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        // Dispatch via MSG91 WhatsApp OTP
+        const sendResult = await sendWhatsAppOTP(cleanMobile, otp);
+        if (!sendResult.success) {
+            return NextResponse.json({ 
+                error: sendResult.error || "Failed to deliver WhatsApp OTP. Please check your MSG91 configuration or ensure your number is on WhatsApp." 
+            }, { status: 500 });
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: sendResult.message || `OTP sent to your WhatsApp number (+91 ${cleanMobile})`,
+            mobile: cleanMobile,
+            partnerName: partner.name,
+            simulated: false
+        });
+    } catch (err: any) {
+        console.error("Send WhatsApp OTP error:", err);
+        return NextResponse.json({ error: "Internal server error while sending OTP" }, { status: 500 });
     }
 }

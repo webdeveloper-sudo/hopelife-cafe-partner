@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import { sendPartnerOTPEmail } from "@/lib/email";
+import { sendPasswordResetOTPEmail } from "@/lib/email";
 
 export const runtime = 'nodejs';
 
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
             }
         });
 
-        const sent = await sendPartnerOTPEmail(email, otp);
+        const sent = await sendPasswordResetOTPEmail(email, otp);
         if (!sent) {
             return NextResponse.json({ error: "Failed to send OTP email. Please try again." }, { status: 500 });
         }

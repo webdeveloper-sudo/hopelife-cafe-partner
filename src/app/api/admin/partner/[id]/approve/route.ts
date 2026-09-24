@@ -35,9 +35,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         );
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://hopelife-cafe-partner.vercel.app";
-        const setPasswordUrl = `${appUrl}/set-password?token=${token}&email=${encodeURIComponent(partner.email || "")}`;
+        const setPasswordUrl = `${appUrl}/verify-partner?mobile=${encodeURIComponent(partner.mobile)}`;
 
-        // Send welcome email
+        // Send welcome email if email exists
         if (partner.email) {
             await sendPartnerApprovalEmail(
                 partner.email,
@@ -50,7 +50,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({
             success: true,
             partner: updated,
-            setPasswordUrl
+            setPasswordUrl,
+            verifyUrl: setPasswordUrl
         });
     } catch (err) {
         console.error("Approve partner error:", err);

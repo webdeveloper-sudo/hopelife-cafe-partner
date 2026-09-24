@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import { sendPartnerApprovalEmail } from "@/lib/email";
-import jwt from "jsonwebtoken";
 
 export const runtime = 'nodejs';
 
@@ -10,8 +8,20 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { partnerName, contactName, mobile, email, businessType, address, city, pincode, commissionSlab, upiId, referredBy } = body;
 
-        if (!partnerName || !contactName || !mobile || !email || !upiId) {
-            return NextResponse.json({ error: "Missing required fields (including Settlement UPI ID)" }, { status: 400 });
+        // Mobile is strictly required
+        const cleanMobile = mobile ? mobile.replace(/\D/g, "").slice(-10) : "";
+        if (!cleanMobile || cleanMobile.length !== 10) {
+            return NextResponse.json({ error: "A valid 10-digit mobile number is required" }, { status: 400 });
+        }
+
+        // Email is optional, but if provided must be valid format
+        const cleanEmail = email && typeof email === "string" && email.trim() ? email.toLowerCase().trim() : null;
+        if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+            return NextResponse.json({ error: "Please enter a valid email address or leave it blank" }, { status: 400 });
+        }
+
+        if (!partnerName || !contactName || !upiId) {
+            return NextResponse.json({ error: "Missing required fields (including Business Name, Contact Person, and Settlement UPI ID)" }, { status: 400 });
         }
 
         const cleanUpi = upiId.trim();
@@ -21,25 +31,45 @@ export async function POST(req: Request) {
 
         const prisma = getPrisma();
 
-        // Fetch system config to get dynamic bonus values and maintenance mode
+        // Fetch system config
         const config = await prisma.systemConfig.findUnique({ where: { id: "GLOBAL" } });
-        const maintenanceMode = config?.maintenanceMode ?? false;
-        const welcomeBonus = config?.welcomeBonus ?? 500;
         const baseCommission = config?.baseCommission ?? 7.5;
         const baseGuestDiscount = config?.baseGuestDiscount ?? 7.5;
 
-        // Determine the effective commission slab
+        // Determine effective commission slab
         const effectiveCommission = commissionSlab ? parseFloat(commissionSlab) : baseCommission;
         const effectiveDiscount   = commissionSlab ? parseFloat(commissionSlab) : baseGuestDiscount;
 
-        // Check duplicates
-        const existingMobile = await prisma.partner.findUnique({ where: { mobile } });
+        // Check duplicate mobile
+        const existingMobile = await prisma.partner.findFirst({
+            where: {
+                OR: [
+                    { mobile: cleanMobile },
+                    { mobile: `+91${cleanMobile}` },
+                    { mobile: `91${cleanMobile}` }
+                ]
+            }
+        });
+
         if (existingMobile) {
-            return NextResponse.json({ error: "A partner with this mobile already exists." }, { status: 409 });
+            if (existingMobile.password) {
+                return NextResponse.json({ error: "A partner with this mobile number already exists." }, { status: 409 });
+            }
+            return NextResponse.json({
+                success: true,
+                alreadyInitiated: true,
+                partnerCode: existingMobile.partnerCode,
+                mobile: cleanMobile,
+                redirectUrl: `/verify-partner?mobile=${cleanMobile}`
+            });
         }
-        const existingEmail = await prisma.partner.findFirst({ where: { email: email.toLowerCase() } });
-        if (existingEmail) {
-            return NextResponse.json({ error: "A partner with this email already exists." }, { status: 409 });
+
+        // Check duplicate email only if provided
+        if (cleanEmail) {
+            const existingEmail = await prisma.partner.findFirst({ where: { email: cleanEmail } });
+            if (existingEmail) {
+                return NextResponse.json({ error: "A partner with this email already exists." }, { status: 409 });
+            }
         }
 
         // Generate partner code
@@ -48,10 +78,10 @@ export async function POST(req: Request) {
 
         const partner = await prisma.partner.create({
             data: {
-                name: partnerName,
-                contactName,
-                mobile,
-                email: email.toLowerCase(),
+                name: partnerName.trim(),
+                contactName: contactName.trim(),
+                mobile: cleanMobile,
+                email: cleanEmail,
                 partnerCode,
                 businessType: businessType || null,
                 address: address || null,
@@ -60,7 +90,7 @@ export async function POST(req: Request) {
                 upiId: cleanUpi,
                 commissionSlab: effectiveCommission,
                 guestDiscountSlab: effectiveDiscount,
-                status: "ACTIVE",
+                status: "PENDING",
                 walletBalance: 0,
                 bonusCommission: 0,
                 retentionStreak: 0,
@@ -68,26 +98,13 @@ export async function POST(req: Request) {
             }
         });
 
-        // Generate set-password token
-        const jwtSecret = process.env.JWT_SECRET || "hope-cafe-secret";
-        const token = jwt.sign(
-            { partnerId: partner.id, email: partner.email, purpose: "set-password" },
-            jwtSecret,
-            { expiresIn: "48h" }
-        );
-
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://hopelife-cafe-partner.vercel.app";
-        const setPasswordUrl = `${appUrl}/set-password?token=${token}&email=${encodeURIComponent(email)}`;
-
-        // Send welcome email immediately
-        await sendPartnerApprovalEmail(email, partnerName, contactName, setPasswordUrl);
-
         return NextResponse.json({
             success: true,
             partnerCode: partner.partnerCode,
-            setPasswordUrl
+            mobile: partner.mobile,
+            redirectUrl: `/verify-partner?mobile=${partner.mobile}`
         });
-    } catch (err) {
+    } catch (err: any) {
         console.error("Admin onboard partner error:", err);
         return NextResponse.json({ error: "Failed to onboard partner." }, { status: 500 });
     }

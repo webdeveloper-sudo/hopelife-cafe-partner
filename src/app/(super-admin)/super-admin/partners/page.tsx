@@ -319,7 +319,7 @@ export default function SuperAdminPartnersPage() {
         const errs: Record<string, string> = {};
         if (!newPartner.partnerName.trim()) errs.partnerName = "Business name is required";
         if (!newPartner.contactName.trim()) errs.contactName = "Contact name is required";
-        if (!newPartner.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newPartner.email)) errs.email = "Valid email is required";
+        if (newPartner.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newPartner.email.trim())) errs.email = "Valid email is required or leave empty";
         if (!newPartner.mobile || newPartner.mobile.replace(/\D/g, "").length < 10) errs.mobile = "Valid 10-digit phone number is required";
         if (!newPartner.businessType) errs.businessType = "Business type is required";
         if (!newPartner.address.trim()) errs.address = "Address is required";
@@ -347,11 +347,14 @@ export default function SuperAdminPartnersPage() {
                 }
             }
 
+            const cleanMobile = newPartner.mobile.replace(/\D/g, "").slice(-10);
+
             const res = await fetch("/api/admin/partner/onboard", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...newPartner,
+                    mobile: cleanMobile,
                     referredBy: finalReferredBy
                 }),
             });
@@ -372,11 +375,12 @@ export default function SuperAdminPartnersPage() {
                 }
                 throw new Error(data.error || "Failed to onboard partner");
             }
-            toast.success("Partner onboarded! Welcome email sent. ✅");
+            toast.success("Partner onboarded! Redirecting to WhatsApp verification... 🚀");
             setShowOnboard(false);
             setErrors({});
             setNewPartner({ partnerName: "", contactName: "", email: "", mobile: "", businessType: "", address: "", city: "Pondicherry", pincode: "", upiId: "", commissionSlab: config?.baseCommission || 7.5, referredBySelect: "", referredByCustom: "" });
             fetchPartners();
+            router.push(`/verify-partner?mobile=${encodeURIComponent(cleanMobile)}`);
         } catch (err: any) { toast.error(err.message); }
         finally { setIsOnboarding(false); }
     };
@@ -623,8 +627,8 @@ export default function SuperAdminPartnersPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email *</label>
-                                        <Input required type="email" placeholder="partner@email.com" {...np("email")} />
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email (Optional)</label>
+                                        <Input type="email" placeholder="partner@email.com (optional)" {...np("email")} />
                                         {errors.email && <p className="text-[10px] text-red-500 font-bold">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-1.5">
@@ -727,13 +731,13 @@ export default function SuperAdminPartnersPage() {
                                 </div>
 
                                 <div className="pt-4 border-t border-gray-100">
-                                    <div className="bg-green-50 border border-gray-300 rounded-md p-4 mb-5">
-                                        <p className="text-xs text-green-700 font-bold">
-                                            ✅ This partner will be saved as <strong>Active</strong> immediately. A welcome email with a set-password link will be sent to the email above.
+                                    <div className="bg-emerald-50 border border-emerald-200 rounded-md p-4 mb-5">
+                                        <p className="text-xs text-emerald-800 font-bold">
+                                            ✅ Upon onboard submission, you will be redirected to the WhatsApp OTP verification and password setup page for this partner.
                                         </p>
                                     </div>
                                     <Button type="submit" className="w-full h-13 font-black text-base rounded-md border border-gray-300" isLoading={isOnboarding}>
-                                        Onboard Partner
+                                        Onboard Partner & Verify
                                     </Button>
                                 </div>
                             </form>

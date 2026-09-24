@@ -79,7 +79,8 @@ model IncomeLog {
 
 model PartnerOTP {
   id        String   @id @default(uuid())
-  email     String
+  mobile    String?
+  email     String?
   otp       String
   expiresAt DateTime
   isUsed    Boolean  @default(false)
